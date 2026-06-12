@@ -18,6 +18,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script>
   tailwind.config = {
@@ -899,6 +900,63 @@ const LS_HISTORY = LS_KEY + '_history';
 const DEFAULT_BATA_QTY = '11,52';
 
 // ════════════════════════════════════════════════════════════════
+//  SUPABASE CONFIG
+// ════════════════════════════════════════════════════════════════
+const SB_URL  = 'https://stfvhqexiftkwszihaxf.supabase.co';
+const SB_KEY  = 'sb_publishable_GDUpC76cdnPP4h3QMwbuvw_gsnaCXbr';
+const _sb = supabase.createClient(SB_URL, SB_KEY);
+
+// ── Supabase helpers ──────────────────────────────────────────
+async function sbGetHistory() {
+  const { data, error } = await _sb
+    .from('invoices')
+    .select('id, ts, data')
+    .order('ts', { ascending: false })
+    .limit(200);
+  if (error) { console.error('sbGetHistory:', error); return null; }
+  return data.map(r => r.data);
+}
+
+async function sbUpsertInvoice(entry) {
+  const { error } = await _sb.from('invoices').upsert(
+    { id: entry.id, ts: entry.ts, data: entry },
+    { onConflict: 'id' }
+  );
+  if (error) console.error('sbUpsertInvoice:', error);
+  return !error;
+}
+
+async function sbDeleteInvoice(id) {
+  const { error } = await _sb.from('invoices').delete().eq('id', id);
+  if (error) console.error('sbDeleteInvoice:', error);
+  return !error;
+}
+
+async function sbDeleteAllInvoices() {
+  const { error } = await _sb.from('invoices').delete().gte('id', 0);
+  if (error) console.error('sbDeleteAllInvoices:', error);
+  return !error;
+}
+
+async function sbGetSeq(type) {
+  const { data, error } = await _sb
+    .from('invoice_seq')
+    .select('seq')
+    .eq('type', type)
+    .single();
+  if (error) return 0;
+  return data?.seq || 0;
+}
+
+async function sbSetSeq(type, seq) {
+  const { error } = await _sb.from('invoice_seq').upsert(
+    { type, seq },
+    { onConflict: 'type' }
+  );
+  if (error) console.error('sbSetSeq:', error);
+}
+
+// ════════════════════════════════════════════════════════════════
 //  STATE
 // ════════════════════════════════════════════════════════════════
 let mode = 'bata';  // default: bata (leftmost tab)
@@ -1071,9 +1129,12 @@ function regenInvoiceNo() {
   updatePreview();
 }
 
-function commitSeq(type, seq) {
+async function commitSeq(type, seq) {
   const cur = parseInt(localStorage.getItem(seqKey(type)) || '0');
-  if (seq > cur) localStorage.setItem(seqKey(type), String(seq));
+  if (seq > cur) {
+    localStorage.setItem(seqKey(type), String(seq));
+    await sbSetSeq(type, seq);
+  }
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -1100,6 +1161,18 @@ document.addEventListener('DOMContentLoaded', () => {
   renderHistory();
   updatePhonePreview();
   updatePreview();
+
+  // Load history from Supabase cloud (async, updates UI when ready)
+  loadHistoryFromCloud().then(() => {
+    // Also sync seq from cloud to localStorage
+    ['BRC','PLC'].forEach(async type => {
+      const cloudSeq = await sbGetSeq(type);
+      const localSeq = parseInt(localStorage.getItem(seqKey(type)) || '0');
+      if (cloudSeq > localSeq) {
+        localStorage.setItem(seqKey(type), String(cloudSeq));
+      }
+    });
+  });
 });
 
 function onDateChange() {
@@ -2027,18 +2100,34 @@ async function doExport() {
 }
 
 // ════════════════════════════════════════════════════════════════
-//  HISTORY (localStorage)
+//  HISTORY (Supabase cloud + localStorage cache)
 // ════════════════════════════════════════════════════════════════
+
+// In-memory cache so sync UI updates feel instant
+let _histCache = null;
+
 function getHistory() {
+  if (_histCache !== null) return _histCache;
+  // Fallback to localStorage while first load is in progress
   try { return JSON.parse(localStorage.getItem(LS_HISTORY) || '[]'); }
   catch { return []; }
 }
+
 function setHistoryRaw(arr) {
-  localStorage.setItem(LS_HISTORY, JSON.stringify(arr.slice(0, 50)));
+  _histCache = arr;
+  localStorage.setItem(LS_HISTORY, JSON.stringify(arr.slice(0, 200)));
   renderHistory();
 }
 
-function saveToHistory() {
+// Load from Supabase and refresh cache + UI
+async function loadHistoryFromCloud() {
+  const data = await sbGetHistory();
+  if (data !== null) {
+    setHistoryRaw(data);
+  }
+}
+
+async function saveToHistory() {
   const docNo = document.getElementById('docNo').value.trim();
   if (!docNo) return;
 
@@ -2082,13 +2171,17 @@ function saveToHistory() {
     subtitle,
   };
 
+  // Upsert to Supabase
+  await sbUpsertInvoice(entry);
+
+  // Update local cache
   const hist = getHistory();
   const existingIdx = hist.findIndex(e => e.docNo === entry.docNo && e.mode === entry.mode);
   if (existingIdx >= 0) hist[existingIdx] = entry;
   else hist.unshift(entry);
   setHistoryRaw(hist);
 
-  // Commit seq so counter persists even if this history entry is deleted later
+  // Commit seq
   const match = docNo.match(/^(\d+)\/([A-Z]+)\//);
   if (match) commitSeq(match[2], parseInt(match[1]));
 }
@@ -2166,20 +2259,21 @@ function renderHistory() {
   }).join('');
 }
 
-function deleteHistory(id) {
+async function deleteHistory(id) {
   if (!confirm('Hapus invoice ini dari history?')) return;
   const e = getHistory().find(x => x.id === id);
   if (e && e.docNo) {
     const match = e.docNo.match(/^(\d+)\/([A-Z]+)\//);
     if (match) commitSeq(match[2], parseInt(match[1]));
   }
+  await sbDeleteInvoice(id);
   setHistoryRaw(getHistory().filter(e => e.id !== id));
 }
 
-function clearHistory() {
+async function clearHistory() {
   if (!confirm('Hapus SEMUA history?\n(Nomor urut invoice tetap tersimpan)')) return;
   const hist = getHistory();
-  ['BRC','PLC'].forEach(type => {
+  for (const type of ['BRC','PLC']) {
     let maxSeq = parseInt(localStorage.getItem(seqKey(type)) || '0');
     hist.forEach(e => {
       const m = (e.docNo||'').match(/^(\d+)\/([A-Z]+)\//);
@@ -2188,8 +2282,12 @@ function clearHistory() {
         if (n > maxSeq) maxSeq = n;
       }
     });
-    if (maxSeq > 0) localStorage.setItem(seqKey(type), String(maxSeq));
-  });
+    if (maxSeq > 0) {
+      localStorage.setItem(seqKey(type), String(maxSeq));
+      await sbSetSeq(type, maxSeq);
+    }
+  }
+  await sbDeleteAllInvoices();
   setHistoryRaw([]);
 }
 
@@ -2200,6 +2298,8 @@ function showHistoryView() {
   document.getElementById('main-view').style.display = 'none';
   document.getElementById('history-view').style.display = 'flex';
   renderHistory();
+  // Refresh from cloud silently
+  loadHistoryFromCloud();
   window.scrollTo(0, 0);
   // Push a synthetic state so the next "back" pops it (handled by popstate listener)
   if (history.state?.view !== 'history') {
@@ -2332,7 +2432,7 @@ function importHistoryData(event) {
   if (!file) return;
 
   const reader = new FileReader();
-  reader.onload = (ev) => {
+  reader.onload = async (ev) => {
     try {
       const data = JSON.parse(ev.target.result);
       if (!data || !Array.isArray(data.history)) {
@@ -2354,16 +2454,23 @@ function importHistoryData(event) {
       });
 
       const merged = [...toAdd, ...existing];
-      // Re-use setHistoryRaw to persist + re-render (it also caps at 50)
       setHistoryRaw(merged);
+
+      // Push new entries to Supabase
+      for (const entry of toAdd) {
+        await sbUpsertInvoice(entry);
+      }
 
       // Restore seq counters (use MAX of existing and backup)
       if (data.seq) {
-        ['BRC','PLC'].forEach(type => {
+        for (const type of ['BRC','PLC']) {
           const cur = parseInt(localStorage.getItem(seqKey(type)) || '0');
           const bak = parseInt(data.seq[type] || 0);
-          if (bak > cur) localStorage.setItem(seqKey(type), String(bak));
-        });
+          if (bak > cur) {
+            localStorage.setItem(seqKey(type), String(bak));
+            await sbSetSeq(type, bak);
+          }
+        }
       }
 
       // v9.0: refresh the on-screen invoice number so it reflects the
