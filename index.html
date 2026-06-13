@@ -682,15 +682,15 @@
   .splash-error.show { display: block; }
   /* Header user badge */
   #user-badge {
-    font-size: 11px; font-weight: 600; color: #7a9abf;
-    background: #1a2535; border: 1px solid #2a3a50;
-    border-radius: 99px; padding: 3px 10px;
-    display: none; align-items: center; gap: 5px;
-    cursor: pointer; transition: background 0.15s;
-    white-space: nowrap;
+    display: none; align-items: center; gap: 6px;
+    height: 34px; padding: 0 10px; border-radius: 8px;
+    border: 1px solid #e2e8f0; background: #f8fafc;
+    color: #475569; font-size: 12px; font-weight: 600;
+    font-family: 'Inter', sans-serif; cursor: pointer;
+    transition: all 0.15s; white-space: nowrap;
   }
   #user-badge.visible { display: flex; }
-  #user-badge:hover { background: #243045; }
+  #user-badge:hover { border-color: var(--brand-color); color: var(--brand-dark); }
 </style>
 </head>
 <body>
@@ -701,7 +701,7 @@
     <div class="splash-logo-wrap">
       <img id="splashLogo" class="splash-logo" src="" alt="Citicon">
       <div class="splash-title">Invoice Generator</div>
-      <div class="splash-subtitle">Procon Persada · Krian, Sidoarjo</div>
+      <div class="splash-subtitle">made with 🫰 by <b>cacak</b> 😎</div>
     </div>
     <div>
       <div class="splash-label">Password</div>
@@ -722,23 +722,38 @@
 <div id="main-view" style="display:flex;flex-direction:column;height:100dvh;">
 
 <!-- ═══════════ HEADER ═══════════ -->
-<header class="bg-white border-b border-slate-200 px-6 flex items-center gap-3 flex-shrink-0" style="height:60px;">
-  <div class="flex items-center gap-3">
-    <div class="w-9 h-9 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0" style="background:transparent;">
-      <img id="appHeaderIcon" alt="Invoice Generator" class="w-9 h-9 object-contain" style="display:block;background:transparent;">
+<header class="bg-white border-b border-slate-200 flex items-center flex-shrink-0" style="height:60px;padding:0 16px;gap:12px;">
+  <!-- Logo + Title -->
+  <div class="flex items-center gap-2.5 min-w-0 flex-1">
+    <div class="flex-shrink-0" style="width:36px;height:36px;border-radius:10px;overflow:hidden;background:transparent;display:flex;align-items:center;justify-content:center;">
+      <img id="appHeaderIcon" alt="Invoice Generator"
+           style="width:36px;height:36px;object-fit:contain;display:block;">
     </div>
-    <div class="min-w-0">
-      <div class="text-[15px] font-bold text-slate-900 truncate" id="appHeaderTitle">Invoice Generator</div>
-      <div class="text-[10.5px] text-slate-500 truncate" id="appHeaderSub">v1.0.19 · Procon Persada · Krian Sidoarjo</div>
+    <div class="min-w-0 hidden sm:block">
+      <div class="text-[14px] font-bold text-slate-900 truncate leading-tight" id="appHeaderTitle">Invoice Generator</div>
+      <div class="text-[10px] text-slate-400 truncate leading-tight" id="appHeaderSub">v1.0.19 · Procon Persada · Krian Sidoarjo</div>
     </div>
   </div>
-  <div class="ml-auto flex items-center gap-2">
-    <button id="user-badge" class="visible" onclick="doLogout()" title="Keluar">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-      <span id="user-badge-name">—</span>
+
+  <!-- Right actions -->
+  <div class="flex items-center gap-2 flex-shrink-0">
+    <!-- Profile/logout button -->
+    <button id="user-badge" class="visible" onclick="doLogout()" title="Keluar"
+            style="display:none;align-items:center;gap:6px;height:34px;padding:0 10px;border-radius:8px;border:1px solid #e2e8f0;background:#f8fafc;color:#475569;font-size:12px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:all 0.15s;white-space:nowrap;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+        <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+      </svg>
+      <span id="user-badge-name" class="hidden sm:inline">—</span>
     </button>
-    <button onclick="showHistoryView()" class="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg text-xs text-slate-600 hover:text-slate-900 transition-colors flex items-center gap-2 font-medium">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+
+    <!-- History button -->
+    <button onclick="showHistoryView()"
+            style="display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:8px;border:1px solid #e2e8f0;background:#f8fafc;color:#475569;font-size:12.5px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:all 0.15s;white-space:nowrap;"
+            onmouseover="this.style.borderColor='var(--brand-color)';this.style.color='var(--brand-dark)'"
+            onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#475569'">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;">
+        <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+      </svg>
       <span id="history-count">History</span>
     </button>
   </div>
