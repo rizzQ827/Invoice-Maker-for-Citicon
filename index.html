@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Citicon Invoice Maker · v10.0</title>
-<!-- v10.0 -->
-<meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai Citicon">
+<title>Invoice Generator · v1.0.19</title>
+<!-- v1.0.19 -->
+<meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai multi-brand">
 <meta name="theme-color" content="#0e9e4a">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Citicon Invoice">
+<meta name="apple-mobile-web-app-title" content="Invoice Generator">
 <link rel="manifest" href="site.webmanifest">
 <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -26,6 +26,8 @@
       extend: {
         colors: {
           citicon: { DEFAULT: '#0e9e4a', dark: '#0a7a38', light: '#22c55e' },
+          bricon:  { DEFAULT: '#c0392b', dark: '#922b21', light: '#e74c3c' },
+          grandel: { DEFAULT: '#b7860b', dark: '#8d6508', light: '#d4a017' },
           slate: { 25: '#fcfcfd', 150: '#ebeef3' }
         },
         fontFamily: { sans:['Inter','sans-serif'], mono:['JetBrains Mono','monospace'] }
@@ -73,8 +75,8 @@
   }
   .input:hover { border-color: #94a3b8; }
   .input:focus {
-    border-color: #0e9e4a;
-    box-shadow: 0 0 0 3px rgba(14,158,74,0.12);
+    border-color: var(--brand-color);
+    box-shadow: 0 0 0 3px rgba(var(--brand-rgb),0.12);
   }
   .input::placeholder { color: #94a3b8; }
   select.input {
@@ -99,6 +101,26 @@
     box-shadow: 0 1px 2px rgba(15,23,42,0.03);
   }
 
+  /* ─── BRAND THEME VARS ─── */
+  :root {
+    --brand-color: #0e9e4a;
+    --brand-dark:  #0a7a38;
+    --brand-light: #22c55e;
+    --brand-rgb:   14,158,74;
+  }
+  body[data-brand="bricon"] {
+    --brand-color: #c0392b;
+    --brand-dark:  #922b21;
+    --brand-light: #e74c3c;
+    --brand-rgb:   192,57,43;
+  }
+  body[data-brand="grandel"] {
+    --brand-color: #b7860b;
+    --brand-dark:  #8d6508;
+    --brand-light: #d4a017;
+    --brand-rgb:   183,134,11;
+  }
+
   /* ─── MODE TABS ─── */
   .mode-tab {
     flex: 1; padding: 11px 12px; font-size: 13px; font-weight: 600;
@@ -108,11 +130,31 @@
   }
   .mode-tab:hover:not(.active) { color: #334155; background: rgba(148,163,184,0.08); }
   .mode-tab.active {
-    background: linear-gradient(135deg,#0a7a38,#0e9e4a);
+    background: linear-gradient(135deg, var(--brand-dark), var(--brand-color));
     color: white;
-    box-shadow: 0 4px 12px rgba(14,158,74,0.28);
+    box-shadow: 0 4px 12px rgba(var(--brand-rgb),0.28);
   }
   .mode-tab svg { flex-shrink: 0; }
+
+  /* ─── BRAND TABS (Citicon / Bricon / Grand Elephant) ─── */
+  .brand-tab-bar {
+    display: flex; background: #f1f5f9; border: 1px solid #e2e8f0;
+    border-radius: 10px; padding: 3px; gap: 3px; margin-bottom: 10px;
+  }
+  .brand-tab {
+    flex: 1; padding: 8px 4px; font-size: 11.5px; font-weight: 700;
+    border: none; border-radius: 8px; cursor: pointer; font-family: 'Inter',sans-serif;
+    color: #64748b; background: transparent; transition: all 0.2s; text-align: center;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .brand-tab:hover:not(.active) { color: #334155; background: rgba(148,163,184,0.1); }
+  .brand-tab.active {
+    background: white; font-weight: 800;
+    box-shadow: 0 1px 4px rgba(15,23,42,0.08);
+  }
+  .brand-tab[data-brand="citicon"].active  { color: #0a7a38; }
+  .brand-tab[data-brand="bricon"].active   { color: #922b21; }
+  .brand-tab[data-brand="grandel"].active  { color: #8d6508; }
 
   /* v9.0: Price-mode segmented switch (Harga Terpasang ⇄ Tanpa Pemasangan) */
   .price-mode-switch {
@@ -142,7 +184,7 @@
   .price-mode-tab:hover:not(.active) { color: #334155; background: rgba(148,163,184,0.10); }
   .price-mode-tab.active {
     background: #ffffff;
-    color: #0a7a38;
+    color: var(--brand-dark);
     box-shadow: 0 1px 3px rgba(15,23,42,0.06);
     font-weight: 700;
   }
@@ -156,8 +198,8 @@
     text-decoration: none;
   }
   .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-green { background: linear-gradient(135deg,#0a7a38,#0e9e4a); color: white; box-shadow: 0 4px 14px rgba(14,158,74,0.25); }
-  .btn-green:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(14,158,74,0.35); }
+  .btn-green { background: linear-gradient(135deg, var(--brand-dark), var(--brand-color)); color: white; box-shadow: 0 4px 14px rgba(var(--brand-rgb),0.25); }
+  .btn-green:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(var(--brand-rgb),0.35); }
 
   /* ─── ITEM ROWS ─── */
   .item-row {
@@ -168,9 +210,9 @@
   .item-row:hover { border-color: #cbd5e1; background: #f1f5f9; }
 
   .row-badge {
-    font-size: 10.5px; font-weight: 700; color: #0a7a38;
-    background: rgba(14,158,74,0.08); padding: 3px 9px;
-    border-radius: 5px; border: 1px solid rgba(14,158,74,0.15);
+    font-size: 10.5px; font-weight: 700; color: var(--brand-dark);
+    background: rgba(var(--brand-rgb),0.08); padding: 3px 9px;
+    border-radius: 5px; border: 1px solid rgba(var(--brand-rgb),0.15);
     font-family: 'JetBrains Mono',monospace;
   }
   .remove-btn {
@@ -184,11 +226,11 @@
   .add-btn {
     padding: 6px 13px; background: #ffffff;
     border: 1.5px dashed #cbd5e1; border-radius: 7px;
-    color: #0a7a38; font-size: 12px; font-weight: 600;
+    color: var(--brand-dark); font-size: 12px; font-weight: 600;
     cursor: pointer; font-family: 'Inter',sans-serif;
     transition: all 0.2s;
   }
-  .add-btn:hover { border-color: #0e9e4a; background: rgba(14,158,74,0.05); }
+  .add-btn:hover { border-color: var(--brand-color); background: rgba(var(--brand-rgb),0.05); }
 
   /* Bold add buttons (PLC section) — full-width grid pair */
   .add-btn-bold {
@@ -210,14 +252,14 @@
     color: #0f172a;
   }
   .add-btn-bold-primary {
-    border-color: rgba(14,158,74,0.4);
-    color: #0a7a38;
-    background: rgba(14,158,74,0.04);
+    border-color: rgba(var(--brand-rgb),0.4);
+    color: var(--brand-dark);
+    background: rgba(var(--brand-rgb),0.04);
   }
   .add-btn-bold-primary:hover {
-    border-color: #0e9e4a;
-    background: rgba(14,158,74,0.10);
-    color: #064d23;
+    border-color: var(--brand-color);
+    background: rgba(var(--brand-rgb),0.10);
+    color: var(--brand-dark);
   }
 
   /* Footer credit */
@@ -233,8 +275,8 @@
 
   .calc-badge {
     font-family: 'JetBrains Mono',monospace; font-size: 11px;
-    color: #0a7a38; background: rgba(14,158,74,0.06);
-    border: 1px solid rgba(14,158,74,0.18); border-radius: 7px;
+    color: var(--brand-dark); background: rgba(var(--brand-rgb),0.06);
+    border: 1px solid rgba(var(--brand-rgb),0.18); border-radius: 7px;
     padding: 9px 11px; margin-top: 10px; text-align: right;
     font-weight: 600;
   }
@@ -256,14 +298,14 @@
     cursor: pointer; transition: all 0.15s;
     margin-bottom: 6px;
   }
-  .history-item:hover { border-color: #0e9e4a; background: #ffffff; box-shadow: 0 2px 6px rgba(14,158,74,0.08); }
+  .history-item:hover { border-color: var(--brand-color); background: #ffffff; box-shadow: 0 2px 6px rgba(var(--brand-rgb),0.08); }
 
   /* ─── PREVIEW ─── */
   .preview-scroll {
     background: #e2e8f0;
     background-image:
-      radial-gradient(circle at 20% 10%, rgba(14,158,74,0.04) 0%, transparent 40%),
-      radial-gradient(circle at 80% 90%, rgba(14,158,74,0.03) 0%, transparent 40%);
+      radial-gradient(circle at 20% 10%, rgba(var(--brand-rgb),0.04) 0%, transparent 40%),
+      radial-gradient(circle at 80% 90%, rgba(var(--brand-rgb),0.03) 0%, transparent 40%);
   }
 
   #invoice-preview {
@@ -329,11 +371,11 @@
     display: inline-flex; align-items: center; gap: 6px;
     padding: 8px 14px; border-radius: 8px;
     background: white; border: 1px solid #e2e8f0;
-    color: #0a7a38; font-size: 12.5px; font-weight: 600;
+    color: var(--brand-dark); font-size: 12.5px; font-weight: 600;
     cursor: pointer; transition: all 0.15s;
     font-family: 'Inter', sans-serif;
   }
-  .hist-action-btn:hover { border-color: #0e9e4a; background: rgba(14,158,74,0.05); }
+  .hist-action-btn:hover { border-color: var(--brand-color); background: rgba(var(--brand-rgb),0.05); }
   .hist-action-btn.danger { color: #dc2626; }
   .hist-action-btn.danger:hover { border-color: #fca5a5; background: #fef2f2; }
 
@@ -382,10 +424,10 @@
   .toast {
     position: fixed; bottom: 24px; left: 50%;
     transform: translateX(-50%) translateY(100px);
-    background: #0a7a38; color: white;
+    background: var(--brand-dark); color: white;
     padding: 12px 22px; border-radius: 10px;
     font-size: 13px; font-weight: 600;
-    box-shadow: 0 10px 30px rgba(10,122,56,0.35);
+    box-shadow: 0 10px 30px rgba(var(--brand-rgb),0.35);
     opacity: 0; transition: all 0.3s ease;
     z-index: 100; pointer-events: none;
   }
@@ -396,7 +438,7 @@
   .phone-preview {
     font-family: 'JetBrains Mono',monospace;
     font-size: 10.5px;
-    color: #0a7a38;
+    color: var(--brand-dark);
     margin-top: 5px;
     display: none;
   }
@@ -430,8 +472,24 @@
     cursor: pointer; transition: all 0.15s;
     font-family: 'Inter', sans-serif;
   }
-  .back-btn:hover { border-color: #0e9e4a; color: #0a7a38; background: #f8fafc; }
+  .back-btn:hover { border-color: var(--brand-color); color: var(--brand-dark); background: #f8fafc; }
 
+  /* ─── HISTORY BRAND FILTER TABS ─── */
+  .hist-brand-tabs {
+    display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .hist-brand-tab {
+    padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    border: 1.5px solid #e2e8f0; background: white; color: #64748b;
+    cursor: pointer; transition: all 0.18s; font-family: 'Inter',sans-serif;
+  }
+  .hist-brand-tab:hover { border-color: #94a3b8; color: #334155; }
+  .hist-brand-tab.active[data-filter="all"]    { background: #0f172a; border-color: #0f172a; color: white; }
+  .hist-brand-tab.active[data-filter="citicon"]{ background: #0a7a38; border-color: #0a7a38; color: white; }
+  .hist-brand-tab.active[data-filter="bricon"] { background: #922b21; border-color: #922b21; color: white; }
+  .hist-brand-tab.active[data-filter="grandel"]{ background: #8d6508; border-color: #8d6508; color: white; }
+
+  /* ─── HISTORY CARD BRAND BORDER ─── */
   .history-card {
     background: white; border: 1px solid #e2e8f0;
     border-radius: 12px; padding: 18px;
@@ -439,12 +497,16 @@
     display: flex; flex-direction: column; gap: 10px;
     cursor: pointer;
     box-shadow: 0 1px 3px rgba(15,23,42,0.03);
+    position: relative; overflow: hidden;
   }
-  .history-card:hover {
-    border-color: #0e9e4a;
-    box-shadow: 0 4px 20px rgba(14,158,74,0.12);
-    transform: translateY(-2px);
+  .history-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 4px; border-radius: 12px 0 0 12px;
+    background: #cbd5e1; /* default neutral */
   }
+  .history-card[data-brand="citicon"]::before { background: #0e9e4a; }
+  .history-card[data-brand="bricon"]::before  { background: #c0392b; }
+  .history-card[data-brand="grandel"]::before { background: #b7860b; }
   .history-card-delete {
     background: white; border: 1px solid #e2e8f0;
     color: #dc2626; font-size: 11.5px; font-weight: 600;
@@ -458,8 +520,26 @@
     font-size: 10.5px; font-weight: 600; padding: 3px 8px;
     border-radius: 5px; text-transform: uppercase; letter-spacing: 0.5px;
   }
-  .mode-pill.bata { background: rgba(14,158,74,0.08); color: #0a7a38; border: 1px solid rgba(14,158,74,0.15); }
-  .mode-pill.panel { background: rgba(37,99,235,0.08); color: #1d4ed8; border: 1px solid rgba(37,99,235,0.15); }
+  /* Brand+mode combinations for history pills */
+  .mode-pill.bata-citicon  { background: rgba(14,158,74,0.08);  color: #0a7a38; border: 1px solid rgba(14,158,74,0.15); }
+  .mode-pill.panel-citicon { background: rgba(37,99,235,0.08);  color: #1d4ed8; border: 1px solid rgba(37,99,235,0.15); }
+  .mode-pill.bata-bricon   { background: rgba(192,57,43,0.08);  color: #922b21; border: 1px solid rgba(192,57,43,0.15); }
+  .mode-pill.panel-bricon  { background: rgba(192,57,43,0.06);  color: #a93226; border: 1px solid rgba(192,57,43,0.15); }
+  .mode-pill.bata-grandel  { background: rgba(183,134,11,0.08); color: #8d6508; border: 1px solid rgba(183,134,11,0.15); }
+  .mode-pill.panel-grandel { background: rgba(183,134,11,0.06); color: #7d5a07; border: 1px solid rgba(183,134,11,0.15); }
+  /* Legacy (no brand) */
+  .mode-pill.bata  { background: rgba(14,158,74,0.08);  color: #0a7a38; border: 1px solid rgba(14,158,74,0.15); }
+  .mode-pill.panel { background: rgba(37,99,235,0.08);  color: #1d4ed8; border: 1px solid rgba(37,99,235,0.15); }
+
+  /* Brand badge in history card */
+  .brand-badge {
+    display: inline-flex; align-items: center;
+    font-size: 9.5px; font-weight: 700; padding: 2px 7px;
+    border-radius: 4px; text-transform: uppercase; letter-spacing: 0.8px;
+  }
+  .brand-badge.citicon { background: rgba(14,158,74,0.10);  color: #0a7a38; border: 1px solid rgba(14,158,74,0.2); }
+  .brand-badge.bricon  { background: rgba(192,57,43,0.10);  color: #922b21; border: 1px solid rgba(192,57,43,0.2); }
+  .brand-badge.grandel { background: rgba(183,134,11,0.10); color: #8d6508; border: 1px solid rgba(183,134,11,0.2); }
 
   .empty-state {
     text-align: center; padding: 80px 20px;
@@ -499,8 +579,8 @@
     box-shadow: 0 5px 14px rgba(37,99,235,0.35);
   }
   .btn-copy.copied {
-    background: linear-gradient(135deg, #0a7a38, #0e9e4a);
-    box-shadow: 0 3px 10px rgba(14,158,74,0.25);
+    background: linear-gradient(135deg, var(--brand-dark), var(--brand-color));
+    box-shadow: 0 3px 10px rgba(var(--brand-rgb),0.25);
   }
 
   /* ─── v7.0: SMOOTH TAB TRANSITIONS ─── */
@@ -620,7 +700,7 @@
   <div class="splash-card">
     <div class="splash-logo-wrap">
       <img id="splashLogo" class="splash-logo" src="" alt="Citicon">
-      <div class="splash-title">Citicon Invoice Maker</div>
+      <div class="splash-title">Invoice Generator</div>
       <div class="splash-subtitle">Procon Persada · Krian, Sidoarjo</div>
     </div>
     <div>
@@ -645,11 +725,11 @@
 <header class="bg-white border-b border-slate-200 px-6 flex items-center gap-3 flex-shrink-0" style="height:60px;">
   <div class="flex items-center gap-3">
     <div class="w-9 h-9 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0" style="background:transparent;">
-      <img id="appHeaderIcon" alt="Citicon Invoice" class="w-9 h-9 object-contain" style="display:block;background:transparent;">
+      <img id="appHeaderIcon" alt="Invoice Generator" class="w-9 h-9 object-contain" style="display:block;background:transparent;">
     </div>
     <div class="min-w-0">
-      <div class="text-[15px] font-bold text-slate-900 truncate">Citicon Invoice Maker</div>
-      <div class="text-[10.5px] text-slate-500 truncate">v10.0 · Procon Persada · Krian Sidoarjo</div>
+      <div class="text-[15px] font-bold text-slate-900 truncate" id="appHeaderTitle">Invoice Generator</div>
+      <div class="text-[10.5px] text-slate-500 truncate" id="appHeaderSub">v1.0.19 · Procon Persada · Krian Sidoarjo</div>
     </div>
   </div>
   <div class="ml-auto flex items-center gap-2">
@@ -677,6 +757,15 @@
         <span>Mode Read-Only — data dari history</span>
       </div>
       <button class="edit-btn" onclick="enableEditMode()">✎ Edit</button>
+    </div>
+
+    <!-- BRAND TABS -->
+    <div class="card !p-2 mb-0">
+      <div class="brand-tab-bar">
+        <button class="brand-tab active" data-brand="citicon" onclick="setBrand('citicon')">Citicon</button>
+        <button class="brand-tab" data-brand="bricon" onclick="setBrand('bricon')">Bricon</button>
+        <button class="brand-tab" data-brand="grandel" onclick="setBrand('grandel')">Grand Elephant</button>
+      </div>
     </div>
 
     <!-- MODE TABS -->
@@ -929,6 +1018,13 @@
   <!-- History content -->
   <main class="flex-1 overflow-auto p-6" style="background:#f8fafc;">
     <div class="max-w-5xl mx-auto">
+      <!-- Brand filter tabs -->
+      <div class="hist-brand-tabs">
+        <button class="hist-brand-tab active" data-filter="all" onclick="setHistoryFilter('all')">Semua</button>
+        <button class="hist-brand-tab" data-filter="citicon" onclick="setHistoryFilter('citicon')">Citicon</button>
+        <button class="hist-brand-tab" data-filter="bricon" onclick="setHistoryFilter('bricon')">Bricon</button>
+        <button class="hist-brand-tab" data-filter="grandel" onclick="setHistoryFilter('grandel')">Grand Elephant</button>
+      </div>
       <div id="history-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
       <div id="history-empty" class="empty-state hidden">
         <div class="icon">
@@ -1241,6 +1337,8 @@ async function sbSetSeq(type, seq) {
 //  STATE
 // ════════════════════════════════════════════════════════════════
 let mode = 'bata';  // default: bata (leftmost tab)
+let currentBrand = 'citicon'; // v11.0: 'citicon' | 'bricon' | 'grandel'
+let historyFilter = 'all';    // v11.0: 'all' | 'citicon' | 'bricon' | 'grandel'
 
 let bataRows = [
   { qty: '11,52', unit: 'M3',  size: '10cm', price: '605000' },
@@ -1363,7 +1461,11 @@ function isValidPhone(normalized) {
 // ════════════════════════════════════════════════════════════════
 //  INVOICE NUMBER AUTO-GEN
 // ════════════════════════════════════════════════════════════════
-function typePrefix(m) { return m === 'bata' ? 'BRC' : 'PLC'; }
+function typePrefix(m) {
+  const modeCode = m === 'bata' ? 'BR' : 'PL';
+  const brandCode = { citicon: 'C', bricon: 'B', grandel: 'GE' }[currentBrand] || 'C';
+  return modeCode + brandCode;
+}
 function seqKey(type) { return userSeqKey(type); }
 
 // Smart seq: max of (persisted counter) and (highest seq in current history)
@@ -1430,6 +1532,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const splashLogo = document.getElementById('splashLogo');
   if (splashLogo) splashLogo.src = ICON_INVOICE_B64;
 
+  // Set default brand
+  document.body.setAttribute('data-brand', 'citicon');
+
   // ── Auth gate: check existing session ──────────────────────
   const savedUserId = sessionStorage.getItem('citicon_user_id');
   const savedUser = USERS.find(u => u.id === savedUserId);
@@ -1479,6 +1584,89 @@ function onDateChange() {
   // Re-generate invoice no to reflect new date (if user hasn't manually edited it)
   if (!isReadOnly) regenInvoiceNo();
   updatePreview();
+}
+
+// ════════════════════════════════════════════════════════════════
+//  BRAND SWITCHER (v11.0)
+// ════════════════════════════════════════════════════════════════
+const BRAND_META = {
+  citicon: {
+    name:    'Invoice Generator',
+    sub:     'v1.0.19 · Procon Persada · Krian Sidoarjo',
+    company: 'BATA RINGAN DAN PANEL LANTAI CITICON',
+    role_bata:  'Distributor',
+    role_panel: 'Aplikator',
+    addr:    'Puri Bagus A7/23 Krian Sidoarjo',
+    phone:   '0811 – 323 – 7070',
+    web:     'www.citicon-indonesia.com',
+    color:   '#0a7a38',
+    logo:    null,   // null = gunakan LOGO_B64 default
+  },
+  bricon: {
+    name:    'Invoice Generator',
+    sub:     'v1.0.19 · Procon Persada · Krian Sidoarjo',
+    company: 'BATA RINGAN DAN PANEL LANTAI BRICON',
+    role_bata:  'Distributor',
+    role_panel: 'Aplikator',
+    addr:    'Puri Bagus A7/23 Krian Sidoarjo',
+    phone:   '0811 – 323 – 7070',
+    web:     'www.bricon-indonesia.com',
+    color:   '#922b21',
+    logo:    null,   // user akan kirim logo nanti
+  },
+  grandel: {
+    name:    'Invoice Generator',
+    sub:     'v1.0.19 · Procon Persada · Krian Sidoarjo',
+    company: 'BATA RINGAN DAN PANEL LANTAI GRAND ELEPHANT',
+    role_bata:  'Distributor',
+    role_panel: 'Aplikator',
+    addr:    'Puri Bagus A7/23 Krian Sidoarjo',
+    phone:   '0811 – 323 – 7070',
+    web:     'www.grandelephant-indonesia.com',
+    color:   '#8d6508',
+    logo:    null,   // user akan kirim logo nanti
+  },
+};
+
+function getCurrentLogo() {
+  const meta = BRAND_META[currentBrand];
+  return meta.logo || LOGO_B64;
+}
+
+function setBrand(brand) {
+  if (!BRAND_META[brand]) return;
+  currentBrand = brand;
+
+  // Update body data-brand for CSS theming
+  document.body.setAttribute('data-brand', brand);
+
+  // Update brand tab active state
+  document.querySelectorAll('.brand-tab').forEach(t => {
+    t.classList.toggle('active', t.getAttribute('data-brand') === brand);
+  });
+
+  // Update header
+  const meta = BRAND_META[brand];
+  const titleEl = document.getElementById('appHeaderTitle');
+  const subEl   = document.getElementById('appHeaderSub');
+  if (titleEl) titleEl.textContent = meta.name;
+  if (subEl)   subEl.textContent   = meta.sub;
+
+  // Update header icon
+  const headerIcon = document.getElementById('appHeaderIcon');
+  if (headerIcon) headerIcon.src = getCurrentLogo();
+
+  // Regen invoice no (prefix changes with brand)
+  if (!isReadOnly) regenInvoiceNo();
+  updatePreview();
+}
+
+function setHistoryFilter(filter) {
+  historyFilter = filter;
+  document.querySelectorAll('.hist-brand-tab').forEach(t => {
+    t.classList.toggle('active', t.getAttribute('data-filter') === filter);
+  });
+  renderHistory();
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -1901,9 +2089,11 @@ function updatePreview() {
 
 // ─── Shared header block ─────────────────────────
 function buildHead({ dateStr, docNo, salute, custName, custAddr, custPhone }) {
-  const role = mode === 'bata' ? 'Distributor' : 'Aplikator';
+  const meta = BRAND_META[currentBrand] || BRAND_META.citicon;
+  const role = mode === 'bata' ? meta.role_bata : meta.role_panel;
   const titleMain = 'INVOICE';
   const titleSub  = mode === 'bata' ? 'BATA RINGAN' : 'PANEL LANTAI';
+  const accentColor = meta.color;
 
   // Customer block — LEFT-aligned, separate lines for Nama, Alamat, No Telp
   const addrLines = custAddr ? custAddr.split('\n').filter(Boolean) : [];
@@ -1917,19 +2107,19 @@ function buildHead({ dateStr, docNo, salute, custName, custAddr, custPhone }) {
   <!-- TOP: logo + title (v9.0: logo height matched to header text block; vertically centered) -->
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;">
     <div style="display:flex;align-items:center;gap:14px;">
-      <img src="${LOGO_B64}" alt="Citicon"
+      <img src="${getCurrentLogo()}" alt="${meta.name}"
            style="height:92px;width:auto;display:block;flex-shrink:0;object-fit:contain;" crossorigin="anonymous">
       <div>
         <div style="font-weight:900;font-size:12.5px;text-transform:uppercase;
                     letter-spacing:0.3px;color:#111;line-height:1.35;max-width:270px;
                     font-family:Arial,sans-serif;">
-          BATA RINGAN DAN PANEL LANTAI CITICON
+          ${h(meta.company)}
         </div>
         <div style="font-size:10px;color:#333;line-height:1.7;margin-top:6px;font-family:Arial,sans-serif;">
           <div>${h(role)}&nbsp; : Procon Persada</div>
-          <div>Puri Bagus A7/23 Krian Sidoarjo</div>
-          <div>0811 – 323 – 7070</div>
-          <div style="color:#0a7a38;">www.citicon-indonesia.com</div>
+          <div>${h(meta.addr)}</div>
+          <div>${h(meta.phone)}</div>
+          <div style="color:${accentColor};">${h(meta.web)}</div>
         </div>
       </div>
     </div>
@@ -1938,7 +2128,7 @@ function buildHead({ dateStr, docNo, salute, custName, custAddr, custPhone }) {
                   line-height:1;font-family:Arial Black,Arial,sans-serif;">
         ${titleMain}
       </div>
-      <div style="font-size:13.5px;font-weight:700;color:#0a7a38;letter-spacing:3px;
+      <div style="font-size:13.5px;font-weight:700;color:${accentColor};letter-spacing:3px;
                   line-height:1;margin-top:6px;font-family:Arial,sans-serif;">
         ${titleSub}
       </div>
@@ -1953,8 +2143,8 @@ function buildHead({ dateStr, docNo, salute, custName, custAddr, custPhone }) {
     <strong>NO. INVOICE</strong> &nbsp;: &nbsp; ${h(docNo) || '____________________'}
   </div>
 
-  <!-- Green divider -->
-  <div style="height:2.5px;background:#0a7a38;margin-bottom:18px;"></div>
+    <!-- Brand color divider -->
+  <div style="height:2.5px;background:${accentColor};margin-bottom:18px;"></div>
 
   <!-- Customer block: LEFT-aligned, separate lines -->
   <div style="font-size:11.5px;line-height:1.75;color:#111;font-family:Arial,sans-serif;">
@@ -2174,7 +2364,7 @@ function buildPanel({ docNo, dateStr, salute, custName, custAddr, custPhone, ban
       </table>
 
       <!-- Harga derivation line — v9.0: grouting moved here (out of table); all rows conditional; order: Terpasang -> Tanpa Pemasangan -> Grouting -> Ongkir -> Langsir -> Grand Total -->
-      <div style="font-size:11px;line-height:1.85;font-family:Arial,sans-serif;color:#222;margin-top:14px;padding:10px 12px;background:#f8f8f8;border-left:3px solid #0a7a38;">
+      <div style="font-size:11px;line-height:1.85;font-family:Arial,sans-serif;color:#222;margin-top:14px;padding:10px 12px;background:#f8f8f8;border-left:3px solid ${accentColor};">
         ${pricePerM2 > 0 ? `<div>• Harga Panel Lantai Terpasang : Rp. ${fmtRupiah(pricePerM2)},- &nbsp;×&nbsp; ${fmtM2(totalArea)} m² = <strong>Rp. ${fmtRupiah(tableTotal)},-</strong></div>` : ''}
         ${nonPasangRate > 0 ? `<div>• Harga Panel Tanpa Pemasangan : Rp. ${fmtRupiah(nonPasangRate)},- &nbsp;×&nbsp; ${fmtM2(totalArea)} m² = <strong>Rp. ${fmtRupiah(tableTotal)},-</strong></div>` : ''}
         ${groutingItems.filter(g => g.subtotal > 0).map(g => `<div>• ${h(GROUTING_NAME)} : Rp. ${fmtRupiah(g.price)},- &nbsp;×&nbsp; ${fmtQty(g.qty)} Sak = <strong>Rp. ${fmtRupiah(g.subtotal)},-</strong></div>`).join('')}
@@ -2451,6 +2641,7 @@ async function saveToHistory() {
     id: Date.now(),
     ts: new Date().toISOString(),
     mode,
+    brand: currentBrand,   // v11.0: simpan brand di setiap entry
     docNo,
     docDate: document.getElementById('docDate').value,
     salute: document.getElementById('custSalute').value,
@@ -2490,10 +2681,17 @@ function renderHistory() {
   const hist = getHistory();
   document.getElementById('history-count').textContent = `History (${hist.length})`;
 
+  // v11.0: Apply brand filter
+  const filtered = historyFilter === 'all'
+    ? hist
+    : hist.filter(e => (e.brand || 'citicon') === historyFilter);
+
   const sub = document.getElementById('history-subtitle');
   if (sub) sub.textContent = hist.length === 0
     ? 'Belum ada invoice tersimpan'
-    : `${hist.length} invoice tersimpan`;
+    : filtered.length !== hist.length
+      ? `${filtered.length} dari ${hist.length} invoice`
+      : `${hist.length} invoice tersimpan`;
 
   const clearBtn = document.getElementById('clear-history-btn');
   if (clearBtn) clearBtn.classList.toggle('hidden', hist.length === 0);
@@ -2502,14 +2700,13 @@ function renderHistory() {
   const empty = document.getElementById('history-empty');
   if (!grid || !empty) return;
 
-  if (hist.length === 0) {
+  if (filtered.length === 0) {
     grid.innerHTML = '';
     empty.classList.remove('hidden');
     return;
   }
   empty.classList.add('hidden');
 
-  // v7.0: SVG icons replacing emoji 🧱 (Bata Ringan) and 📐 (Panel Lantai)
   const SVG_ICON_BATA = `<svg width="11" height="11" viewBox="0 0 400 400" fill="currentColor" style="display:inline-block;vertical-align:-1px;flex-shrink:0;">
     <path d="M194,226L194,299C194,310.038 185.038,319 174,319L20,319C8.962,319 0,310.038 0,299L0,226C0,214.962 8.962,206 20,206L174,206C185.038,206 194,214.962 194,226Z"/>
     <path d="M400,226L400,299C400,310.038 391.038,319 380,319L226,319C214.962,319 206,310.038 206,299L206,226C206,214.962 214.962,206 226,206L380,206C391.038,206 400,214.962 400,226Z"/>
@@ -2525,33 +2722,41 @@ function renderHistory() {
     <path d="M14,136C14,127.716 20.716,121 29,121L286,121C294.284,121 301,127.716 301,136C301,144.284 294.284,151 286,151L29,151C20.716,151 14,144.284 14,136Z"/>
   </svg>`;
 
-  grid.innerHTML = hist.map(e => {
+  const BRAND_LABELS = { citicon: 'Citicon', bricon: 'Bricon', grandel: 'Grand Elephant' };
+  const BRAND_COLORS = { citicon: '#0a7a38', bricon: '#922b21', grandel: '#8d6508' };
+
+  grid.innerHTML = filtered.map(e => {
     const date = e.docDate ? fmtDateID(e.docDate) : '';
-    const modeIcon = e.mode === 'bata' ? SVG_ICON_BATA : SVG_ICON_PANEL;
+    const modeIcon  = e.mode === 'bata' ? SVG_ICON_BATA : SVG_ICON_PANEL;
     const modeLabel = e.mode === 'bata' ? 'Bata Ringan' : 'Panel Lantai';
+    const entryBrand = e.brand || 'citicon';
+    const brandLabel = BRAND_LABELS[entryBrand] || 'Citicon';
+    const accentClr  = BRAND_COLORS[entryBrand] || '#0a7a38';
+    const pillClass  = `mode-pill ${e.mode}-${entryBrand}`;
     return `
-    <div class="history-card" onclick="loadFromHistory(${e.id})">
-      <div class="flex items-start justify-between gap-2">
+    <div class="history-card" data-brand="${entryBrand}" onclick="loadFromHistory(${e.id})">
+      <div class="flex items-start justify-between gap-2" style="padding-left:8px;">
         <div style="flex:1;min-width:0;">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#0a7a38;font-weight:700;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:${accentClr};font-weight:700;">
             ${h(e.docNo)}
           </div>
           <div style="font-size:10.5px;color:#94a3b8;margin-top:2px;">${h(date)}</div>
         </div>
         <button onclick="event.stopPropagation();deleteHistory(${e.id})" class="history-card-delete">Hapus</button>
       </div>
-
-      <div style="padding:10px 0;border-top:1px solid #f1f5f9;border-bottom:1px solid #f1f5f9;">
+      <div style="padding:10px 0 10px 8px;border-top:1px solid #f1f5f9;border-bottom:1px solid #f1f5f9;">
         <div style="font-size:14px;color:#0f172a;font-weight:600;line-height:1.3;">
           ${h(e.salute)} ${h(e.custName)||'—'}
         </div>
         ${e.custAddr ? `<div style="font-size:11px;color:#64748b;margin-top:2px;line-height:1.45;">${h(e.custAddr.split('\n')[0])}</div>` : ''}
         ${e.custPhone ? `<div style="font-size:11px;color:#64748b;font-family:'JetBrains Mono',monospace;margin-top:2px;">${h(e.custPhone)}</div>` : ''}
       </div>
-
-      <div class="flex items-center justify-between">
-        <span class="mode-pill ${e.mode}">${modeIcon}<span style="margin-left:5px;">${modeLabel}</span></span>
-        <span style="font-size:14px;color:#0a7a38;font-weight:800;font-family:'JetBrains Mono',monospace;">
+      <div class="flex items-center justify-between" style="padding-left:8px;">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="${pillClass}">${modeIcon}<span style="margin-left:5px;">${modeLabel}</span></span>
+          <span class="brand-badge ${entryBrand}">${brandLabel}</span>
+        </div>
+        <span style="font-size:14px;color:${accentClr};font-weight:800;font-family:'JetBrains Mono',monospace;">
           Rp ${fmtRupiah(e.total)}
         </span>
       </div>
@@ -2592,16 +2797,16 @@ async function clearHistory() {
 }
 
 // ═══ HISTORY PAGE NAVIGATION ═══
-// v9.0: integrate with browser history so the device back button (mobile)
-// returns the user to the invoice view instead of exiting the app.
+// v11.0: Three navigation levels:
+//   main-view → (push #history) → history-view → (push #detail) → main-view (read-only)
+// Back from detail → history-view; back from history-view → main-view.
+
 function showHistoryView() {
   document.getElementById('main-view').style.display = 'none';
   document.getElementById('history-view').style.display = 'flex';
   renderHistory();
-  // Refresh from cloud silently
   loadHistoryFromCloud();
   window.scrollTo(0, 0);
-  // Push a synthetic state so the next "back" pops it (handled by popstate listener)
   if (history.state?.view !== 'history') {
     history.pushState({ view: 'history' }, '', '#history');
   }
@@ -2610,29 +2815,51 @@ function showHistoryView() {
 function hideHistoryView() {
   document.getElementById('history-view').style.display = 'none';
   document.getElementById('main-view').style.display = 'flex';
-  // If user clicks the in-app back arrow while a history-state is on the stack,
-  // pop that state too so the URL hash is cleared and the back button keeps
-  // working as expected.
   if (history.state?.view === 'history') {
     history.back();
   }
 }
 
-// v9.0: Listen for device/browser back button.
-// When user is on the history page and presses back, return to invoice instead
-// of leaving the app.
+// v11.0: popstate handles all back-navigation cases:
+//   • from detail (#detail) → go to history-view
+//   • from history (#history) → go to main-view
 window.addEventListener('popstate', (ev) => {
   const histVisible = document.getElementById('history-view')?.style.display === 'flex';
+  const mainVisible = document.getElementById('main-view')?.style.display === 'flex';
+
+  // Coming back from a detail view (#detail state was pushed by loadFromHistory)
+  if (ev.state?.view === 'history' && mainVisible) {
+    // User backed from read-only invoice → return to history
+    document.getElementById('main-view').style.display = 'none';
+    document.getElementById('history-view').style.display = 'flex';
+    renderHistory();
+    return;
+  }
+
+  // Coming back from history page (#history) → return to main
   if (histVisible) {
     document.getElementById('history-view').style.display = 'none';
     document.getElementById('main-view').style.display = 'flex';
+    return;
   }
 });
 
 function loadFromHistory(id) {
   const e = getHistory().find(x => x.id === id);
   if (!e) return;
-  hideHistoryView();
+
+  // v11.0: Push a #detail state so back from invoice → history (not exit)
+  history.pushState({ view: 'detail', id }, '', '#detail');
+
+  // Show main-view (hide history)
+  document.getElementById('history-view').style.display = 'none';
+  document.getElementById('main-view').style.display = 'flex';
+
+  // v11.0: Restore brand before setMode (so typePrefix uses correct brand)
+  if (e.brand && BRAND_META[e.brand]) {
+    setBrand(e.brand);
+  }
+
   setMode(e.mode);
   document.getElementById('docNo').value = e.docNo;
   document.getElementById('docDate').value = e.docDate || '';
@@ -2702,8 +2929,8 @@ function exportHistoryData() {
     return;
   }
   const payload = {
-    app: 'citicon-invoice-maker',
-    version: '10.0',
+    app: 'invoice-generator',
+    version: '1.0.19',
     exportedAt: new Date().toISOString(),
     seq: {
       BRC: parseInt(localStorage.getItem(userSeqKey('BRC')) || '0'),
@@ -2717,7 +2944,7 @@ function exportHistoryData() {
   const a = document.createElement('a');
   const stamp = new Date().toISOString().slice(0,10);
   a.href = url;
-  a.download = `citicon-invoice-backup-${stamp}.json`;
+  a.download = `invoice-backup-${stamp}.json`;
   document.body.appendChild(a);
   a.click();
   a.remove();
