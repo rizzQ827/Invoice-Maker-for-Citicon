@@ -2381,6 +2381,9 @@ function buildBata({ docNo, dateStr, salute, custName, custAddr, custPhone, bank
 
 // ═══════════════ PANEL INVOICE BUILDER (TABLE FORMAT) ═══════════════
 function buildPanel({ docNo, dateStr, salute, custName, custAddr, custPhone, bankInfoPanel }) {
+  // v11.0: brand accent color for the derivation block border (matches buildHead)
+  const accentColor = (BRAND_META[currentBrand] || BRAND_META.citicon).color;
+
   // v9.0: pricePerM2 is gated by priceMode (0 when 'nonpasang' is active)
   const pricePerM2 = getPriceTerpasangRate();
 
