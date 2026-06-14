@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Invoice Generator · v1.0.21</title>
-<!-- v1.0.21 -->
+<title>Invoice Generator · v1.0.26</title>
+<!-- v1.0.26 -->
 <meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai multi-brand">
 <meta name="theme-color" content="#0e9e4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -761,7 +761,7 @@
     </div>
     <div class="min-w-0">
       <div class="text-[14px] font-bold text-slate-900 truncate leading-tight">Invoice Generator</div>
-      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.21</div>
+      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.26</div>
     </div>
   </div>
 
@@ -1221,7 +1221,7 @@ function toggleSplashEye() {
 // ── Apply per-user profile to UI ─────────────────────────────
 const COMPANY_MAP = {
   proconpersada: 'Procon Persada',
-  proconlite:    'Procon Lite',
+  proconlite:    'Procon lite',
 };
 
 function applyUserProfile() {
@@ -1702,7 +1702,7 @@ function onDateChange() {
 const BRAND_META = {
   citicon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.21 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.26 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI CITICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -1714,7 +1714,7 @@ const BRAND_META = {
   },
   bricon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.21 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.26 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI BRICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -1726,7 +1726,7 @@ const BRAND_META = {
   },
   grandel: {
     name:    'Invoice Generator',
-    sub:     'v1.0.21 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.26 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI GRAND ELEPHANT',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -2230,7 +2230,7 @@ function buildHead({ dateStr, docNo, salute, custName, custAddr, custPhone }) {
           ${h(meta.company)}
         </div>
         <div style="font-size:10px;color:#333;line-height:1.7;margin-top:6px;font-family:Arial,sans-serif;">
-          <div>${h(role)}&nbsp; : ${currentUser && currentUser.id === 'proconlite' ? 'Procon Lite' : 'Procon Persada'}</div>
+          <div>${h(role)}&nbsp; : ${currentUser && currentUser.id === 'proconlite' ? 'Procon lite' : 'Procon Persada'}</div>
           <div>${h(meta.addr)}</div>
           <div>${currentUser && currentUser.id === 'proconlite' ? '0851 – 8402 – 8183' : h(meta.phone)}</div>
           <div style="color:${accentColor};">${h(meta.web)}</div>
