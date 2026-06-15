@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Invoice Generator · v1.0.29</title>
-<!-- v1.0.29 -->
+<title>Invoice Generator · v1.0.30</title>
+<!-- v1.0.30 -->
 <meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai multi-brand">
 <meta name="theme-color" content="#0e9e4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -794,7 +794,7 @@
     </div>
     <div class="min-w-0">
       <div class="text-[14px] font-bold text-slate-900 truncate leading-tight">Invoice Generator</div>
-      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.29</div>
+      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.30</div>
     </div>
   </div>
 
@@ -1727,34 +1727,35 @@ function initAppUI() {
 }  // end initAppUI
 
 // Set slider positions on load (no transition so they snap into place instantly)
+function snapSlider(sliderId, activeEl) {
+  const slider = document.getElementById(sliderId);
+  if (!slider || !activeEl) return;
+  slider.style.transition = 'none';
+  slider.style.left  = activeEl.offsetLeft + 'px';
+  slider.style.width = activeEl.offsetWidth + 'px';
+  requestAnimationFrame(() => { slider.style.transition = ''; });
+}
+// Move slider with animation (for click interactions)
+function moveSlider(sliderId, activeEl) {
+  const slider = document.getElementById(sliderId);
+  if (!slider || !activeEl) return;
+  slider.style.left  = activeEl.offsetLeft + 'px';
+  slider.style.width = activeEl.offsetWidth + 'px';
+}
+
 function initSliders() {
   // Mode slider
-  const modeSlider   = document.getElementById('modeSlider');
-  const activeModeBtn = document.getElementById(mode === 'bata' ? 'btn-bata' : 'btn-panel');
-  if (modeSlider && activeModeBtn) {
-    modeSlider.style.transition = 'none';
-    modeSlider.style.left  = activeModeBtn.offsetLeft + 'px';
-    modeSlider.style.width = activeModeBtn.offsetWidth + 'px';
-    requestAnimationFrame(() => modeSlider.style.transition = '');
-  }
+  snapSlider('modeSlider', document.getElementById(mode === 'bata' ? 'btn-bata' : 'btn-panel'));
+
   // Brand slider
-  const bSlider    = document.getElementById('brandSlider');
-  const activeBrand = document.querySelector(`.brand-tab[data-brand="${currentBrand}"]`);
-  if (bSlider && activeBrand) {
-    bSlider.style.transition = 'none';
-    bSlider.style.left  = activeBrand.offsetLeft + 'px';
-    bSlider.style.width = activeBrand.offsetWidth + 'px';
-    requestAnimationFrame(() => bSlider.style.transition = '');
-  }
-  // Price-mode slider
-  const pmSlider   = document.getElementById('priceModeSlider');
-  const activePmBtn = document.getElementById(priceMode === 'terpasang' ? 'priceTab-terpasang' : 'priceTab-nonpasang');
-  if (pmSlider && activePmBtn) {
-    pmSlider.style.transition = 'none';
-    pmSlider.style.left  = activePmBtn.offsetLeft + 'px';
-    pmSlider.style.width = activePmBtn.offsetWidth + 'px';
-    requestAnimationFrame(() => pmSlider.style.transition = '');
-  }
+  snapSlider('brandSlider', document.querySelector(`.brand-tab[data-brand="${currentBrand}"]`));
+
+  // Price-mode slider — sec-panel may be hidden; temporarily show it to measure
+  const secPanel = document.getElementById('sec-panel');
+  const wasHidden = secPanel && secPanel.style.display === 'none';
+  if (wasHidden) { secPanel.style.visibility = 'hidden'; secPanel.style.display = 'block'; }
+  snapSlider('priceModeSlider', document.getElementById(priceMode === 'terpasang' ? 'priceTab-terpasang' : 'priceTab-nonpasang'));
+  if (wasHidden) { secPanel.style.display = 'none'; secPanel.style.visibility = ''; }
 }
 document.addEventListener('DOMContentLoaded', () => requestAnimationFrame(initSliders));
 
@@ -1770,7 +1771,7 @@ function onDateChange() {
 const BRAND_META = {
   citicon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.29 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.30 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI CITICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -1782,7 +1783,7 @@ const BRAND_META = {
   },
   bricon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.29 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.30 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI BRICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -1794,7 +1795,7 @@ const BRAND_META = {
   },
   grandel: {
     name:    'Invoice Generator',
-    sub:     'v1.0.29 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.30 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI GRAND ELEPHANT',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -1824,12 +1825,7 @@ function setBrand(brand) {
   });
 
   // Animate brand slider via offsetLeft
-  const activeTab = document.querySelector(`.brand-tab[data-brand="${brand}"]`);
-  const bSlider = document.getElementById('brandSlider');
-  if (bSlider && activeTab) {
-    bSlider.style.left  = activeTab.offsetLeft + 'px';
-    bSlider.style.width = activeTab.offsetWidth + 'px';
-  }
+  moveSlider('brandSlider', document.querySelector(`.brand-tab[data-brand="${brand}"]`));
 
   // Update dynamic prefix labels
   updatePrefixLabels();
@@ -1870,12 +1866,7 @@ function setMode(m) {
   document.getElementById('sec-panel').style.display = m === 'panel' ? 'block' : 'none';
 
   // Animate mode slider via offsetLeft
-  const activeBtn = document.getElementById(m === 'bata' ? 'btn-bata' : 'btn-panel');
-  const slider = document.getElementById('modeSlider');
-  if (slider && activeBtn) {
-    slider.style.left  = activeBtn.offsetLeft + 'px';
-    slider.style.width = activeBtn.offsetWidth + 'px';
-  }
+  moveSlider('modeSlider', document.getElementById(m === 'bata' ? 'btn-bata' : 'btn-panel'));
 
   if (!isReadOnly) regenInvoiceNo();
   updatePreview();
@@ -2143,12 +2134,7 @@ function setPriceMode(m) {
   document.getElementById('priceTab-terpasang')?.setAttribute('aria-selected', m === 'terpasang');
   document.getElementById('priceTab-nonpasang')?.setAttribute('aria-selected', m === 'nonpasang');
   // Animate slider via offsetLeft
-  const pmSlider = document.getElementById('priceModeSlider');
-  const pmActiveBtn = document.getElementById(m === 'terpasang' ? 'priceTab-terpasang' : 'priceTab-nonpasang');
-  if (pmSlider && pmActiveBtn) {
-    pmSlider.style.left  = pmActiveBtn.offsetLeft + 'px';
-    pmSlider.style.width = pmActiveBtn.offsetWidth + 'px';
-  }
+  moveSlider('priceModeSlider', document.getElementById(m === 'terpasang' ? 'priceTab-terpasang' : 'priceTab-nonpasang'));
   // Show/hide the corresponding input
   const wrapT = document.getElementById('priceWrap-terpasang');
   const wrapN = document.getElementById('priceWrap-nonpasang');
