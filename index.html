@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Invoice Generator · v1.0.27</title>
-<!-- v1.0.27 -->
+<title>Invoice Generator · v1.0.28</title>
+<!-- v1.0.28 -->
 <meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai multi-brand">
 <meta name="theme-color" content="#0e9e4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -223,6 +223,18 @@
     gap: 3px;
     margin-bottom: 10px;
   }
+  .price-mode-slider {
+    position: absolute;
+    top: 3px; bottom: 3px;
+    width: calc(50% - 4.5px);
+    border-radius: 7px;
+    background: white;
+    box-shadow: 0 1px 3px rgba(15,23,42,0.06);
+    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .price-mode-slider.to-nonpasang { transform: translateX(calc(100% + 3px)); }
   .price-mode-tab {
     flex: 1;
     padding: 8px 6px;
@@ -234,15 +246,15 @@
     border-radius: 7px;
     cursor: pointer;
     font-family: 'Inter',sans-serif;
-    transition: all 0.18s;
+    transition: color 0.22s ease;
     line-height: 1.2;
     text-align: center;
+    position: relative;
+    z-index: 1;
   }
-  .price-mode-tab:hover:not(.active) { color: #334155; background: rgba(148,163,184,0.10); }
+  .price-mode-tab:hover:not(.active) { color: #334155; }
   .price-mode-tab.active {
-    background: #ffffff;
     color: var(--brand-dark);
-    box-shadow: 0 1px 3px rgba(15,23,42,0.06);
     font-weight: 700;
   }
 
@@ -789,7 +801,7 @@
     </div>
     <div class="min-w-0">
       <div class="text-[14px] font-bold text-slate-900 truncate leading-tight">Invoice Generator</div>
-      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.27</div>
+      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.28</div>
     </div>
   </div>
 
@@ -972,7 +984,8 @@
         <div class="label-section mb-3">Biaya Tambahan</div>
 
         <!-- v9.0: Price-mode switch — Harga Terpasang ⇄ Harga Tanpa Pemasangan (mutually exclusive) -->
-        <div class="price-mode-switch" id="price-mode-switch" role="tablist" aria-label="Pilih jenis harga panel">
+        <div class="price-mode-switch" id="price-mode-switch" role="tablist" aria-label="Pilih jenis harga panel" style="position:relative;">
+          <div class="price-mode-slider" id="priceModeSlider"></div>
           <button type="button" class="price-mode-tab active" id="priceTab-terpasang"
                   onclick="setPriceMode('terpasang')" role="tab" aria-selected="true">Harga Terpasang</button>
           <button type="button" class="price-mode-tab" id="priceTab-nonpasang"
@@ -1732,7 +1745,7 @@ function onDateChange() {
 const BRAND_META = {
   citicon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.27 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.28 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI CITICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -1744,7 +1757,7 @@ const BRAND_META = {
   },
   bricon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.27 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.28 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI BRICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -1756,7 +1769,7 @@ const BRAND_META = {
   },
   grandel: {
     name:    'Invoice Generator',
-    sub:     'v1.0.27 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.28 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI GRAND ELEPHANT',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -2101,6 +2114,9 @@ function setPriceMode(m) {
   document.getElementById('priceTab-nonpasang')?.classList.toggle('active', m === 'nonpasang');
   document.getElementById('priceTab-terpasang')?.setAttribute('aria-selected', m === 'terpasang');
   document.getElementById('priceTab-nonpasang')?.setAttribute('aria-selected', m === 'nonpasang');
+  // Animate slider
+  const pmSlider = document.getElementById('priceModeSlider');
+  if (pmSlider) pmSlider.classList.toggle('to-nonpasang', m === 'nonpasang');
   // Show/hide the corresponding input
   const wrapT = document.getElementById('priceWrap-terpasang');
   const wrapN = document.getElementById('priceWrap-nonpasang');
@@ -2267,9 +2283,10 @@ function buildHead({ dateStr, docNo, salute, custName, custAddr, custPhone }) {
            style="height:92px;width:auto;display:block;flex-shrink:0;object-fit:contain;" crossorigin="anonymous">
       <div>
         <div style="font-weight:900;font-size:12.5px;text-transform:uppercase;
-                    letter-spacing:0.3px;color:#111;line-height:1.35;max-width:270px;
+                    letter-spacing:0.3px;color:#111;line-height:1.35;
                     font-family:Arial,sans-serif;">
-          ${h(meta.company)}
+          <div>BATA RINGAN DAN PANEL LANTAI</div>
+          <div>${h(meta.company.replace('BATA RINGAN DAN PANEL LANTAI ',''))}</div>
         </div>
         <div style="font-size:10px;color:#333;line-height:1.7;margin-top:6px;font-family:Arial,sans-serif;">
           <div>${h(role)}&nbsp; : ${currentUser && currentUser.id === 'proconlite' ? 'Procon lite' : 'Procon Persada'}</div>
@@ -2537,12 +2554,13 @@ function buildPanel({ docNo, dateStr, salute, custName, custAddr, custPhone, ban
         </div>
       </div>
 
-      <!-- STATIC NOTE (permanent, not editable) -->
+      <!-- STATIC NOTE (hanya di mode terpasang) -->
+      ${priceMode === 'terpasang' ? `
       <div style="font-size:10.5px;color:#333;font-style:italic;line-height:1.75;
                   margin-top:18px;padding-top:10px;border-top:1px solid #e0e0e0;
                   font-family:Arial,sans-serif;">
         ${h(STATIC_PANEL_NOTE)}
-      </div>
+      </div>` : ''}
 
       ${bankInfoPanel ? `
       <div style="font-size:10.5px;color:#333;line-height:1.75;margin-top:14px;
