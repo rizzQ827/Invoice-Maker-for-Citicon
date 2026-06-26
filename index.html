@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Invoice Generator · v1.0.31</title>
-<!-- v1.0.31 -->
+<title>Invoice Generator · v1.0.32</title>
+<!-- v1.0.32 -->
 <meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai multi-brand">
 <meta name="theme-color" content="#0e9e4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -794,7 +794,7 @@
     </div>
     <div class="min-w-0">
       <div class="text-[14px] font-bold text-slate-900 truncate leading-tight">Invoice Generator</div>
-      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.31</div>
+      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.32</div>
     </div>
   </div>
 
@@ -1050,9 +1050,9 @@
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Download Invoice
       </button>
-      <button class="btn-primary btn-copy" id="copyMsgBtn" onclick="copyInvoiceMessage()">
+      <button class="btn-primary btn-copy" id="copyMsgBtn" onclick="copyInvoiceMessage()" disabled>
         <svg id="copyMsgIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-        <span id="copyMsgLabel">Salin Pesan Tagihan</span>
+        <span id="copyMsgLabel">Download dulu untuk menyalin</span>
       </button>
     </div>
 
@@ -1771,7 +1771,7 @@ function onDateChange() {
 const BRAND_META = {
   citicon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.31 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.32 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI CITICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -1783,7 +1783,7 @@ const BRAND_META = {
   },
   bricon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.31 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.32 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI BRICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -1795,7 +1795,7 @@ const BRAND_META = {
   },
   grandel: {
     name:    'Invoice Generator',
-    sub:     'v1.0.31 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.32 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI GRAND ELEPHANT',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -2263,6 +2263,8 @@ function renderGroutingRows() {
 //  INVOICE PREVIEW BUILDER
 // ════════════════════════════════════════════════════════════════
 function updatePreview() {
+  // Invoice berubah → wajib download ulang sebelum boleh salin lagi
+  if (_invoiceDownloaded) setCopyGate(false);
   const docNo     = document.getElementById('docNo').value.trim();
   const dateStr   = fmtDateID(document.getElementById('docDate').value);
   const salute    = document.getElementById('custSalute').value;
@@ -2649,7 +2651,7 @@ function buildInvoiceMessage() {
   const lines = [
     `Halo ${salute} ${name},`,
     ``,
-    `Berikut Invoice ${label} Citicon:`,
+    `Berikut Invoice ${label} ${getBrandProductName()}:`,
     `No: ${docNo}`,
     `Total: Rp ${fmtRupiah(total)}`,
     ``,
@@ -2661,10 +2663,24 @@ function buildInvoiceMessage() {
   return lines.join('\n');
 }
 
-async function copyInvoiceMessage() {
+// ── Copy gate: tombol salin hanya aktif SETELAH invoice di-download ──
+// Mencegah double entry: 1 invoice = download (yg menyimpan history) lalu salin.
+let _invoiceDownloaded = false;
+function setCopyGate(enabled) {
+  _invoiceDownloaded = enabled;
   const btn = document.getElementById('copyMsgBtn');
   const label = document.getElementById('copyMsgLabel');
   if (!btn) return;
+  btn.disabled = !enabled;
+  if (label && !btn.classList.contains('copied')) {
+    label.textContent = enabled ? 'Salin Pesan Tagihan' : 'Download dulu untuk menyalin';
+  }
+}
+
+async function copyInvoiceMessage() {
+  const btn = document.getElementById('copyMsgBtn');
+  const label = document.getElementById('copyMsgLabel');
+  if (!btn || btn.disabled) return;  // gate: wajib download dulu
 
   const msg = buildInvoiceMessage();
   let success = false;
@@ -2700,17 +2716,16 @@ async function copyInvoiceMessage() {
 
   if (success) {
     // Visual feedback: green flash + label change
-    const origLabel = label ? label.textContent : 'Salin Pesan Tagihan';
     btn.classList.add('copied');
     if (label) label.textContent = '✓ Tersalin!';
     toast('✓ Pesan tagihan tersalin ke clipboard');
 
-    // Save to history (so the entry is recorded just like Export does)
-    saveToHistory();
+    // Catatan: history TIDAK disimpan di sini. Penyimpanan history
+    // hanya terjadi saat download (lihat doExport) agar 1 invoice = 1 entry.
 
     setTimeout(() => {
       btn.classList.remove('copied');
-      if (label) label.textContent = origLabel;
+      if (label) label.textContent = _invoiceDownloaded ? 'Salin Pesan Tagihan' : 'Download dulu untuk menyalin';
     }, 1800);
   } else {
     toast('Gagal menyalin pesan ke clipboard', 'error');
@@ -2774,6 +2789,7 @@ async function doExport() {
   try {
     await downloadInvoicePNG();
     saveToHistory();
+    setCopyGate(true);   // download sukses → tombol salin boleh ditekan
     toast('✓ Invoice berhasil diunduh');
   } catch(e) {
     console.error(e);
@@ -2832,8 +2848,11 @@ async function saveToHistory() {
     subtitle = `${fmtM2(area)} m²${groutingRows.length ? ` + ${groutingRows.length} grouting` : ''}${nonPasangVal > 0 ? ` + tanpa pasang` : ''}${ongkirVal > 0 ? ` + ongkir` : ''}${langsirVal > 0 ? ` + langsir` : ''}`;
   }
 
+  // Idempotent id: kalau invoice (docNo+mode) sudah ada di history,
+  // pakai id lamanya supaya upsert MENG-UPDATE baris yg sama, bukan bikin baris baru.
+  const _prev = getHistory().find(e => e.docNo === docNo && e.mode === mode);
   const entry = {
-    id: Date.now(),
+    id: _prev ? _prev.id : Date.now(),
     ts: new Date().toISOString(),
     mode,
     brand: currentBrand,   // v11.0: simpan brand di setiap entry
