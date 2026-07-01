@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Invoice Generator · v1.0.32</title>
-<!-- v1.0.32 -->
+<title>Invoice Generator · v1.0.33</title>
+<!-- v1.0.33 -->
 <meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai multi-brand">
 <meta name="theme-color" content="#0e9e4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -794,7 +794,7 @@
     </div>
     <div class="min-w-0">
       <div class="text-[14px] font-bold text-slate-900 truncate leading-tight">Invoice Generator</div>
-      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.32</div>
+      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.33</div>
     </div>
   </div>
 
@@ -856,8 +856,8 @@
       <div class="brand-tab-bar">
         <div class="brand-tab-slider" id="brandSlider"></div>
         <button class="brand-tab active" data-brand="citicon" onclick="setBrand('citicon')">Citicon</button>
-        <button class="brand-tab" data-brand="bricon" onclick="setBrand('bricon')">Bricon</button>
         <button class="brand-tab" data-brand="grandel" onclick="setBrand('grandel')">Grand Elephant</button>
+        <button class="brand-tab" data-brand="bricon" onclick="setBrand('bricon')">Bricon</button>
       </div>
     </div>
 
@@ -1260,9 +1260,31 @@ const COMPANY_MAP = {
   proconlite:    'Procon lite',
 };
 
+// Default brand tab per akun saat login
+const DEFAULT_BRAND_BY_USER = {
+  proconlite:    'bricon',
+  proconpersada: 'citicon',
+};
+
+function applyDefaultBrandForUser(userId) {
+  const brand = DEFAULT_BRAND_BY_USER[userId] || 'citicon';
+  if (!BRAND_META[brand]) return;
+  currentBrand = brand;
+  document.body.setAttribute('data-brand', brand);
+  document.querySelectorAll('.brand-tab').forEach(t => {
+    t.classList.toggle('active', t.getAttribute('data-brand') === brand);
+  });
+  // Slider baru bisa diukur setelah layout siap → tunggu 1 frame
+  requestAnimationFrame(() => {
+    snapSlider('brandSlider', document.querySelector(`.brand-tab[data-brand="${brand}"]`));
+  });
+}
+
 function applyUserProfile() {
   if (!currentUser) return;
   const { id, displayName, profile } = currentUser;
+
+  applyDefaultBrandForUser(id);
 
   // Isi profile card di sidebar
   const card = document.getElementById('profileCard');
@@ -1771,7 +1793,7 @@ function onDateChange() {
 const BRAND_META = {
   citicon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.32 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.33 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI CITICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -1783,7 +1805,7 @@ const BRAND_META = {
   },
   bricon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.32 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.33 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI BRICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -1795,7 +1817,7 @@ const BRAND_META = {
   },
   grandel: {
     name:    'Invoice Generator',
-    sub:     'v1.0.32 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.33 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI GRAND ELEPHANT',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
