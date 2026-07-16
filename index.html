@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Invoice Generator · v1.0.37</title>
-<!-- v1.0.37 -->
+<title>Invoice Generator · v1.0.38</title>
+<!-- v1.0.38 -->
 <meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai multi-brand">
 <meta name="theme-color" content="#0e9e4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -262,6 +262,9 @@
   .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
   .btn-green { background: linear-gradient(135deg, var(--brand-dark), var(--brand-color)); color: white; box-shadow: 0 4px 14px rgba(var(--brand-rgb),0.25); }
   .btn-green:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(var(--brand-rgb),0.35); }
+  /* v1.0.38: tombol Simpan Perubahan — dipakai saat mengedit invoice dari history (trigger save tanpa download) */
+  .btn-save { background: linear-gradient(135deg, #1d4ed8, #2563eb); color: white; box-shadow: 0 4px 14px rgba(37,99,235,0.28); }
+  .btn-save:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(37,99,235,0.38); }
 
   /* ─── ITEM ROWS ─── */
   .item-row {
@@ -537,33 +540,40 @@
   }
   .back-btn:hover { border-color: var(--brand-color); color: var(--brand-dark); background: #f8fafc; }
 
-  /* ─── HISTORY BRAND FILTER TABS ─── */
-  .hist-brand-tabs {
-    display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap;
+  /* ─── HISTORY FILTER CHECKBOX CHIPS (v1.0.38: replaces single-select pill tabs) ─── */
+  .hist-filter-row {
+    display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; align-items: center;
   }
-  .hist-brand-tab {
-    padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  .hist-filter-label {
+    font-size: 10.5px; font-weight: 700; color: #94a3b8; text-transform: uppercase;
+    letter-spacing: 0.5px; margin-right: 2px; font-family: 'Inter',sans-serif;
+  }
+  .hist-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px 5px 8px; border-radius: 20px; font-size: 12px; font-weight: 600;
     border: 1.5px solid #e2e8f0; background: white; color: #64748b;
     cursor: pointer; transition: all 0.18s; font-family: 'Inter',sans-serif;
+    user-select: none;
   }
-  .hist-brand-tab:hover { border-color: #94a3b8; color: #334155; }
-  .hist-brand-tab.active[data-filter="all"]    { background: #0f172a; border-color: #0f172a; color: white; }
-  .hist-brand-tab.active[data-filter="citicon"]{ background: #0a7a38; border-color: #0a7a38; color: white; }
-  .hist-brand-tab.active[data-filter="bricon"] { background: #922b21; border-color: #922b21; color: white; }
-  .hist-brand-tab.active[data-filter="grandel"]{ background: #8d6508; border-color: #8d6508; color: white; }
-
-  /* ─── HISTORY MODE (BATA/PANEL) SUB-TABS ─── */
-  .hist-mode-tabs {
-    display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap;
+  .hist-chip:hover { border-color: #94a3b8; color: #334155; }
+  .hist-chip .chip-box {
+    width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid #cbd5e1;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: all 0.15s; background: white;
   }
-  .hist-mode-tab {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
-    border: 1.5px solid #e2e8f0; background: white; color: #64748b;
-    cursor: pointer; transition: all 0.18s; font-family: 'Inter',sans-serif;
-  }
-  .hist-mode-tab:hover { border-color: #94a3b8; color: #334155; }
-  .hist-mode-tab.active { background: var(--brand-color, #0f172a); border-color: var(--brand-color, #0f172a); color: white; }
+  .hist-chip .chip-box svg { opacity: 0; transform: scale(0.5); transition: all 0.15s; }
+  .hist-chip.checked .chip-box svg { opacity: 1; transform: scale(1); }
+  .hist-chip.checked[data-filter="citicon"] { border-color: #0a7a38; color: #0a7a38; background: #f0fdf4; }
+  .hist-chip.checked[data-filter="citicon"] .chip-box { background: #0a7a38; border-color: #0a7a38; }
+  .hist-chip.checked[data-filter="bricon"]  { border-color: #922b21; color: #922b21; background: #fef2f2; }
+  .hist-chip.checked[data-filter="bricon"]  .chip-box { background: #922b21; border-color: #922b21; }
+  .hist-chip.checked[data-filter="grandel"] { border-color: #8d6508; color: #8d6508; background: #fffbeb; }
+  .hist-chip.checked[data-filter="grandel"] .chip-box { background: #8d6508; border-color: #8d6508; }
+  .hist-chip.checked[data-mode="bata"]  { border-color: var(--brand-color,#0f172a); color: var(--brand-dark,#0f172a); background: #f8fafc; }
+  .hist-chip.checked[data-mode="bata"]  .chip-box { background: var(--brand-color,#0f172a); border-color: var(--brand-color,#0f172a); }
+  .hist-chip.checked[data-mode="panel"] { border-color: var(--brand-color,#0f172a); color: var(--brand-dark,#0f172a); background: #f8fafc; }
+  .hist-chip.checked[data-mode="panel"] .chip-box { background: var(--brand-color,#0f172a); border-color: var(--brand-color,#0f172a); }
+  .chip-box svg { color: white; }
 
   /* ─── HISTORY CARD BRAND BORDER ─── */
   .history-card {
@@ -592,17 +602,17 @@
   }
   .history-card-delete:hover { background: #fef2f2; border-color: #fca5a5; }
 
-  /* Large translucent mode icon watermark, top-right of card */
+  /* v1.0.38: Large translucent mode icon watermark, top-right corner —
+     digeser lebih ke dalam supaya tertimpa/overlap dgn header row (docNo/tanggal),
+     warna netral abu-abu (bukan warna brand) supaya jadi hiasan bg yang benar-benar samar */
   .history-card-icon-bg {
-    position: absolute; top: -14px; right: -14px;
-    width: 96px; height: 96px;
-    opacity: 0.08;
+    position: absolute; top: -6px; right: -6px;
+    width: 78px; height: 78px;
+    opacity: 0.06;
+    color: #64748b;
     pointer-events: none;
     z-index: 1;
   }
-  .history-card[data-brand="citicon"] .history-card-icon-bg { color: #0e9e4a; }
-  .history-card[data-brand="bricon"]  .history-card-icon-bg { color: #c0392b; }
-  .history-card[data-brand="grandel"] .history-card-icon-bg { color: #b7860b; }
   .history-card > * { position: relative; z-index: 2; }
 
   .empty-state {
@@ -795,7 +805,7 @@
     </div>
     <div class="min-w-0">
       <div class="text-[14px] font-bold text-slate-900 truncate leading-tight">Invoice Generator</div>
-      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.37</div>
+      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.38</div>
     </div>
   </div>
 
@@ -1048,8 +1058,8 @@
     <!-- ACTIONS -->
     <div class="space-y-2 pt-1">
       <button class="btn-primary btn-green" id="exportBtn" onclick="doExport()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Download Invoice
+        <svg id="exportBtnIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span id="exportBtnLabel">Download Invoice</span>
       </button>
       <button class="btn-primary btn-copy" id="copyMsgBtn" onclick="copyInvoiceMessage()" disabled>
         <svg id="copyMsgIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
@@ -1114,17 +1124,32 @@
   <!-- History content -->
   <main class="flex-1 overflow-auto p-6" style="background:#f8fafc;">
     <div class="max-w-5xl mx-auto">
-      <!-- Brand filter tabs -->
-      <div class="hist-brand-tabs">
-        <button class="hist-brand-tab active" data-filter="all" onclick="setHistoryFilter('all')">Semua</button>
-        <button class="hist-brand-tab" data-filter="citicon" onclick="setHistoryFilter('citicon')">Citicon</button>
-        <button class="hist-brand-tab" data-filter="bricon" onclick="setHistoryFilter('bricon')">Bricon</button>
-        <button class="hist-brand-tab" data-filter="grandel" onclick="setHistoryFilter('grandel')">Grand Elephant</button>
+      <!-- v1.0.38: Brand filter — checkbox chips (multi-select), tanpa opsi "Semua" -->
+      <div class="hist-filter-row">
+        <span class="hist-filter-label">Brand</span>
+        <button class="hist-chip checked" data-filter="citicon" onclick="toggleHistoryFilter('citicon')">
+          <span class="chip-box"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          Citicon
+        </button>
+        <button class="hist-chip checked" data-filter="bricon" onclick="toggleHistoryFilter('bricon')">
+          <span class="chip-box"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          Bricon
+        </button>
+        <button class="hist-chip checked" data-filter="grandel" onclick="toggleHistoryFilter('grandel')">
+          <span class="chip-box"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          Grand Elephant
+        </button>
       </div>
-      <div class="hist-mode-tabs">
-        <button class="hist-mode-tab active" data-mode="all" onclick="setHistoryModeFilter('all')">Semua Jenis</button>
-        <button class="hist-mode-tab" data-mode="bata" onclick="setHistoryModeFilter('bata')">Bata Ringan</button>
-        <button class="hist-mode-tab" data-mode="panel" onclick="setHistoryModeFilter('panel')">Panel Lantai</button>
+      <div class="hist-filter-row">
+        <span class="hist-filter-label">Jenis</span>
+        <button class="hist-chip checked" data-mode="bata" onclick="toggleHistoryModeFilter('bata')">
+          <span class="chip-box"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          Bata Ringan
+        </button>
+        <button class="hist-chip checked" data-mode="panel" onclick="toggleHistoryModeFilter('panel')">
+          <span class="chip-box"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          Panel Lantai
+        </button>
       </div>
       <div id="history-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
       <div id="history-empty" class="empty-state hidden">
@@ -1514,8 +1539,9 @@ async function sbSetSeq(type, seq) {
 // ════════════════════════════════════════════════════════════════
 let mode = 'bata';  // default: bata (leftmost tab)
 let currentBrand = 'citicon'; // v11.0: 'citicon' | 'bricon' | 'grandel'
-let historyFilter = 'all';    // v11.0: 'all' | 'citicon' | 'bricon' | 'grandel'
-let historyModeFilter = 'all'; // v1.0.37: 'all' | 'bata' | 'panel'
+// v1.0.38: multi-select checklist — Set kosong ditangani sbg "semua brand/jenis dicentang"
+let historyFilter = new Set(['citicon','bricon','grandel']);
+let historyModeFilter = new Set(['bata','panel']);
 
 let bataRows = [
   { qty: '11,52', unit: 'M3',  size: '10cm', price: '605000' },
@@ -1857,7 +1883,7 @@ function onDateChange() {
 const BRAND_META = {
   citicon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.37 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.38 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI CITICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -1869,7 +1895,7 @@ const BRAND_META = {
   },
   bricon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.37 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.38 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI BRICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -1881,7 +1907,7 @@ const BRAND_META = {
   },
   grandel: {
     name:    'Invoice Generator',
-    sub:     'v1.0.37 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.38 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI GRAND ELEPHANT',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -1933,19 +1959,29 @@ function updatePrefixLabels() {
   renderGroutingRows();
 }
 
-function setHistoryFilter(filter) {
-  historyFilter = filter;
-  document.querySelectorAll('.hist-brand-tab').forEach(t => {
-    t.classList.toggle('active', t.getAttribute('data-filter') === filter);
-  });
+// v1.0.38: toggle checklist brand — minimal 1 harus tetap tercentang
+function toggleHistoryFilter(filter) {
+  if (historyFilter.has(filter)) {
+    if (historyFilter.size === 1) { toast('Minimal 1 brand harus dicentang', 'error'); return; }
+    historyFilter.delete(filter);
+  } else {
+    historyFilter.add(filter);
+  }
+  const chip = document.querySelector(`.hist-chip[data-filter="${filter}"]`);
+  if (chip) chip.classList.toggle('checked', historyFilter.has(filter));
   renderHistory();
 }
 
-function setHistoryModeFilter(m) {
-  historyModeFilter = m;
-  document.querySelectorAll('.hist-mode-tab').forEach(t => {
-    t.classList.toggle('active', t.getAttribute('data-mode') === m);
-  });
+// v1.0.38: toggle checklist jenis produk — minimal 1 harus tetap tercentang
+function toggleHistoryModeFilter(m) {
+  if (historyModeFilter.has(m)) {
+    if (historyModeFilter.size === 1) { toast('Minimal 1 jenis produk harus dicentang', 'error'); return; }
+    historyModeFilter.delete(m);
+  } else {
+    historyModeFilter.add(m);
+  }
+  const chip = document.querySelector(`.hist-chip[data-mode="${m}"]`);
+  if (chip) chip.classList.toggle('checked', historyModeFilter.has(m));
   renderHistory();
 }
 
@@ -2875,7 +2911,14 @@ async function downloadInvoicePNG() {
   return { filename, blob };
 }
 
+// v1.0.38: Tombol utama berperan ganda —
+//  - Invoice baru: "Download Invoice" (download PNG + saveToHistory + buka gate salin)
+//  - Invoice dari history yang sedang di-Edit: "Simpan Perubahan" (saveToHistory saja, tanpa download)
 async function doExport() {
+  if (_viewingHistoryDetail && !isReadOnly) {
+    await doSaveChanges();
+    return;
+  }
   const btn = document.getElementById('exportBtn');
   const orig = btn.innerHTML;
   btn.disabled = true;
@@ -2891,6 +2934,47 @@ async function doExport() {
   } finally {
     btn.disabled = false;
     btn.innerHTML = orig;
+  }
+}
+
+// v1.0.38: Simpan perubahan invoice hasil edit (dari history) TANPA download —
+// dipakai saat tombol utama dalam mode "Simpan Perubahan".
+async function doSaveChanges() {
+  const btn = document.getElementById('exportBtn');
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Menyimpan...';
+  try {
+    await saveToHistory();
+    setCopyGate(true);   // simpan sukses → tombol salin boleh ditekan (pakai data terbaru)
+    toast('✓ Perubahan invoice tersimpan');
+  } catch(e) {
+    console.error(e);
+    toast('Gagal menyimpan: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = orig;
+  }
+}
+
+// v1.0.38: Set tampilan tombol utama sesuai konteks —
+//  editingHistory=true  -> "Simpan Perubahan" (biru, ikon disket)
+//  editingHistory=false -> "Download Invoice" (hijau brand, ikon download) — default
+function updateActionButtonMode(editingHistory) {
+  const btn   = document.getElementById('exportBtn');
+  const icon  = document.getElementById('exportBtnIcon');
+  const label = document.getElementById('exportBtnLabel');
+  if (!btn || !icon || !label) return;
+  if (editingHistory) {
+    btn.classList.remove('btn-green');
+    btn.classList.add('btn-save');
+    icon.outerHTML = '<svg id="exportBtnIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2Z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>';
+    label.textContent = 'Simpan Perubahan';
+  } else {
+    btn.classList.remove('btn-save');
+    btn.classList.add('btn-green');
+    icon.outerHTML = '<svg id="exportBtnIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+    label.textContent = 'Download Invoice';
   }
 }
 
@@ -3008,11 +3092,10 @@ function renderHistory() {
   const hist = getHistory();
   document.getElementById('history-count').textContent = `History (${hist.length})`;
 
-  // v11.0: Apply brand filter
-  // v1.0.37: Apply mode (Bata/Panel) filter as well
+  // v1.0.38: Apply brand + jenis filter via checklist (Set) — dicentang = ditampilkan
   const filtered = hist
-    .filter(e => historyFilter === 'all' || (e.brand || 'citicon') === historyFilter)
-    .filter(e => historyModeFilter === 'all' || e.mode === historyModeFilter);
+    .filter(e => historyFilter.has(e.brand || 'citicon'))
+    .filter(e => historyModeFilter.has(e.mode));
 
   const sub = document.getElementById('history-subtitle');
   if (sub) sub.textContent = hist.length === 0
@@ -3224,6 +3307,7 @@ function loadFromHistory(id) {
 
   // v5.0: Historical data opens in READ-ONLY mode by default
   setReadOnly(true);
+  updateActionButtonMode(false);  // v1.0.38: read-only awal → tombol tetap "Download Invoice"; berubah ke "Simpan Perubahan" saat user klik Edit
   toast('✓ Invoice dimuat (Read-Only). Klik Edit untuk mengubah.');
 }
 
@@ -3247,6 +3331,7 @@ function setReadOnly(ro) {
 
 function enableEditMode() {
   setReadOnly(false);
+  updateActionButtonMode(true);   // v1.0.38: tombol utama jadi "Simpan Perubahan"
   toast('✎ Mode Edit aktif — silakan ubah invoice');
 }
 
@@ -3257,6 +3342,7 @@ function resetToFreshInvoice() {
   _viewingHistoryDetail = false;
   _currentEntryId = null;
   setReadOnly(false);
+  updateActionButtonMode(false);  // v1.0.38: invoice baru → tombol kembali "Download Invoice"
 
   bataRows = [
     { qty: '11,52', unit: 'M3',  size: '10cm', price: '605000' },
