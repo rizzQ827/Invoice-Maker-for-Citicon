@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Invoice Generator · v1.0.35</title>
-<!-- v1.0.35 -->
+<title>Invoice Generator · v1.0.36</title>
+<!-- v1.0.36 -->
 <meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai multi-brand">
 <meta name="theme-color" content="#0e9e4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -794,7 +794,7 @@
     </div>
     <div class="min-w-0">
       <div class="text-[14px] font-bold text-slate-900 truncate leading-tight">Invoice Generator</div>
-      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.35</div>
+      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.36</div>
     </div>
   </div>
 
@@ -1638,9 +1638,10 @@ function typePrefix(m) {
 }
 function seqKey(type) { return userSeqKey(type); }
 
-// Smart seq: max of (persisted counter) and (highest seq in current history)
-function getHighestSeq(type) {
-  const persisted = parseInt(localStorage.getItem(seqKey(type)) || '0');
+// Smart seq: always reflects the true highest seq found in current history for
+// this exact type (brand+mode). Ignores any stale persisted counter that no
+// longer matches reality (e.g. after an invoice was edited/deleted).
+function getHistoryMaxSeq(type) {
   const hist = getHistory();
   let histMax = 0;
   hist.forEach(e => {
@@ -1652,7 +1653,26 @@ function getHighestSeq(type) {
       if (n > histMax) histMax = n;
     }
   });
-  return Math.max(persisted, histMax);
+  return histMax;
+}
+
+// Resync the persisted counter (local + cloud) so it exactly matches the real
+// highest seq present in history for this type — never leaves it stuck ahead
+// (e.g. after deleting the top invoice) nor behind.
+async function resyncSeq(type) {
+  const truth = getHistoryMaxSeq(type);
+  const cur = parseInt(localStorage.getItem(seqKey(type)) || '0');
+  if (truth !== cur) {
+    localStorage.setItem(seqKey(type), String(truth));
+    await sbSetSeq(type, truth);
+  }
+  return truth;
+}
+
+function getHighestSeq(type) {
+  // Source of truth is always the real history, not the persisted counter,
+  // so edits/deletes are reflected immediately in the next generated number.
+  return getHistoryMaxSeq(type);
 }
 
 function genInvoiceNo(forMode = mode, forDate = null) {
@@ -1795,7 +1815,7 @@ function onDateChange() {
 const BRAND_META = {
   citicon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.35 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.36 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI CITICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -1807,7 +1827,7 @@ const BRAND_META = {
   },
   bricon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.35 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.36 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI BRICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -1819,7 +1839,7 @@ const BRAND_META = {
   },
   grandel: {
     name:    'Invoice Generator',
-    sub:     'v1.0.35 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.36 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI GRAND ELEPHANT',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -2910,9 +2930,10 @@ async function saveToHistory() {
   else hist.unshift(entry);
   setHistoryRaw(hist);
 
-  // Commit seq
+  // Resync seq for this type against the real history (handles new invoices,
+  // manually-edited docNo, and re-saves consistently).
   const match = docNo.match(/^(\d+)\/([A-Z]+)\//);
-  if (match) commitSeq(match[2], parseInt(match[1]));
+  if (match) await resyncSeq(match[2]);
 }
 
 function renderHistory() {
@@ -3005,33 +3026,23 @@ function renderHistory() {
 async function deleteHistory(id) {
   if (!confirm('Hapus invoice ini dari history?')) return;
   const e = getHistory().find(x => x.id === id);
-  if (e && e.docNo) {
-    const match = e.docNo.match(/^(\d+)\/([A-Z]+)\//);
-    if (match) commitSeq(match[2], parseInt(match[1]));
-  }
+  const match = e && e.docNo ? e.docNo.match(/^(\d+)\/([A-Z]+)\//) : null;
   await sbDeleteInvoice(id);
   setHistoryRaw(getHistory().filter(e => e.id !== id));
+  // Resync the counter for this type against the now-updated history, so a
+  // deleted top invoice correctly frees up its number for the next one.
+  if (match) await resyncSeq(match[2]);
 }
 
 async function clearHistory() {
-  if (!confirm('Hapus SEMUA history?\n(Nomor urut invoice tetap tersimpan)')) return;
-  const hist = getHistory();
-  for (const type of ['BRC','PLC']) {
-    let maxSeq = parseInt(localStorage.getItem(seqKey(type)) || '0');
-    hist.forEach(e => {
-      const m = (e.docNo||'').match(/^(\d+)\/([A-Z]+)\//);
-      if (m && m[2] === type) {
-        const n = parseInt(m[1]);
-        if (n > maxSeq) maxSeq = n;
-      }
-    });
-    if (maxSeq > 0) {
-      localStorage.setItem(seqKey(type), String(maxSeq));
-      await sbSetSeq(type, maxSeq);
-    }
-  }
+  if (!confirm('Hapus SEMUA history?\n(Nomor urut invoice akan disesuaikan otomatis)')) return;
   await sbDeleteAllInvoices();
   setHistoryRaw([]);
+  // With history now empty, the true seq for every type is 0 — resync so the
+  // next invoice starts fresh instead of continuing from a stale counter.
+  for (const type of ['BRC','PLC','BRB','PLB','BRGE','PLGE']) {
+    await resyncSeq(type);
+  }
 }
 
 // ═══ HISTORY PAGE NAVIGATION ═══
