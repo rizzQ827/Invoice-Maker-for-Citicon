@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Invoice Generator · v1.0.36</title>
-<!-- v1.0.36 -->
+<title>Invoice Generator · v1.0.37</title>
+<!-- v1.0.37 -->
 <meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai multi-brand">
 <meta name="theme-color" content="#0e9e4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -552,6 +552,19 @@
   .hist-brand-tab.active[data-filter="bricon"] { background: #922b21; border-color: #922b21; color: white; }
   .hist-brand-tab.active[data-filter="grandel"]{ background: #8d6508; border-color: #8d6508; color: white; }
 
+  /* ─── HISTORY MODE (BATA/PANEL) SUB-TABS ─── */
+  .hist-mode-tabs {
+    display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .hist-mode-tab {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    border: 1.5px solid #e2e8f0; background: white; color: #64748b;
+    cursor: pointer; transition: all 0.18s; font-family: 'Inter',sans-serif;
+  }
+  .hist-mode-tab:hover { border-color: #94a3b8; color: #334155; }
+  .hist-mode-tab.active { background: var(--brand-color, #0f172a); border-color: var(--brand-color, #0f172a); color: white; }
+
   /* ─── HISTORY CARD BRAND BORDER ─── */
   .history-card {
     background: white; border: 1px solid #e2e8f0;
@@ -575,34 +588,22 @@
     color: #dc2626; font-size: 11.5px; font-weight: 600;
     padding: 5px 10px; border-radius: 6px;
     cursor: pointer; transition: all 0.15s;
+    position: relative; z-index: 2;
   }
   .history-card-delete:hover { background: #fef2f2; border-color: #fca5a5; }
 
-  .mode-pill {
-    display: inline-flex; align-items: center; gap: 4px;
-    font-size: 10.5px; font-weight: 600; padding: 3px 8px;
-    border-radius: 5px; text-transform: uppercase; letter-spacing: 0.5px;
+  /* Large translucent mode icon watermark, top-right of card */
+  .history-card-icon-bg {
+    position: absolute; top: -14px; right: -14px;
+    width: 96px; height: 96px;
+    opacity: 0.08;
+    pointer-events: none;
+    z-index: 1;
   }
-  /* Brand+mode combinations for history pills */
-  .mode-pill.bata-citicon  { background: rgba(14,158,74,0.08);  color: #0a7a38; border: 1px solid rgba(14,158,74,0.15); }
-  .mode-pill.panel-citicon { background: rgba(37,99,235,0.08);  color: #1d4ed8; border: 1px solid rgba(37,99,235,0.15); }
-  .mode-pill.bata-bricon   { background: rgba(192,57,43,0.08);  color: #922b21; border: 1px solid rgba(192,57,43,0.15); }
-  .mode-pill.panel-bricon  { background: rgba(192,57,43,0.06);  color: #a93226; border: 1px solid rgba(192,57,43,0.15); }
-  .mode-pill.bata-grandel  { background: rgba(183,134,11,0.08); color: #8d6508; border: 1px solid rgba(183,134,11,0.15); }
-  .mode-pill.panel-grandel { background: rgba(183,134,11,0.06); color: #7d5a07; border: 1px solid rgba(183,134,11,0.15); }
-  /* Legacy (no brand) */
-  .mode-pill.bata  { background: rgba(14,158,74,0.08);  color: #0a7a38; border: 1px solid rgba(14,158,74,0.15); }
-  .mode-pill.panel { background: rgba(37,99,235,0.08);  color: #1d4ed8; border: 1px solid rgba(37,99,235,0.15); }
-
-  /* Brand badge in history card */
-  .brand-badge {
-    display: inline-flex; align-items: center;
-    font-size: 9.5px; font-weight: 700; padding: 2px 7px;
-    border-radius: 4px; text-transform: uppercase; letter-spacing: 0.8px;
-  }
-  .brand-badge.citicon { background: rgba(14,158,74,0.10);  color: #0a7a38; border: 1px solid rgba(14,158,74,0.2); }
-  .brand-badge.bricon  { background: rgba(192,57,43,0.10);  color: #922b21; border: 1px solid rgba(192,57,43,0.2); }
-  .brand-badge.grandel { background: rgba(183,134,11,0.10); color: #8d6508; border: 1px solid rgba(183,134,11,0.2); }
+  .history-card[data-brand="citicon"] .history-card-icon-bg { color: #0e9e4a; }
+  .history-card[data-brand="bricon"]  .history-card-icon-bg { color: #c0392b; }
+  .history-card[data-brand="grandel"] .history-card-icon-bg { color: #b7860b; }
+  .history-card > * { position: relative; z-index: 2; }
 
   .empty-state {
     text-align: center; padding: 80px 20px;
@@ -794,7 +795,7 @@
     </div>
     <div class="min-w-0">
       <div class="text-[14px] font-bold text-slate-900 truncate leading-tight">Invoice Generator</div>
-      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.36</div>
+      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.37</div>
     </div>
   </div>
 
@@ -1119,6 +1120,11 @@
         <button class="hist-brand-tab" data-filter="citicon" onclick="setHistoryFilter('citicon')">Citicon</button>
         <button class="hist-brand-tab" data-filter="bricon" onclick="setHistoryFilter('bricon')">Bricon</button>
         <button class="hist-brand-tab" data-filter="grandel" onclick="setHistoryFilter('grandel')">Grand Elephant</button>
+      </div>
+      <div class="hist-mode-tabs">
+        <button class="hist-mode-tab active" data-mode="all" onclick="setHistoryModeFilter('all')">Semua Jenis</button>
+        <button class="hist-mode-tab" data-mode="bata" onclick="setHistoryModeFilter('bata')">Bata Ringan</button>
+        <button class="hist-mode-tab" data-mode="panel" onclick="setHistoryModeFilter('panel')">Panel Lantai</button>
       </div>
       <div id="history-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
       <div id="history-empty" class="empty-state hidden">
@@ -1509,6 +1515,7 @@ async function sbSetSeq(type, seq) {
 let mode = 'bata';  // default: bata (leftmost tab)
 let currentBrand = 'citicon'; // v11.0: 'citicon' | 'bricon' | 'grandel'
 let historyFilter = 'all';    // v11.0: 'all' | 'citicon' | 'bricon' | 'grandel'
+let historyModeFilter = 'all'; // v1.0.37: 'all' | 'bata' | 'panel'
 
 let bataRows = [
   { qty: '11,52', unit: 'M3',  size: '10cm', price: '605000' },
@@ -1543,6 +1550,8 @@ let priceMode = 'terpasang';
 
 // Read-only state — set when user loads from history
 let isReadOnly = false;
+let _viewingHistoryDetail = false; // v1.0.37: true saat main-view menampilkan invoice dari history (walau sudah di-Edit)
+let _currentEntryId = null; // v1.0.37: id entry history yang sedang dibuka/diedit (null = invoice baru)
 
 // ════════════════════════════════════════════════════════════════
 //  UTILS
@@ -1710,6 +1719,39 @@ async function commitSeq(type, seq) {
   }
 }
 
+// v1.0.37: "Smart edit numbering" — kalau invoice yang sedang di-edit nomornya
+// diubah ke seq yang SUDAH dipakai invoice lain (mode+type sama), maka semua
+// invoice lain dengan seq >= seq baru itu (kecuali entry yang sedang diedit
+// sendiri) digeser +1, supaya urutannya tetap rapi tanpa nomor bentrok/ganda.
+// excludeId = id entry yang sedang di-save (supaya tidak ikut kegeser).
+async function shiftSeqForInsert(type, newSeq, excludeId) {
+  const hist = getHistory();
+  const rx = new RegExp(`^(\\d+)/${type}/(.+)$`);
+  let changed = false;
+
+  // Urutkan dari seq tertinggi ke terendah supaya shift +1 tidak saling menimpa
+  const candidates = hist
+    .filter(e => e.id !== excludeId)
+    .map(e => {
+      const m = e.docNo && e.docNo.match(rx);
+      return m ? { entry: e, seq: parseInt(m[1]), suffix: m[2] } : null;
+    })
+    .filter(Boolean)
+    .filter(c => c.seq >= newSeq)
+    .sort((a, b) => b.seq - a.seq);
+
+  for (const c of candidates) {
+    const shiftedSeq = c.seq + 1;
+    const seqStr = String(shiftedSeq).padStart(3, '0');
+    c.entry.docNo = `${seqStr}/${type}/${c.suffix}`;
+    await sbUpsertInvoice(c.entry);
+    changed = true;
+  }
+
+  if (changed) setHistoryRaw(getHistory());
+  return changed;
+}
+
 // ════════════════════════════════════════════════════════════════
 //  INIT
 // ════════════════════════════════════════════════════════════════
@@ -1815,7 +1857,7 @@ function onDateChange() {
 const BRAND_META = {
   citicon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.36 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.37 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI CITICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -1827,7 +1869,7 @@ const BRAND_META = {
   },
   bricon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.36 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.37 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI BRICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -1839,7 +1881,7 @@ const BRAND_META = {
   },
   grandel: {
     name:    'Invoice Generator',
-    sub:     'v1.0.36 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.37 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI GRAND ELEPHANT',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -1895,6 +1937,14 @@ function setHistoryFilter(filter) {
   historyFilter = filter;
   document.querySelectorAll('.hist-brand-tab').forEach(t => {
     t.classList.toggle('active', t.getAttribute('data-filter') === filter);
+  });
+  renderHistory();
+}
+
+function setHistoryModeFilter(m) {
+  historyModeFilter = m;
+  document.querySelectorAll('.hist-mode-tab').forEach(t => {
+    t.classList.toggle('active', t.getAttribute('data-mode') === m);
   });
   renderHistory();
 }
@@ -2892,9 +2942,12 @@ async function saveToHistory() {
     subtitle = `${fmtM2(area)} m²${groutingRows.length ? ` + ${groutingRows.length} grouting` : ''}${nonPasangVal > 0 ? ` + tanpa pasang` : ''}${ongkirVal > 0 ? ` + ongkir` : ''}${langsirVal > 0 ? ` + langsir` : ''}`;
   }
 
-  // Idempotent id: kalau invoice (docNo+mode) sudah ada di history,
-  // pakai id lamanya supaya upsert MENG-UPDATE baris yg sama, bukan bikin baris baru.
-  const _prev = getHistory().find(e => e.docNo === docNo && e.mode === mode);
+  // Idempotent id: kalau invoice ini sedang di-edit (dibuka dari history), pakai
+  // id lamanya (_currentEntryId) supaya upsert MENG-UPDATE baris yg sama, bukan
+  // bikin baris baru — walaupun docNo di field sudah diubah manual oleh user.
+  // Fallback: cocokkan docNo+mode (untuk invoice baru yang kebetulan re-save).
+  const _prevById = _currentEntryId ? getHistory().find(e => e.id === _currentEntryId) : null;
+  const _prev = _prevById || getHistory().find(e => e.docNo === docNo && e.mode === mode);
   const entry = {
     id: _prev ? _prev.id : Date.now(),
     ts: new Date().toISOString(),
@@ -2920,20 +2973,35 @@ async function saveToHistory() {
     subtitle,
   };
 
+  // v1.0.37: Smart edit numbering — kalau nomor urut invoice ini diubah (edit)
+  // ke seq yang sudah dipakai invoice lain, geser invoice-invoice lain (seq >=
+  // seq baru) supaya tetap urut tanpa bentrok/duplikat nomor.
+  const newMatch = docNo.match(/^(\d+)\/([A-Z]+)\//);
+  if (_prev && _prev.docNo !== docNo && newMatch) {
+    const oldMatch = _prev.docNo.match(/^(\d+)\/([A-Z]+)\//);
+    // Hanya geser kalau type (mode+brand code) sama dan seq baru bentrok dgn entry lain
+    if (oldMatch && oldMatch[2] === newMatch[2]) {
+      const newSeq = parseInt(newMatch[1]);
+      const clashes = getHistory().some(e => e.id !== entry.id && e.docNo && e.docNo.match(new RegExp(`^${String(newSeq).padStart(3,'0')}/${newMatch[2]}/`)));
+      if (clashes) await shiftSeqForInsert(newMatch[2], newSeq, entry.id);
+    }
+  }
+
   // Upsert to Supabase
   await sbUpsertInvoice(entry);
 
   // Update local cache
   const hist = getHistory();
-  const existingIdx = hist.findIndex(e => e.docNo === entry.docNo && e.mode === entry.mode);
+  const existingIdx = hist.findIndex(e => e.id === entry.id);
   if (existingIdx >= 0) hist[existingIdx] = entry;
   else hist.unshift(entry);
   setHistoryRaw(hist);
 
+  _currentEntryId = entry.id; // v1.0.37: setelah save, entry ini jadi acuan id berikutnya
+
   // Resync seq for this type against the real history (handles new invoices,
   // manually-edited docNo, and re-saves consistently).
-  const match = docNo.match(/^(\d+)\/([A-Z]+)\//);
-  if (match) await resyncSeq(match[2]);
+  if (newMatch) await resyncSeq(newMatch[2]);
 }
 
 function renderHistory() {
@@ -2941,9 +3009,10 @@ function renderHistory() {
   document.getElementById('history-count').textContent = `History (${hist.length})`;
 
   // v11.0: Apply brand filter
-  const filtered = historyFilter === 'all'
-    ? hist
-    : hist.filter(e => (e.brand || 'citicon') === historyFilter);
+  // v1.0.37: Apply mode (Bata/Panel) filter as well
+  const filtered = hist
+    .filter(e => historyFilter === 'all' || (e.brand || 'citicon') === historyFilter)
+    .filter(e => historyModeFilter === 'all' || e.mode === historyModeFilter);
 
   const sub = document.getElementById('history-subtitle');
   if (sub) sub.textContent = hist.length === 0
@@ -2986,14 +3055,14 @@ function renderHistory() {
 
   grid.innerHTML = filtered.map(e => {
     const date = e.docDate ? fmtDateID(e.docDate) : '';
-    const modeIcon  = e.mode === 'bata' ? SVG_ICON_BATA : SVG_ICON_PANEL;
-    const modeLabel = e.mode === 'bata' ? 'Bata Ringan' : 'Panel Lantai';
+    const modeIconBg = e.mode === 'bata' ? SVG_ICON_BATA : SVG_ICON_PANEL;
     const entryBrand = e.brand || 'citicon';
-    const brandLabel = BRAND_LABELS[entryBrand] || 'Citicon';
     const accentClr  = BRAND_COLORS[entryBrand] || '#0a7a38';
-    const pillClass  = `mode-pill ${e.mode}-${entryBrand}`;
+    // Watermark icon needs full viewBox width/height to render large in the corner
+    const iconBgHtml = modeIconBg.replace('width="11" height="11"', 'width="100%" height="100%"');
     return `
     <div class="history-card" data-brand="${entryBrand}" onclick="loadFromHistory(${e.id})">
+      <div class="history-card-icon-bg">${iconBgHtml}</div>
       <div class="flex items-start justify-between gap-2" style="padding-left:8px;">
         <div style="flex:1;min-width:0;">
           <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:${accentClr};font-weight:700;">
@@ -3010,11 +3079,7 @@ function renderHistory() {
         ${e.custAddr ? `<div style="font-size:11px;color:#64748b;margin-top:2px;line-height:1.45;">${h(e.custAddr.split('\n')[0])}</div>` : ''}
         ${e.custPhone ? `<div style="font-size:11px;color:#64748b;font-family:'JetBrains Mono',monospace;margin-top:2px;">${h(e.custPhone)}</div>` : ''}
       </div>
-      <div class="flex items-center justify-between" style="padding-left:8px;">
-        <div class="flex items-center gap-2 flex-wrap">
-          <span class="${pillClass}">${modeIcon}<span style="margin-left:5px;">${modeLabel}</span></span>
-          <span class="brand-badge ${entryBrand}">${brandLabel}</span>
-        </div>
+      <div class="flex items-center justify-end" style="padding-left:8px;">
         <span style="font-size:14px;color:${accentClr};font-weight:800;font-family:'JetBrains Mono',monospace;">
           Rp ${fmtRupiah(e.total)}
         </span>
@@ -3064,6 +3129,10 @@ function showHistoryView() {
 function hideHistoryView() {
   document.getElementById('history-view').style.display = 'none';
   document.getElementById('main-view').style.display = 'flex';
+  // v1.0.37: Jika sebelumnya user sempat membuka/edit invoice dari history lalu
+  // kembali kesini, main-view harus mendarat di form baru yang bersih, bukan
+  // sisa data invoice lama.
+  if (_viewingHistoryDetail) resetToFreshInvoice();
   if (history.state?.view === 'history') {
     history.back();
   }
@@ -3072,6 +3141,9 @@ function hideHistoryView() {
 // v11.0: popstate handles all back-navigation cases:
 //   • from detail (#detail) → go to history-view
 //   • from history (#history) → go to main-view
+// v1.0.37: Back dari main-view ke base (bukan dari #detail) harus mereset
+// form ke invoice baru, supaya rantai edit>back>history>back tidak mendarat
+// di form yang masih berisi data invoice lama / masih dalam mode edit.
 window.addEventListener('popstate', (ev) => {
   const histVisible = document.getElementById('history-view')?.style.display === 'flex';
   const mainVisible = document.getElementById('main-view')?.style.display === 'flex';
@@ -3089,13 +3161,23 @@ window.addEventListener('popstate', (ev) => {
   if (histVisible) {
     document.getElementById('history-view').style.display = 'none';
     document.getElementById('main-view').style.display = 'flex';
+    if (_viewingHistoryDetail) resetToFreshInvoice();
     return;
+  }
+
+  // Landed back on base state directly (e.g. from main-view after having
+  // viewed a history detail, without history-view being visible)
+  if (mainVisible && !ev.state && _viewingHistoryDetail) {
+    resetToFreshInvoice();
   }
 });
 
 function loadFromHistory(id) {
   const e = getHistory().find(x => x.id === id);
   if (!e) return;
+
+  _viewingHistoryDetail = true; // v1.0.37: tandai bahwa main-view kini menampilkan detail dari history
+  _currentEntryId = e.id; // v1.0.37: lacak entry mana yang sedang dibuka, dipakai saat save-edit
 
   // v11.0: Push a #detail state so back from invoice → history (not exit)
   history.pushState({ view: 'detail', id }, '', '#detail');
@@ -3166,6 +3248,50 @@ function setReadOnly(ro) {
 function enableEditMode() {
   setReadOnly(false);
   toast('✎ Mode Edit aktif — silakan ubah invoice');
+}
+
+// v1.0.37: Kembalikan form ke kondisi "invoice baru" yang bersih — dipakai saat
+// user nge-back dua kali dari halaman detail invoice (edit > back > history > back)
+// supaya mendarat di form kosong, bukan sisa data invoice yang tadi dibuka/diedit.
+function resetToFreshInvoice() {
+  _viewingHistoryDetail = false;
+  _currentEntryId = null;
+  setReadOnly(false);
+
+  bataRows = [
+    { qty: '11,52', unit: 'M3',  size: '10cm', price: '605000' },
+    { qty: '',      unit: 'SAK', size: '',      price: '80000'  },
+  ];
+  panelRows = [
+    { panjang: '322', qty: '9'  },
+    { panjang: '297', qty: '22' },
+  ];
+  groutingRows = [];
+  ongkir = '';
+  biayaLangsir = '';
+  priceNonPasang = '';
+  priceMode = 'terpasang';
+
+  document.getElementById('custSalute').value = 'Bpk.';
+  document.getElementById('custName').value = '';
+  document.getElementById('custAddr').value = '';
+  document.getElementById('custPhone').value = '';
+  if (document.getElementById('bankInfo')) document.getElementById('bankInfo').value = '';
+  if (document.getElementById('bankInfoPanel')) document.getElementById('bankInfoPanel').value = '';
+  if (document.getElementById('pricePerM2')) document.getElementById('pricePerM2').value = '';
+  if (document.getElementById('ongkirInput')) document.getElementById('ongkirInput').value = '';
+  if (document.getElementById('biayaLangsirInput')) document.getElementById('biayaLangsirInput').value = '';
+  if (document.getElementById('plcPriceNonPasang')) document.getElementById('plcPriceNonPasang').value = '';
+
+  const now = new Date();
+  const y = now.getFullYear(), m = String(now.getMonth()+1).padStart(2,'0'), d = String(now.getDate()).padStart(2,'0');
+  document.getElementById('docDate').value = `${y}-${m}-${d}`;
+
+  setPriceMode(priceMode);
+  setMode('bata');
+  renderBataRows(); renderPanelRows(); renderGroutingRows();
+  updatePhonePreview();
+  updatePreview();
 }
 
 // ════════════════════════════════════════════════════════════════
