@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Invoice Generator · v1.0.39</title>
-<!-- v1.0.39 -->
+<title>Invoice Generator · v1.0.40</title>
+<!-- v1.0.40 -->
 <meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai multi-brand">
 <meta name="theme-color" content="#0e9e4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -262,7 +262,7 @@
   .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
   .btn-green { background: linear-gradient(135deg, var(--brand-dark), var(--brand-color)); color: white; box-shadow: 0 4px 14px rgba(var(--brand-rgb),0.25); }
   .btn-green:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(var(--brand-rgb),0.35); }
-  /* v1.0.39: tombol Simpan Perubahan — dipakai saat mengedit invoice dari history (trigger save tanpa download) */
+  /* v1.0.40: tombol Simpan Perubahan — dipakai saat mengedit invoice dari history (trigger save tanpa download) */
   .btn-save { background: linear-gradient(135deg, #1d4ed8, #2563eb); color: white; box-shadow: 0 4px 14px rgba(37,99,235,0.28); }
   .btn-save:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(37,99,235,0.38); }
 
@@ -540,7 +540,7 @@
   }
   .back-btn:hover { border-color: var(--brand-color); color: var(--brand-dark); background: #f8fafc; }
 
-  /* ─── HISTORY FILTER CHECKBOX CHIPS (v1.0.39: replaces single-select pill tabs) ─── */
+  /* ─── HISTORY FILTER CHECKBOX CHIPS (v1.0.40: replaces single-select pill tabs) ─── */
   .hist-filter-row {
     display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; align-items: center;
   }
@@ -602,32 +602,16 @@
   }
   .history-card-delete:hover { background: #fef2f2; border-color: #fca5a5; }
 
-  /* v1.0.39: Mode icon jadi "stempel lilin" — badge lingkaran solid warna brand,
-     pojok kiri bawah sejajar harga, icon dimiringkan BERLAWANAN arah jarum jam
-     dan dikelilingi cincin titik-titik tipis (tekstur bekas tekan stempel). */
-  .history-card-seal {
-    width: 30px; height: 30px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    position: relative;
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.18), 0 1px 3px rgba(0,0,0,0.12);
-  }
-  .history-card-seal::before {
-    /* cincin tekstur "bekas tekan" — titik-titik halus mengelilingi badge */
-    content: '';
-    position: absolute; inset: -3px;
-    border-radius: 50%;
-    background-image: radial-gradient(circle, rgba(255,255,255,0.55) 0.6px, transparent 0.6px);
-    background-size: 5px 5px;
-    opacity: 0.5;
+  /* v1.0.40: Large translucent mode icon watermark, top-right corner —
+     digeser lebih ke dalam supaya tertimpa/overlap dgn header row (docNo/tanggal),
+     warna netral abu-abu (bukan warna brand) supaya jadi hiasan bg yang benar-benar samar */
+  .history-card-icon-bg {
+    position: absolute; top: -6px; right: -6px;
+    width: 78px; height: 78px;
+    opacity: 0.06;
+    color: #64748b;
     pointer-events: none;
-  }
-  .history-card-seal svg {
-    transform: rotate(-14deg);
-    color: #fff;
-    opacity: 0.92;
-    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
+    z-index: 1;
   }
   .history-card > * { position: relative; z-index: 2; }
 
@@ -821,7 +805,7 @@
     </div>
     <div class="min-w-0">
       <div class="text-[14px] font-bold text-slate-900 truncate leading-tight">Invoice Generator</div>
-      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.39</div>
+      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.40</div>
     </div>
   </div>
 
@@ -949,8 +933,24 @@
           </div>
         </div>
         <div>
+          <label class="label-field">Metode Pengiriman</label>
+          <div class="price-mode-switch" id="delivery-method-switch" role="tablist" aria-label="Pilih metode pengiriman" style="position:relative;">
+            <div class="price-mode-slider" id="deliveryMethodSlider"></div>
+            <button type="button" class="price-mode-tab active" id="deliveryTab-kirim"
+                    onclick="setDeliveryMethod('kirim')" role="tab" aria-selected="true">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:-3px;margin-right:4px;"><path d="M19.1 7.8c-.38-.5-.97-.8-1.6-.8H15V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2 0 1.65 1.35 3 3 3s3-1.35 3-3h4c0 1.65 1.35 3 3 3s3-1.35 3-3c1.1 0 2-.9 2-2v-3.67c0-.43-.14-.86-.4-1.2zM17.5 9l1.5 2h-4V9zM7 19a1.003 1.003 0 0 1-.87-1.5c.37-.63 1.36-.63 1.73 0 .09.15.13.32.13.49 0 .55-.45 1-1 1Zm2.23-3s-.05-.05-.08-.07c-.06-.06-.12-.11-.17-.16-.12-.11-.25-.21-.38-.29a3 3 0 0 0-.67-.32c-.07-.02-.14-.05-.21-.07Q7.375 15 7 15c-.375 0-.49.04-.72.09-.07.02-.14.05-.21.07-.16.05-.31.11-.45.19-.07.04-.15.08-.22.13-.13.09-.26.18-.38.29-.06.05-.12.1-.18.16-.02.03-.05.04-.08.07h-.77V6h9v10H9.22ZM17 19a1.003 1.003 0 0 1-.87-1.5c.37-.63 1.36-.63 1.73 0 .09.15.13.32.13.49 0 .55-.45 1-1 1Zm3-3h-.77s-.05-.05-.08-.07c-.06-.06-.12-.11-.17-.16-.12-.11-.25-.21-.38-.29a3 3 0 0 0-.67-.32c-.07-.02-.14-.05-.21-.07Q17.375 15 17 15c-.375 0-.47.04-.7.09-.06.01-.12.03-.18.05-.18.06-.36.13-.52.22l-.12.06c-.17.1-.33.21-.48.35v-2.76h5v3Z"/></svg>Dikirim ke Alamat</button>
+            <button type="button" class="price-mode-tab" id="deliveryTab-ambil"
+                    onclick="setDeliveryMethod('ambil')" role="tab" aria-selected="false">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:-3px;margin-right:4px;"><path d="M11 14h2v2h-2zm4 0h2v2h-2zm-8 0h2v2H7z"/><path d="M8 3H4c-.55 0-1 .45-1 1v15c0 .55.45 1 1 1h16c.55 0 1-.45 1-1V6c0-.4-.24-.77-.62-.92a.99.99 0 0 0-1.09.22L17 7.59V6c0-.4-.24-.77-.62-.92a.98.98 0 0 0-1.09.22L13 7.59V6c0-.4-.24-.77-.62-.92a.99.99 0 0 0-1.09.22L9 7.59V4c0-.55-.45-1-1-1m3 5.41V10c0 .4.24.77.62.92.37.16.8.07 1.09-.22L15 8.41V10c0 .4.24.77.62.92.37.16.8.07 1.09-.22L19 8.41V18H5V5h2v5c0 .4.24.77.62.92.37.16.8.07 1.09-.22z"/></svg>Ambil Sendiri</button>
+          </div>
+        </div>
+        <div id="wrap-custAddr">
           <label class="label-field">Alamat <span class="text-slate-400">(Enter = baris baru)</span></label>
           <textarea class="input" id="custAddr" oninput="updatePreview()" rows="2" placeholder="Barengkrajan&#10;Krian, Sidoarjo"></textarea>
+        </div>
+        <div id="wrap-pickupInfo" style="display:none;">
+          <label class="label-field">Alamat Pabrik <span class="text-slate-400">(bisa diganti)</span></label>
+          <textarea class="input" id="pickupAddr" oninput="onPickupInput()" rows="2"></textarea>
         </div>
         <div>
           <label class="label-field">No. HP <span class="text-slate-400">(auto-format)</span></label>
@@ -1140,7 +1140,7 @@
   <!-- History content -->
   <main class="flex-1 overflow-auto p-6" style="background:#f8fafc;">
     <div class="max-w-5xl mx-auto">
-      <!-- v1.0.39: Brand filter — checkbox chips (multi-select), tanpa opsi "Semua" -->
+      <!-- v1.0.40: Brand filter — checkbox chips (multi-select), tanpa opsi "Semua" -->
       <div class="hist-filter-row">
         <span class="hist-filter-label">Brand</span>
         <button class="hist-chip checked" data-filter="citicon" onclick="toggleHistoryFilter('citicon')">
@@ -1157,7 +1157,7 @@
         </button>
       </div>
       <div class="hist-filter-row">
-        <span class="hist-filter-label">Produk</span>
+        <span class="hist-filter-label">Jenis</span>
         <button class="hist-chip checked" data-mode="bata" onclick="toggleHistoryModeFilter('bata')">
           <span class="chip-box"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
           Bata Ringan
@@ -1555,7 +1555,7 @@ async function sbSetSeq(type, seq) {
 // ════════════════════════════════════════════════════════════════
 let mode = 'bata';  // default: bata (leftmost tab)
 let currentBrand = 'citicon'; // v11.0: 'citicon' | 'bricon' | 'grandel'
-// v1.0.39: multi-select checklist — Set kosong ditangani sbg "semua brand/jenis dicentang"
+// v1.0.40: multi-select checklist — Set kosong ditangani sbg "semua brand/jenis dicentang"
 let historyFilter = new Set(['citicon','bricon','grandel']);
 let historyModeFilter = new Set(['bata','panel']);
 
@@ -1589,6 +1589,17 @@ let priceNonPasang = '';
 // 'nonpasang'  → uses priceNonPasang (panel only)
 // Only ONE is included in totals at a time (mutually exclusive).
 let priceMode = 'terpasang';
+
+// v1.0.40: Metode Pengiriman — 'kirim' (dikirim ke alamat, default) atau 'ambil' (ambil sendiri di pabrik).
+// Saat 'ambil': alamat customer disembunyikan, ongkir dipaksa 0, muncul field alamat pabrik (editable, default per brand).
+let deliveryMethod = 'kirim';
+let pickupAddr = '';
+let pickupAddrTouched = false; // true jika user sudah mengedit manual, jangan overwrite saat ganti brand
+const PABRIK_ADDRESS = {
+  citicon: 'Jl. Raya Pacet km 3 Jatilangkung Pungging Mojosari Mojokerto',
+  grandel: 'Jl. Raya Ponokawan No.KM.27, Ponokawan, Kec. Krian Sidoarjo',
+  bricon:  'Landep Banjartanggul, Kec. Pungging Mojokerto',
+};
 
 // Read-only state — set when user loads from history
 let isReadOnly = false;
@@ -1884,6 +1895,9 @@ function initSliders() {
   if (wasHidden) { secPanel.style.visibility = 'hidden'; secPanel.style.display = 'block'; }
   snapSlider('priceModeSlider', document.getElementById(priceMode === 'terpasang' ? 'priceTab-terpasang' : 'priceTab-nonpasang'));
   if (wasHidden) { secPanel.style.display = 'none'; secPanel.style.visibility = ''; }
+
+  // v1.0.40: Delivery method slider (always visible, no hidden-parent trick needed)
+  snapSlider('deliveryMethodSlider', document.getElementById(deliveryMethod === 'kirim' ? 'deliveryTab-kirim' : 'deliveryTab-ambil'));
 }
 document.addEventListener('DOMContentLoaded', () => requestAnimationFrame(initSliders));
 
@@ -1899,7 +1913,7 @@ function onDateChange() {
 const BRAND_META = {
   citicon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.39 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.40 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI CITICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -1911,7 +1925,7 @@ const BRAND_META = {
   },
   bricon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.39 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.40 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI BRICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -1923,7 +1937,7 @@ const BRAND_META = {
   },
   grandel: {
     name:    'Invoice Generator',
-    sub:     'v1.0.39 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.40 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI GRAND ELEPHANT',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -1958,6 +1972,12 @@ function setBrand(brand) {
   // Update dynamic prefix labels
   updatePrefixLabels();
 
+  // v1.0.40: refresh default alamat pabrik jika mode ambil & user belum edit manual
+  if (deliveryMethod === 'ambil' && !pickupAddrTouched) {
+    pickupAddr = PABRIK_ADDRESS[currentBrand] || '';
+    if (document.getElementById('pickupAddr')) document.getElementById('pickupAddr').value = pickupAddr;
+  }
+
   // Header title/sub tidak berubah lagi (statis "Invoice Generator")
 
   // Regen invoice no (prefix changes with brand)
@@ -1975,7 +1995,7 @@ function updatePrefixLabels() {
   renderGroutingRows();
 }
 
-// v1.0.39: toggle checklist brand — minimal 1 harus tetap tercentang
+// v1.0.40: toggle checklist brand — minimal 1 harus tetap tercentang
 function toggleHistoryFilter(filter) {
   if (historyFilter.has(filter)) {
     if (historyFilter.size === 1) { toast('Minimal 1 brand harus dicentang', 'error'); return; }
@@ -1988,7 +2008,7 @@ function toggleHistoryFilter(filter) {
   renderHistory();
 }
 
-// v1.0.39: toggle checklist jenis produk — minimal 1 harus tetap tercentang
+// v1.0.40: toggle checklist jenis produk — minimal 1 harus tetap tercentang
 function toggleHistoryModeFilter(m) {
   if (historyModeFilter.has(m)) {
     if (historyModeFilter.size === 1) { toast('Minimal 1 jenis produk harus dicentang', 'error'); return; }
@@ -2186,6 +2206,8 @@ function getTotalPanelArea() {
   return panelRows.reduce((s,r) => s + ((parseNum(r.panjang)||0) * PANEL_WIDTH * (parseNum(r.qty)||0))/10000, 0);
 }
 function getOngkir() {
+  // v1.0.40: Ambil Sendiri → ongkir selalu 0, tidak peduli input tersimpan
+  if (deliveryMethod === 'ambil') return 0;
   // Only count ongkir if input is currently visible (totalArea < threshold)
   const totalArea = getTotalPanelArea();
   if (totalArea <= 0 || totalArea >= ONGKIR_THRESHOLD_M2) return 0;
@@ -2201,8 +2223,9 @@ function syncOngkirVisibility() {
   const wrap = document.getElementById('ongkir-wrap');
   if (!wrap) return;
   const totalArea = getTotalPanelArea();
+  // v1.0.40: Ambil Sendiri → ongkir tidak relevan, selalu sembunyikan
   // Show only when there are panel items AND total area is below threshold
-  const shouldShow = totalArea > 0 && totalArea < ONGKIR_THRESHOLD_M2;
+  const shouldShow = deliveryMethod !== 'ambil' && totalArea > 0 && totalArea < ONGKIR_THRESHOLD_M2;
   wrap.classList.toggle('hidden', !shouldShow);
   // If hidden, reset ongkir value so it doesn't carry into calc
   if (!shouldShow) {
@@ -2286,6 +2309,37 @@ function setPriceMode(m) {
   const wrapN = document.getElementById('priceWrap-nonpasang');
   if (wrapT) wrapT.style.display = m === 'terpasang' ? '' : 'none';
   if (wrapN) wrapN.style.display = m === 'nonpasang' ? '' : 'none';
+  updatePreview();
+}
+
+// ─── v1.0.40: Metode Pengiriman (Dikirim / Ambil Sendiri) ────────────────
+function setDeliveryMethod(m) {
+  if (m !== 'kirim' && m !== 'ambil') return;
+  deliveryMethod = m;
+  document.getElementById('deliveryTab-kirim')?.classList.toggle('active', m === 'kirim');
+  document.getElementById('deliveryTab-ambil')?.classList.toggle('active', m === 'ambil');
+  document.getElementById('deliveryTab-kirim')?.setAttribute('aria-selected', m === 'kirim');
+  document.getElementById('deliveryTab-ambil')?.setAttribute('aria-selected', m === 'ambil');
+  moveSlider('deliveryMethodSlider', document.getElementById(m === 'kirim' ? 'deliveryTab-kirim' : 'deliveryTab-ambil'));
+
+  const wrapAddr   = document.getElementById('wrap-custAddr');
+  const wrapPickup = document.getElementById('wrap-pickupInfo');
+  if (wrapAddr)   wrapAddr.style.display   = m === 'kirim' ? '' : 'none';
+  if (wrapPickup) wrapPickup.style.display = m === 'ambil' ? '' : 'none';
+
+  if (m === 'ambil' && !pickupAddrTouched) {
+    pickupAddr = PABRIK_ADDRESS[currentBrand] || '';
+    if (document.getElementById('pickupAddr')) document.getElementById('pickupAddr').value = pickupAddr;
+  }
+
+  syncOngkirVisibility();
+  updatePanelSummaryBadge();
+  updatePreview();
+}
+function onPickupInput() {
+  if (isReadOnly) return;
+  pickupAddr = (document.getElementById('pickupAddr')||{}).value || '';
+  pickupAddrTouched = true; // user mengedit manual, jangan overwrite lagi otomatis
   updatePreview();
 }
 
@@ -2420,13 +2474,13 @@ function updatePreview() {
   const bankInfo  = (document.getElementById('bankInfo')||{}).value || '';
   const bankInfoPanel = (document.getElementById('bankInfoPanel')||{}).value || '';
 
-  const payload = { docNo, dateStr, salute, custName, custAddr, custPhone, bankInfo, bankInfoPanel };
+  const payload = { docNo, dateStr, salute, custName, custAddr, custPhone, bankInfo, bankInfoPanel, deliveryMethod, pickupAddr };
   const html = mode === 'bata' ? buildBata(payload) : buildPanel(payload);
   document.getElementById('invoice-preview').innerHTML = html;
 }
 
 // ─── Shared header block ─────────────────────────
-function buildHead({ dateStr, docNo, salute, custName, custAddr, custPhone }) {
+function buildHead({ dateStr, docNo, salute, custName, custAddr, custPhone, deliveryMethod: dm, pickupAddr: pa }) {
   const meta = BRAND_META[currentBrand] || BRAND_META.citicon;
   const role = mode === 'bata' ? meta.role_bata : meta.role_panel;
   const titleMain = 'INVOICE';
@@ -2440,6 +2494,10 @@ function buildHead({ dateStr, docNo, salute, custName, custAddr, custPhone }) {
     : `<div style="color:#999;">—</div>`;
   const nameDisplay = custName ? `${h(salute)} ${h(custName)}` : `${h(salute)} ____________________`;
   const phoneDisplay = custPhone ? h(custPhone) : '—';
+
+  // v1.0.40: Ambil Sendiri — ganti baris "Alamat" jadi info pengambilan (alamat pabrik editable)
+  const isPickup = dm === 'ambil';
+  const pickupAddress = (pa && pa.trim()) ? pa.trim() : (PABRIK_ADDRESS[currentBrand] || '');
 
   return `
   <!-- TOP: logo + title (v9.0: logo height matched to header text block; vertically centered) -->
@@ -2493,11 +2551,23 @@ function buildHead({ dateStr, docNo, salute, custName, custAddr, custPhone }) {
         <td style="padding:2px 6px 2px 0;vertical-align:top;">:</td>
         <td style="padding:2px 0;vertical-align:top;">${nameDisplay}</td>
       </tr>
+      ${isPickup ? `
+      <tr>
+        <td style="padding:2px 10px 2px 0;vertical-align:top;font-weight:600;white-space:nowrap;">Metode</td>
+        <td style="padding:2px 6px 2px 0;vertical-align:top;">:</td>
+        <td style="padding:2px 0;vertical-align:top;">Ambil Sendiri Pabrik</td>
+      </tr>
+      <tr>
+        <td style="padding:2px 10px 2px 0;vertical-align:top;font-weight:600;white-space:nowrap;">Lokasi</td>
+        <td style="padding:2px 6px 2px 0;vertical-align:top;">:</td>
+        <td style="padding:2px 0;vertical-align:top;">${h(pickupAddress)}</td>
+      </tr>
+      ` : `
       <tr>
         <td style="padding:2px 10px 2px 0;vertical-align:top;font-weight:600;white-space:nowrap;">Alamat</td>
         <td style="padding:2px 6px 2px 0;vertical-align:top;">:</td>
         <td style="padding:2px 0;vertical-align:top;">${addrHTML}</td>
-      </tr>
+      </tr>`}
       <tr>
         <td style="padding:2px 10px 2px 0;vertical-align:top;font-weight:600;white-space:nowrap;">No. Telp</td>
         <td style="padding:2px 6px 2px 0;vertical-align:top;">:</td>
@@ -2526,7 +2596,7 @@ function buildFoot() {
 }
 
 // ═══════════════ BATA INVOICE BUILDER ═══════════════
-function buildBata({ docNo, dateStr, salute, custName, custAddr, custPhone, bankInfo }) {
+function buildBata({ docNo, dateStr, salute, custName, custAddr, custPhone, bankInfo, deliveryMethod, pickupAddr }) {
   const rows = bataRows.map(r => {
     const qty = parseNum(r.qty);
     const price = parseNum(r.price);
@@ -2559,7 +2629,7 @@ function buildBata({ docNo, dateStr, salute, custName, custAddr, custPhone, bank
               padding:42px 46px;min-height:1122px;background:white;box-sizing:border-box;
               display:flex;flex-direction:column;
               -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:geometricPrecision;">
-    ${buildHead({ dateStr, docNo, salute, custName, custAddr, custPhone })}
+    ${buildHead({ dateStr, docNo, salute, custName, custAddr, custPhone, deliveryMethod, pickupAddr })}
 
     <div style="margin-top:20px;">
       <table style="width:100%;border-collapse:collapse;">
@@ -2605,7 +2675,7 @@ function buildBata({ docNo, dateStr, salute, custName, custAddr, custPhone, bank
 }
 
 // ═══════════════ PANEL INVOICE BUILDER (TABLE FORMAT) ═══════════════
-function buildPanel({ docNo, dateStr, salute, custName, custAddr, custPhone, bankInfoPanel }) {
+function buildPanel({ docNo, dateStr, salute, custName, custAddr, custPhone, bankInfoPanel, deliveryMethod, pickupAddr }) {
   // v11.0: brand accent color for the derivation block border (matches buildHead)
   const accentColor = (BRAND_META[currentBrand] || BRAND_META.citicon).color;
 
@@ -2677,7 +2747,7 @@ function buildPanel({ docNo, dateStr, salute, custName, custAddr, custPhone, ban
               padding:42px 46px;min-height:1122px;background:white;box-sizing:border-box;
               display:flex;flex-direction:column;
               -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:geometricPrecision;">
-    ${buildHead({ dateStr, docNo, salute, custName, custAddr, custPhone })}
+    ${buildHead({ dateStr, docNo, salute, custName, custAddr, custPhone, deliveryMethod, pickupAddr })}
 
     <div style="margin-top:20px;">
       <table style="width:100%;border-collapse:collapse;">
@@ -2927,7 +2997,7 @@ async function downloadInvoicePNG() {
   return { filename, blob };
 }
 
-// v1.0.39: Tombol utama berperan ganda —
+// v1.0.40: Tombol utama berperan ganda —
 //  - Invoice baru: "Download Invoice" (download PNG + saveToHistory + buka gate salin)
 //  - Invoice dari history yang sedang di-Edit: "Simpan Perubahan" (saveToHistory saja, tanpa download)
 async function doExport() {
@@ -2953,7 +3023,7 @@ async function doExport() {
   }
 }
 
-// v1.0.39: Simpan perubahan invoice hasil edit (dari history) TANPA download —
+// v1.0.40: Simpan perubahan invoice hasil edit (dari history) TANPA download —
 // dipakai saat tombol utama dalam mode "Simpan Perubahan".
 async function doSaveChanges() {
   const btn = document.getElementById('exportBtn');
@@ -2973,7 +3043,7 @@ async function doSaveChanges() {
   }
 }
 
-// v1.0.39: Set tampilan tombol utama sesuai konteks —
+// v1.0.40: Set tampilan tombol utama sesuai konteks —
 //  editingHistory=true  -> "Simpan Perubahan" (biru, ikon disket)
 //  editingHistory=false -> "Download Invoice" (hijau brand, ikon download) — default
 function updateActionButtonMode(editingHistory) {
@@ -3066,6 +3136,8 @@ async function saveToHistory() {
     biayaLangsir: biayaLangsir || '',
     priceNonPasang: priceNonPasang || '', // v8.0
     priceMode: priceMode || 'terpasang',  // v9.0
+    deliveryMethod: deliveryMethod || 'kirim', // v1.0.40
+    pickupAddr: pickupAddr || '',              // v1.0.40
     panelRows: JSON.parse(JSON.stringify(panelRows)),
     bataRows: JSON.parse(JSON.stringify(bataRows)),
     groutingRows: JSON.parse(JSON.stringify(groutingRows)),
@@ -3108,7 +3180,7 @@ function renderHistory() {
   const hist = getHistory();
   document.getElementById('history-count').textContent = `History (${hist.length})`;
 
-  // v1.0.39: Apply brand + jenis filter via checklist (Set) — dicentang = ditampilkan
+  // v1.0.40: Apply brand + jenis filter via checklist (Set) — dicentang = ditampilkan
   const filtered = hist
     .filter(e => historyFilter.has(e.brand || 'citicon'))
     .filter(e => historyModeFilter.has(e.mode));
@@ -3157,10 +3229,11 @@ function renderHistory() {
     const modeIconBg = e.mode === 'bata' ? SVG_ICON_BATA : SVG_ICON_PANEL;
     const entryBrand = e.brand || 'citicon';
     const accentClr  = BRAND_COLORS[entryBrand] || '#0a7a38';
-    // Badge stempel: icon mode di dalam lingkaran solid warna brand
-    const sealIconHtml = modeIconBg.replace('width="11" height="11"', 'width="14" height="14"');
+    // Watermark icon needs full viewBox width/height to render large in the corner
+    const iconBgHtml = modeIconBg.replace('width="11" height="11"', 'width="100%" height="100%"');
     return `
     <div class="history-card" data-brand="${entryBrand}" onclick="loadFromHistory(${e.id})">
+      <div class="history-card-icon-bg">${iconBgHtml}</div>
       <div class="flex items-start justify-between gap-2" style="padding-left:8px;">
         <div style="flex:1;min-width:0;">
           <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:${accentClr};font-weight:700;">
@@ -3177,8 +3250,7 @@ function renderHistory() {
         ${e.custAddr ? `<div style="font-size:11px;color:#64748b;margin-top:2px;line-height:1.45;">${h(e.custAddr.split('\n')[0])}</div>` : ''}
         ${e.custPhone ? `<div style="font-size:11px;color:#64748b;font-family:'JetBrains Mono',monospace;margin-top:2px;">${h(e.custPhone)}</div>` : ''}
       </div>
-      <div class="flex items-center justify-between" style="padding-left:8px;">
-        <div class="history-card-seal" style="background:${accentClr};">${sealIconHtml}</div>
+      <div class="flex items-center justify-end" style="padding-left:8px;">
         <span style="font-size:14px;color:${accentClr};font-weight:800;font-family:'JetBrains Mono',monospace;">
           Rp ${fmtRupiah(e.total)}
         </span>
@@ -3314,6 +3386,11 @@ function loadFromHistory(id) {
     restoredPriceMode = (priceNonPasang && parseNum(priceNonPasang) > 0 && !(e.pricePerM2)) ? 'nonpasang' : 'terpasang';
   }
   setPriceMode(restoredPriceMode);
+  // v1.0.40: restore delivery method + pickup info (defaults to 'kirim' for legacy entries)
+  pickupAddr = e.pickupAddr || '';
+  pickupAddrTouched = !!(e.pickupAddr && e.pickupAddr.trim());
+  if (document.getElementById('pickupAddr')) document.getElementById('pickupAddr').value = pickupAddr;
+  setDeliveryMethod(e.deliveryMethod || 'kirim');
   panelRows    = e.panelRows    || [];
   bataRows     = e.bataRows     || [];
   groutingRows = e.groutingRows || [];
@@ -3323,7 +3400,7 @@ function loadFromHistory(id) {
 
   // v5.0: Historical data opens in READ-ONLY mode by default
   setReadOnly(true);
-  updateActionButtonMode(false);  // v1.0.39: read-only awal → tombol tetap "Download Invoice"; berubah ke "Simpan Perubahan" saat user klik Edit
+  updateActionButtonMode(false);  // v1.0.40: read-only awal → tombol tetap "Download Invoice"; berubah ke "Simpan Perubahan" saat user klik Edit
   toast('✓ Invoice dimuat (Read-Only). Klik Edit untuk mengubah.');
 }
 
@@ -3347,7 +3424,7 @@ function setReadOnly(ro) {
 
 function enableEditMode() {
   setReadOnly(false);
-  updateActionButtonMode(true);   // v1.0.39: tombol utama jadi "Simpan Perubahan"
+  updateActionButtonMode(true);   // v1.0.40: tombol utama jadi "Simpan Perubahan"
   toast('✎ Mode Edit aktif — silakan ubah invoice');
 }
 
@@ -3358,7 +3435,7 @@ function resetToFreshInvoice() {
   _viewingHistoryDetail = false;
   _currentEntryId = null;
   setReadOnly(false);
-  updateActionButtonMode(false);  // v1.0.39: invoice baru → tombol kembali "Download Invoice"
+  updateActionButtonMode(false);  // v1.0.40: invoice baru → tombol kembali "Download Invoice"
 
   bataRows = [
     { qty: '11,52', unit: 'M3',  size: '10cm', price: '605000' },
@@ -3373,6 +3450,8 @@ function resetToFreshInvoice() {
   biayaLangsir = '';
   priceNonPasang = '';
   priceMode = 'terpasang';
+  pickupAddr = '';
+  pickupAddrTouched = false;
 
   document.getElementById('custSalute').value = 'Bpk.';
   document.getElementById('custName').value = '';
@@ -3384,12 +3463,14 @@ function resetToFreshInvoice() {
   if (document.getElementById('ongkirInput')) document.getElementById('ongkirInput').value = '';
   if (document.getElementById('biayaLangsirInput')) document.getElementById('biayaLangsirInput').value = '';
   if (document.getElementById('plcPriceNonPasang')) document.getElementById('plcPriceNonPasang').value = '';
+  if (document.getElementById('pickupAddr')) document.getElementById('pickupAddr').value = '';
 
   const now = new Date();
   const y = now.getFullYear(), m = String(now.getMonth()+1).padStart(2,'0'), d = String(now.getDate()).padStart(2,'0');
   document.getElementById('docDate').value = `${y}-${m}-${d}`;
 
   setPriceMode(priceMode);
+  setDeliveryMethod('kirim');
   setMode('bata');
   renderBataRows(); renderPanelRows(); renderGroutingRows();
   updatePhonePreview();
@@ -3407,7 +3488,7 @@ function exportHistoryData() {
   }
   const payload = {
     app: 'invoice-generator',
-    version: '1.0.39',
+    version: '1.0.19',
     exportedAt: new Date().toISOString(),
     seq: {
       BRC: parseInt(localStorage.getItem(userSeqKey('BRC')) || '0'),
