@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Invoice Generator · v1.0.40</title>
-<!-- v1.0.40 -->
+<title>Invoice Generator · v1.0.41</title>
+<!-- v1.0.41 -->
 <meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai multi-brand">
 <meta name="theme-color" content="#0e9e4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -602,18 +602,29 @@
   }
   .history-card-delete:hover { background: #fef2f2; border-color: #fca5a5; }
 
-  /* v1.0.40: Large translucent mode icon watermark, top-right corner —
-     digeser lebih ke dalam supaya tertimpa/overlap dgn header row (docNo/tanggal),
-     warna netral abu-abu (bukan warna brand) supaya jadi hiasan bg yang benar-benar samar */
-  .history-card-icon-bg {
-    position: absolute; top: -6px; right: -6px;
-    width: 78px; height: 78px;
-    opacity: 0.06;
-    color: #64748b;
-    pointer-events: none;
-    z-index: 1;
+  /* v1.0.41: Wax-seal badge — lingkaran solid warna brand dengan tekstur splash irregular,
+     ditempatkan di baris harga (kiri bawah), sejajar dengan nominal Rp di kanan.
+     Menggantikan watermark translucent besar v1.0.38/40. */
+  .history-card-seal-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-left: 8px;
   }
-  .history-card > * { position: relative; z-index: 2; }
+  .history-card-seal {
+    position: relative;
+    width: 30px; height: 30px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .history-card-seal svg.seal-splash {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+  }
+  .history-card-seal svg.seal-icon {
+    position: relative;
+    width: 13px; height: 13px;
+    color: #fff;
+    filter: drop-shadow(0 0.5px 0.5px rgba(0,0,0,0.15));
+  }
 
   .empty-state {
     text-align: center; padding: 80px 20px;
@@ -805,7 +816,7 @@
     </div>
     <div class="min-w-0">
       <div class="text-[14px] font-bold text-slate-900 truncate leading-tight">Invoice Generator</div>
-      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.40</div>
+      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.41</div>
     </div>
   </div>
 
@@ -1913,7 +1924,7 @@ function onDateChange() {
 const BRAND_META = {
   citicon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.40 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.41 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI CITICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -1925,7 +1936,7 @@ const BRAND_META = {
   },
   bricon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.40 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.41 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI BRICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -1937,7 +1948,7 @@ const BRAND_META = {
   },
   grandel: {
     name:    'Invoice Generator',
-    sub:     'v1.0.40 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.41 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI GRAND ELEPHANT',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -3206,12 +3217,12 @@ function renderHistory() {
   }
   empty.classList.add('hidden');
 
-  const SVG_ICON_BATA = `<svg width="11" height="11" viewBox="0 0 400 400" fill="currentColor" style="display:inline-block;vertical-align:-1px;flex-shrink:0;">
+  const SVG_ICON_BATA = `<svg class="seal-icon" viewBox="0 0 400 400" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
     <path d="M194,226L194,299C194,310.038 185.038,319 174,319L20,319C8.962,319 0,310.038 0,299L0,226C0,214.962 8.962,206 20,206L174,206C185.038,206 194,214.962 194,226Z"/>
     <path d="M400,226L400,299C400,310.038 391.038,319 380,319L226,319C214.962,319 206,310.038 206,299L206,226C206,214.962 214.962,206 226,206L380,206C391.038,206 400,214.962 400,226Z"/>
     <path d="M297,101L297,174C297,185.038 288.038,194 277,194L123,194C111.962,194 103,185.038 103,174L103,101C103,89.962 111.962,81 123,81L277,81C288.038,81 297,89.962 297,101Z"/>
   </svg>`;
-  const SVG_ICON_PANEL = `<svg width="11" height="11" viewBox="0 0 400 400" fill="currentColor" style="display:inline-block;vertical-align:-1px;flex-shrink:0;">
+  const SVG_ICON_PANEL = `<svg class="seal-icon" viewBox="0 0 400 400" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
     <path d="M380,81C391.046,81 400,89.954 400,101L400,299C400,310.046 391.046,319 380,319L20,319C8.954,319 0,310.046 0,299L0,242.974C0,239.494 1.809,236.265 4.776,234.447L252.842,82.473C254.414,81.51 256.222,81 258.066,81L380,81Z"/>
     <path d="M230,101C230,89.954 238.954,81 250,81L380,81C391.046,81 400,89.954 400,101L400,133C400,144.046 391.046,153 380,153L341.685,153C341.601,152.965 341.518,152.927 341.434,152.893L230,107.056L230,101Z"/>
     <path d="M2.657,253.55C-3.113,244.132 -0.156,231.819 9.263,226.048L232.452,89.314C241.87,83.544 254.183,86.501 259.954,95.92L276.178,122.403C281.948,131.821 278.991,144.135 269.572,149.905L46.383,286.639C36.965,292.409 24.651,289.452 18.881,280.033L2.657,253.55Z"/>
@@ -3223,17 +3234,32 @@ function renderHistory() {
 
   const BRAND_LABELS = { citicon: 'Citicon', bricon: 'Bricon', grandel: 'Grand Elephant' };
   const BRAND_COLORS = { citicon: '#0a7a38', bricon: '#922b21', grandel: '#8d6508' };
+  // v1.0.41: warna gelap per brand untuk gradasi splash wax-seal (dark -> base)
+  const BRAND_COLORS_DARK = { citicon: '#075c29', bricon: '#6b1d13', grandel: '#654a06' };
+
+  // v1.0.41: bentuk splash irregular (bukan lingkaran sempurna) — dipakai sbg dasar wax-seal badge,
+  // path acak-bergelombang khas cap lilin, viewBox 40x40 supaya scalable di dalam badge 30px
+  const SVG_SEAL_SPLASH = (brand) => `<svg class="seal-splash" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="sealGrad-${brand}" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="${BRAND_COLORS[brand]}"/>
+        <stop offset="100%" stop-color="${BRAND_COLORS_DARK[brand]}"/>
+      </linearGradient>
+    </defs>
+    <path fill="url(#sealGrad-${brand})" d="M20.4,2.1c2.3-0.3,4.4,1.2,6.5,2.1c2.1,0.9,4.5,1.2,6,2.9c1.6,1.8,1.7,4.4,2.3,6.7
+      c0.6,2.3,2,4.4,1.7,6.8c-0.3,2.4-2.2,4.1-3.4,6.2c-1.2,2.1-1.7,4.7-3.7,6.1c-2,1.4-4.6,1.1-6.9,1.6
+      c-2.3,0.5-4.4,1.9-6.7,1.5c-2.3-0.4-3.9-2.4-5.8-3.7c-1.9-1.3-4.3-2-5.5-4c-1.2-2-0.7-4.5-1.1-6.8
+      C3.5,19.2,1.9,17,2.3,14.7c0.4-2.3,2.7-3.7,4.2-5.5c1.5-1.8,2.4-4.2,4.5-5.3C13.1,2.8,15.6,3.6,18,3
+      C18.8,2.8,19.6,2.2,20.4,2.1Z"/>
+  </svg>`;
 
   grid.innerHTML = filtered.map(e => {
     const date = e.docDate ? fmtDateID(e.docDate) : '';
-    const modeIconBg = e.mode === 'bata' ? SVG_ICON_BATA : SVG_ICON_PANEL;
+    const modeIcon = e.mode === 'bata' ? SVG_ICON_BATA : SVG_ICON_PANEL;
     const entryBrand = e.brand || 'citicon';
     const accentClr  = BRAND_COLORS[entryBrand] || '#0a7a38';
-    // Watermark icon needs full viewBox width/height to render large in the corner
-    const iconBgHtml = modeIconBg.replace('width="11" height="11"', 'width="100%" height="100%"');
     return `
     <div class="history-card" data-brand="${entryBrand}" onclick="loadFromHistory(${e.id})">
-      <div class="history-card-icon-bg">${iconBgHtml}</div>
       <div class="flex items-start justify-between gap-2" style="padding-left:8px;">
         <div style="flex:1;min-width:0;">
           <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:${accentClr};font-weight:700;">
@@ -3250,7 +3276,11 @@ function renderHistory() {
         ${e.custAddr ? `<div style="font-size:11px;color:#64748b;margin-top:2px;line-height:1.45;">${h(e.custAddr.split('\n')[0])}</div>` : ''}
         ${e.custPhone ? `<div style="font-size:11px;color:#64748b;font-family:'JetBrains Mono',monospace;margin-top:2px;">${h(e.custPhone)}</div>` : ''}
       </div>
-      <div class="flex items-center justify-end" style="padding-left:8px;">
+      <div class="history-card-seal-row">
+        <div class="history-card-seal" title="${e.mode === 'bata' ? 'Bata Ringan' : 'Panel Lantai'}">
+          ${SVG_SEAL_SPLASH(entryBrand)}
+          ${modeIcon}
+        </div>
         <span style="font-size:14px;color:${accentClr};font-weight:800;font-family:'JetBrains Mono',monospace;">
           Rp ${fmtRupiah(e.total)}
         </span>
