@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Invoice Generator · v1.0.44</title>
-<!-- v1.0.44 -->
+<title>Invoice Generator · v1.0.45</title>
+<!-- v1.0.45 -->
 <meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai multi-brand">
 <meta name="theme-color" content="#0e9e4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -445,45 +445,13 @@
   .hist-action-btn.danger { color: #dc2626; }
   .hist-action-btn.danger:hover { border-color: #fca5a5; background: #fef2f2; }
 
-  /* History header — responsive: stack vertically on mobile so toolbar buttons don't overflow */
-  .history-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    padding: 12px 16px;
-    min-height: 60px;
-  }
-  .history-header .title-block { flex: 1 1 auto; min-width: 0; }
-  .history-header .toolbar {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    align-items: center;
+  /* v1.0.45: toolbar history berdiri sendiri di bawah header */
+  .hist-toolbar {
+    display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+    margin-bottom: 14px;
   }
   @media (max-width: 640px) {
-    .history-header {
-      flex-direction: column;
-      align-items: stretch;
-      padding: 12px 14px;
-      height: auto !important;
-    }
-    .history-header .top-row {
-      display: flex; align-items: center; gap: 10px; width: 100%;
-    }
-    .history-header .title-block { flex: 1 1 auto; }
-    .history-header .toolbar {
-      width: 100%;
-      justify-content: flex-start;
-    }
-    .history-header .toolbar .hist-action-btn {
-      flex: 1 1 auto;
-      justify-content: center;
-      min-width: 0;
-      padding: 8px 10px;
-    }
-    .view-title { font-size: 18px; }
-    .view-sub { font-size: 11.5px; }
+    .hist-toolbar .hist-action-btn { flex: 1 1 auto; justify-content: center; padding: 8px 10px; }
   }
 
   /* ─── TOAST ─── */
@@ -511,51 +479,154 @@
   .phone-preview.show { display: block; }
   .phone-preview.invalid { color: #dc2626; }
 
-  /* ─── v1.0.43: NAVBAR 4 TAB (Invoice · Cost · History · Profile) ─── */
-  .topnav { display: flex; align-items: center; gap: 4px; }
+  /* ─── v1.0.45: NAVBAR — desktop bergaya web Bricon, mobile bergaya Telegram ─── */
+  .topnav { display: flex; align-items: center; gap: 2px; }
   .topnav-btn {
+    position: relative;
     display: inline-flex; align-items: center; gap: 6px;
-    height: 34px; padding: 0 12px; border-radius: 8px;
-    border: 1px solid #e2e8f0; background: #f8fafc; color: #475569;
-    font-size: 12.5px; font-weight: 600; font-family: 'Inter', sans-serif;
-    cursor: pointer; transition: all 0.15s; white-space: nowrap;
+    height: 40px; padding: 0 14px;
+    border: none; background: none; color: #475569;
+    font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif;
+    cursor: pointer; transition: color 0.16s; white-space: nowrap;
   }
-  .topnav-btn svg { flex-shrink: 0; width: 15px; height: 15px; }
-  .topnav-btn:hover { border-color: var(--brand-color); color: var(--brand-dark); }
-  .topnav-btn.active {
-    background: var(--brand-color); border-color: var(--brand-color); color: #fff;
-    box-shadow: 0 2px 8px rgba(var(--brand-rgb),0.28);
+  .topnav-btn svg { display: none; }          /* desktop: teks saja, seperti web Bricon */
+  .topnav-btn::after {
+    content: ''; position: absolute; left: 14px; right: 14px; bottom: 6px;
+    height: 2px; border-radius: 2px; background: var(--brand-color);
+    transform: scaleX(0); transform-origin: center; transition: transform 0.2s ease;
   }
-  .topnav-btn.active:hover { color: #fff; filter: brightness(1.06); }
+  .topnav-btn:hover { color: var(--brand-dark); }
+  .topnav-btn:hover::after { transform: scaleX(0.55); }
+  .topnav-btn.active { color: var(--brand-dark); font-weight: 700; }
+  .topnav-btn.active::after { transform: scaleX(1); }
 
   .bottomnav {
     display: none;
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 900;
-    background: rgba(255,255,255,0.96);
-    backdrop-filter: blur(10px);
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(12px);
     border-top: 1px solid #e2e8f0;
-    box-shadow: 0 -2px 14px rgba(15,23,42,0.07);
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
   .bottomnav-inner { display: flex; align-items: stretch; }
   .bottomnav-btn {
     flex: 1 1 0; display: flex; flex-direction: column;
     align-items: center; justify-content: center; gap: 3px;
-    padding: 8px 2px 7px; border: none; background: none;
-    color: #94a3b8; font-family: 'Inter', sans-serif;
-    font-size: 10.5px; font-weight: 600; letter-spacing: 0.1px;
+    padding: 7px 2px 6px; border: none; background: none;
+    color: #8e9aa8; font-family: 'Inter', sans-serif;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.1px;
     cursor: pointer; transition: color 0.15s;
     -webkit-tap-highlight-color: transparent;
   }
-  .bottomnav-btn svg { width: 21px; height: 21px; display: block; }
-  .bottomnav-btn.active { color: var(--brand-color); }
-  .bottomnav-btn.active svg { transform: translateY(-1px); }
+  .bottomnav-btn svg { width: 25px; height: 25px; display: block; transition: transform 0.18s ease; }
+  .bottomnav-btn:active svg { transform: scale(0.88); }
+  .bottomnav-btn.active { color: var(--brand-color); font-weight: 600; }
 
   @media (max-width: 768px) {
     .topnav, .topnav-slot { display: none !important; }
     .bottomnav { display: block; }
-    #main-view, #history-view, #cost-view, #profile-view { padding-bottom: 62px; }
+    #main-view, #history-view, #cost-view, #profile-view { padding-bottom: 64px; }
   }
+
+  /* ─── v1.0.42: HALAMAN COST & PROFILE ─── */
+  .page-wrap {
+    max-width: 720px; margin: 0 auto; padding: 22px 16px 32px;
+    font-family: 'Inter', sans-serif;
+  }
+  .page-empty {
+    margin-top: 10px; padding: 30px 22px; border-radius: 14px;
+    background: #fff; border: 1px dashed #cbd5e1; text-align: center;
+  }
+  .page-empty h3 { font-size: 15px; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
+  .page-empty p  { font-size: 13px; color: #64748b; line-height: 1.65; }
+
+  /* ═══ v1.0.44: SARAN HARGA OTOMATIS DARI ALAMAT ═══ */
+  .sugg-box {
+    display: none; margin-top: 8px; border-radius: 11px;
+    border: 1px solid #bfdbfe; background: #eff6ff; padding: 11px 12px;
+  }
+  .sugg-box.show { display: block; }
+  .sugg-box.warn { border-color: #fde68a; background: #fffbeb; }
+  .sugg-head { display: flex; align-items: center; gap: 7px; }
+  .sugg-ico { flex-shrink: 0; width: 26px; height: 26px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    background: #dbeafe; color: #1d4ed8; }
+  .sugg-box.warn .sugg-ico { background: #fef3c7; color: #92400e; }
+  .sugg-ico svg { width: 15px; height: 15px; }
+  .sugg-title { font-size: 12.5px; font-weight: 800; color: #0f172a; line-height: 1.35; }
+  .sugg-sub { font-size: 11px; color: #64748b; margin-top: 1px; }
+  .sugg-price {
+    margin-left: auto; text-align: right; flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 800; color: #0f172a;
+  }
+  .sugg-price small { display: block; font-family: 'Inter', sans-serif; font-size: 10px; color: #94a3b8; font-weight: 600; }
+  .sugg-choices { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 9px; }
+  .sugg-choice {
+    padding: 7px 11px; border-radius: 8px; border: 1px solid #cbd5e1;
+    background: #fff; color: #334155; cursor: pointer;
+    font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 700;
+  }
+  .sugg-choice:hover { border-color: var(--brand-color); color: var(--brand-dark); }
+  .sugg-actions { display: flex; gap: 6px; margin-top: 9px; }
+  .sugg-btn {
+    flex: 1; height: 34px; border-radius: 8px; cursor: pointer;
+    font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 700;
+    border: 1px solid #cbd5e1; background: #fff; color: #334155;
+  }
+  .sugg-btn.primary { background: var(--brand-color); border-color: var(--brand-color); color: #fff; }
+
+  /* ═══ v1.0.45: DIAGRAM STATISTIK ═══ */
+  .stat-chart-card {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+    padding: 16px; margin-bottom: 12px;
+  }
+  .stat-chart-title {
+    font-size: 11px; font-weight: 800; color: #94a3b8;
+    text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 14px;
+  }
+  .stat-donut-wrap { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .stat-donut-center {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; pointer-events: none;
+  }
+  .stat-donut-center .lbl { font-size: 9.5px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-donut-center .val { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 800; color: #0f172a; margin-top: 2px; }
+  .stat-svg { width: 100%; height: 190px; display: block; overflow: visible; }
+
+  /* ═══ v1.0.44: STATISTIK KEUNTUNGAN (Profile) ═══ */
+  .stat-filters { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 14px; }
+  .stat-filters select {
+    flex: 1 1 120px; height: 40px; border-radius: 10px; border: 1px solid #e2e8f0;
+    background: #fff; padding: 0 10px; outline: none;
+    font-family: 'Inter', sans-serif; font-size: 12.5px; color: #0f172a; font-weight: 600;
+  }
+  .stat-hero {
+    background: linear-gradient(135deg, var(--brand-dark), var(--brand-color));
+    border-radius: 16px; padding: 20px; color: #fff; margin-bottom: 12px;
+  }
+  .stat-hero .lbl { font-size: 11px; font-weight: 800; opacity: 0.85; text-transform: uppercase; letter-spacing: 0.8px; }
+  .stat-hero .val { font-family: 'JetBrains Mono', monospace; font-size: 27px; font-weight: 800; margin-top: 5px; line-height: 1.15; }
+  .stat-hero .sub { font-size: 11.5px; opacity: 0.85; margin-top: 6px; }
+
+  .stat-grid { display: flex; gap: 9px; flex-wrap: wrap; margin-bottom: 16px; }
+  .stat-box {
+    flex: 1 1 130px; background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 12px; padding: 12px 13px;
+  }
+  .stat-box .lbl { font-size: 10.5px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-box .val { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 800; color: #0f172a; margin-top: 3px; }
+
+  .stat-section-title {
+    font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase;
+    letter-spacing: 0.8px; margin: 4px 2px 9px;
+  }
+  .stat-bar-row { margin-bottom: 11px; }
+  .stat-bar-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; }
+  .stat-bar-name { font-size: 12.5px; font-weight: 700; color: #0f172a; }
+  .stat-bar-val { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: #0a7a38; }
+  .stat-bar-track { height: 7px; border-radius: 999px; background: #f1f5f9; overflow: hidden; }
+  .stat-bar-fill { height: 100%; border-radius: 999px; background: var(--brand-color); transition: width 0.3s; }
+  .stat-empty { text-align: center; padding: 28px 16px; color: #94a3b8; font-size: 12.5px; line-height: 1.7; }
 
   /* ═══ v1.0.43: HALAMAN COST ═══ */
   .cost-tabbar {
@@ -714,77 +785,6 @@
   .cost-hist-item:last-child { border-bottom: none; }
   .cost-hist-date { font-size: 11.5px; color: #94a3b8; flex-shrink: 0; min-width: 120px; }
   .cost-hist-val { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: #0f172a; }
-
-
-  /* ═══ v1.0.44: SARAN HARGA OTOMATIS DARI ALAMAT ═══ */
-  .sugg-box {
-    display: none; margin-top: 8px; border-radius: 11px;
-    border: 1px solid #bfdbfe; background: #eff6ff; padding: 11px 12px;
-  }
-  .sugg-box.show { display: block; }
-  .sugg-box.warn { border-color: #fde68a; background: #fffbeb; }
-  .sugg-head { display: flex; align-items: center; gap: 7px; }
-  .sugg-ico { flex-shrink: 0; width: 26px; height: 26px; border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    background: #dbeafe; color: #1d4ed8; }
-  .sugg-box.warn .sugg-ico { background: #fef3c7; color: #92400e; }
-  .sugg-ico svg { width: 15px; height: 15px; }
-  .sugg-title { font-size: 12.5px; font-weight: 800; color: #0f172a; line-height: 1.35; }
-  .sugg-sub { font-size: 11px; color: #64748b; margin-top: 1px; }
-  .sugg-price {
-    margin-left: auto; text-align: right; flex-shrink: 0;
-    font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 800; color: #0f172a;
-  }
-  .sugg-price small { display: block; font-family: 'Inter', sans-serif; font-size: 10px; color: #94a3b8; font-weight: 600; }
-  .sugg-choices { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 9px; }
-  .sugg-choice {
-    padding: 7px 11px; border-radius: 8px; border: 1px solid #cbd5e1;
-    background: #fff; color: #334155; cursor: pointer;
-    font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 700;
-  }
-  .sugg-choice:hover { border-color: var(--brand-color); color: var(--brand-dark); }
-  .sugg-actions { display: flex; gap: 6px; margin-top: 9px; }
-  .sugg-btn {
-    flex: 1; height: 34px; border-radius: 8px; cursor: pointer;
-    font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 700;
-    border: 1px solid #cbd5e1; background: #fff; color: #334155;
-  }
-  .sugg-btn.primary { background: var(--brand-color); border-color: var(--brand-color); color: #fff; }
-
-  /* ═══ v1.0.44: STATISTIK KEUNTUNGAN (Profile) ═══ */
-  .stat-filters { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 14px; }
-  .stat-filters select {
-    flex: 1 1 120px; height: 40px; border-radius: 10px; border: 1px solid #e2e8f0;
-    background: #fff; padding: 0 10px; outline: none;
-    font-family: 'Inter', sans-serif; font-size: 12.5px; color: #0f172a; font-weight: 600;
-  }
-  .stat-hero {
-    background: linear-gradient(135deg, var(--brand-dark), var(--brand-color));
-    border-radius: 16px; padding: 20px; color: #fff; margin-bottom: 12px;
-  }
-  .stat-hero .lbl { font-size: 11px; font-weight: 800; opacity: 0.85; text-transform: uppercase; letter-spacing: 0.8px; }
-  .stat-hero .val { font-family: 'JetBrains Mono', monospace; font-size: 27px; font-weight: 800; margin-top: 5px; line-height: 1.15; }
-  .stat-hero .sub { font-size: 11.5px; opacity: 0.85; margin-top: 6px; }
-
-  .stat-grid { display: flex; gap: 9px; flex-wrap: wrap; margin-bottom: 16px; }
-  .stat-box {
-    flex: 1 1 130px; background: #fff; border: 1px solid #e2e8f0;
-    border-radius: 12px; padding: 12px 13px;
-  }
-  .stat-box .lbl { font-size: 10.5px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
-  .stat-box .val { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 800; color: #0f172a; margin-top: 3px; }
-
-  .stat-section-title {
-    font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase;
-    letter-spacing: 0.8px; margin: 4px 2px 9px;
-  }
-  .stat-bar-row { margin-bottom: 11px; }
-  .stat-bar-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; }
-  .stat-bar-name { font-size: 12.5px; font-weight: 700; color: #0f172a; }
-  .stat-bar-val { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: #0a7a38; }
-  .stat-bar-track { height: 7px; border-radius: 999px; background: #f1f5f9; overflow: hidden; }
-  .stat-bar-fill { height: 100%; border-radius: 999px; background: var(--brand-color); transition: width 0.3s; }
-  .stat-empty { text-align: center; padding: 28px 16px; color: #94a3b8; font-size: 12.5px; line-height: 1.7; }
 
   /* ─── v1.0.44: CATATAN HARGA (price log) ─── */
   .plog-add-btn {
@@ -1182,7 +1182,7 @@
     </div>
     <div class="min-w-0">
       <div class="text-[14px] font-bold text-slate-900 truncate leading-tight">Invoice Generator</div>
-      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.44</div>
+      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.45</div>
     </div>
   </div>
 
@@ -1232,21 +1232,7 @@
     </div>
 
     <!-- PROFILE CARD -->
-    <div id="profileCard" class="profile-card" style="display:none;">
-      <div class="profile-avatar" id="profileAvatar">—</div>
-      <div class="profile-info">
-        <div class="profile-name" id="profileName">—</div>
-        <div class="profile-company" id="profileCompany">Procon Persada</div>
-      </div>
-      <button class="profile-signout" onclick="doLogout()" title="Sign Out">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-          <polyline points="16 17 21 12 16 7"/>
-          <line x1="21" y1="12" x2="9" y2="12"/>
-        </svg>
-        Keluar
-      </button>
-    </div>
+    <!-- v1.0.45: kartu profil dipindah ke halaman Profile -->
 
     <!-- BRAND TABS -->
     <div class="card !p-2 mb-0">
@@ -1506,15 +1492,19 @@
 <div id="history-view" style="display:none;flex-direction:column;height:100dvh;">
 
   <!-- History header -->
-  <header class="bg-white border-b border-slate-200 history-header flex-shrink-0">
-    <div class="top-row">
-      <div class="title-block">
-        <div class="view-title">Riwayat Invoice</div>
-        <div class="view-sub" id="history-subtitle">Belum ada invoice tersimpan</div>
-      </div>
-      <div class="topnav-slot" style="margin-left:auto;"></div>
+  <header class="bg-white border-b border-slate-200 flex items-center flex-shrink-0" style="height:60px;padding:0 16px;gap:12px;">
+    <div class="min-w-0 flex-1">
+      <div class="text-[15px] font-bold text-slate-900 truncate leading-tight">Riwayat Invoice</div>
+      <div class="text-[11px] text-slate-400 truncate leading-tight" id="history-subtitle">Belum ada invoice tersimpan</div>
     </div>
-    <div class="toolbar">
+    <div class="topnav-slot"></div>
+  </header>
+
+  <!-- History content -->
+  <main class="flex-1 overflow-auto p-6" style="background:#f8fafc;">
+    <div class="max-w-5xl mx-auto">
+      <!-- v1.0.45: Export / Import / Hapus dipindah ke bawah header, di atas filter -->
+      <div class="hist-toolbar">
       <button class="hist-action-btn" onclick="exportHistoryData()" title="Backup semua data history ke file .json">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
         Export
@@ -1528,12 +1518,8 @@
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
         Hapus Semua
       </button>
-    </div>
-  </header>
+      </div>
 
-  <!-- History content -->
-  <main class="flex-1 overflow-auto p-6" style="background:#f8fafc;">
-    <div class="max-w-5xl mx-auto">
       <!-- v1.0.40: Brand filter — checkbox chips (multi-select), tanpa opsi "Semua" -->
       <div class="hist-filter-row">
         <span class="hist-filter-label">Brand</span>
@@ -1702,11 +1688,11 @@
   </header>
   <main class="flex-1 overflow-auto" style="background:#f8fafc;">
     <div class="page-wrap">
-      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:20px;display:flex;align-items:center;gap:14px;">
+      <div class="profile-card" id="pageProfileCard">
         <div class="profile-avatar" id="pageProfileAvatar">—</div>
-        <div style="min-width:0;flex:1;">
-          <div style="font-size:15px;font-weight:800;color:#0f172a;line-height:1.3;" id="pageProfileName">—</div>
-          <div style="font-size:12.5px;color:#64748b;margin-top:2px;" id="pageProfileCompany">Procon Persada</div>
+        <div class="profile-info">
+          <div class="profile-name" id="pageProfileName">—</div>
+          <div class="profile-company" id="pageProfileCompany">Procon Persada</div>
         </div>
       </div>
 
@@ -1836,8 +1822,8 @@ function doLogout() {
   localStorage.removeItem('citicon_user_id');
   currentUser = null;
   switchTab('invoice'); // v1.0.44: kembali ke tab Invoice sebelum layar login muncul
-  // Sembunyikan profile card
-  const card = document.getElementById('profileCard');
+  // Sembunyikan kartu profil di halaman Profile
+  const card = document.getElementById('pageProfileCard');
   if (card) card.style.display = 'none';
   showSplash();
 }
@@ -1906,13 +1892,13 @@ function applyUserProfile() {
 
   applyDefaultBrandForUser(id);
 
-  // Isi profile card di sidebar
-  const card = document.getElementById('profileCard');
+  // v1.0.45: kartu profil sekarang hanya ada di halaman Profile
+  const card = document.getElementById('pageProfileCard');
   if (card) {
     card.style.display = 'flex';
-    const avatarEl = document.getElementById('profileAvatar');
-    const nameEl   = document.getElementById('profileName');
-    const compEl   = document.getElementById('profileCompany');
+    const avatarEl = document.getElementById('pageProfileAvatar');
+    const nameEl   = document.getElementById('pageProfileName');
+    const compEl   = document.getElementById('pageProfileCompany');
 
     // Avatar: pakai foto PP jika ada, fallback ke inisial
     if (avatarEl) {
@@ -2070,13 +2056,24 @@ const BRAND_PRODUCT_NAME = {
 function getBrandProductName() {
   return BRAND_PRODUCT_NAME[currentBrand] || 'Citicon';
 }
-function getMortarName()   { return `${getBrandProductName()} Mortar @ 40kg`; }
+function getMortarName()   {
+  // v1.0.45: Bricon memakai merek mortar sendiri
+  if (currentBrand === 'bricon') return 'Maju Mortar @ 40kg';
+  return `${getBrandProductName()} Mortar @ 40kg`;
+}
 function getGroutingName() { return `${getBrandProductName()} Grouting @ 40 kg`; }
 // Legacy constants (dipakai di beberapa tempat, dijaga backward compat)
 const MORTAR_NAME   = 'Citicon Mortar @ 40kg';   // fallback static
 const GROUTING_NAME = 'Citicon Grouting @ 40 kg'; // fallback static
 
 // SIGNER_NAME is now dynamic — resolved at render time from currentUser
+// v1.0.45: harga yang diisi 0 tampil sebagai "Free" di invoice
+function fmtPriceOrFree(v) {
+  if (v === '' || v === null || v === undefined) return '';
+  const n = parseNum(v);
+  return n === 0 ? 'Free' : fmtRupiah(n);
+}
+
 function getSignerName() {
   return (currentUser && currentUser.profile.signerName) || '';
 }
@@ -2499,7 +2496,7 @@ function onDateChange() {
 const BRAND_META = {
   citicon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.44 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.45 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI CITICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -2511,7 +2508,7 @@ const BRAND_META = {
   },
   bricon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.44 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.45 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI BRICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -2523,7 +2520,7 @@ const BRAND_META = {
   },
   grandel: {
     name:    'Invoice Generator',
-    sub:     'v1.0.44 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.45 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI GRAND ELEPHANT',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -3211,10 +3208,10 @@ function buildBata({ docNo, dateStr, salute, custName, custAddr, custPhone, cust
         ${h(r.displayName)}
       </td>
       <td style="border:1px solid #444;padding:9px 12px;text-align:right;font-family:Arial,sans-serif;font-size:11.5px;">
-        ${r.price ? fmtRupiah(r.price) : ''}
+        ${fmtPriceOrFree(r.price)}
       </td>
       <td style="border:1px solid #444;padding:9px 12px;text-align:right;font-family:Arial,sans-serif;font-size:11.5px;">
-        ${r.total ? fmtRupiah(r.total) : '0'}
+        ${fmtPriceOrFree(r.total) || '0'}
       </td>
     </tr>`).join('');
 
@@ -3328,7 +3325,7 @@ function buildPanel({ docNo, dateStr, salute, custName, custAddr, custPhone, cus
           ${fmtM2(r.area)} m²
         </td>
         <td style="border:1px solid #444;padding:9px 12px;text-align:right;font-family:Arial,sans-serif;font-size:11.5px;">
-          ${r.subtotal ? fmtRupiah(r.subtotal) : ''}
+          ${fmtPriceOrFree(r.subtotal)}
         </td>
       </tr>`).join('');
 
@@ -3575,19 +3572,19 @@ function buildSalesMessage() {
     bataRows.forEach(r => {
       const qty = parseNum(r.qty);
       if (qty <= 0) return;
-      items.push(`\u2022 ${bataRowName(r)} : ${fmtQty(r.qty)} ${unitLabel(r.unit)}`);
+      items.push(`\u2022 ${bataRowName(r)} : ${fmtQty(qty)} ${unitLabel(r.unit)}`);
     });
   } else {
     panelRows.forEach(r => {
       const qty = parseNum(r.qty);
       const p   = parseNum(r.panjang);
       if (qty <= 0 || p <= 0) return;
-      items.push(`\u2022 Panel Lantai ${getBrandProductName()} ${fmtQty(r.panjang)} cm : ${fmtQty(r.qty)} Pcs`);
+      items.push(`\u2022 Panel Lantai ${getBrandProductName()} ${fmtQty(p)} cm : ${fmtQty(qty)} Pcs`);
     });
     groutingRows.forEach(g => {
       const qty = parseNum(g.qty);
       if (qty <= 0) return;
-      items.push(`\u2022 ${getGroutingName()} : ${fmtQty(g.qty)} Sak`);
+      items.push(`\u2022 ${getGroutingName()} : ${fmtQty(qty)} Sak`);
     });
   }
 
@@ -4713,6 +4710,120 @@ function buildProfitSnapshot(prevEntry) {
   };
 }
 
+
+// ── v1.0.45: Diagram statistik (SVG murni, tanpa library) ────
+const STAT_PALETTE = {
+  citicon: '#2563eb',
+  bricon:  '#dc2626',
+  grandel: '#f59e0b',
+};
+
+// Diagram cincin (donat) — komposisi untung per merek
+function statDonut(parts, totalLabel, totalValue) {
+  const total = parts.reduce((s, p) => s + p.value, 0);
+  const R = 62, SW = 20, C = 2 * Math.PI * R;
+  if (total <= 0) return '';
+
+  let offset = 0;
+  const rings = parts.map(p => {
+    const frac = p.value / total;
+    const dash = frac * C;
+    const seg = `<circle cx="80" cy="80" r="${R}" fill="none" stroke="${p.color}"
+      stroke-width="${SW}" stroke-linecap="butt"
+      stroke-dasharray="${dash.toFixed(2)} ${(C - dash).toFixed(2)}"
+      stroke-dashoffset="${(-offset).toFixed(2)}"
+      transform="rotate(-90 80 80)"></circle>`;
+    offset += dash;
+    return seg;
+  }).join('');
+
+  const legend = parts.map(p => `
+    <div style="display:flex;align-items:center;gap:7px;margin-bottom:7px;">
+      <span style="width:10px;height:10px;border-radius:3px;background:${p.color};flex-shrink:0;"></span>
+      <span style="font-size:12px;font-weight:600;color:#334155;flex:1;min-width:0;">${h(p.label)}</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;color:#0f172a;">
+        ${Math.round((p.value / total) * 100)}%
+      </span>
+    </div>`).join('');
+
+  return `
+    <div class="stat-chart-card">
+      <div class="stat-chart-title">Komposisi Untung per Merek</div>
+      <div class="stat-donut-wrap">
+        <div style="position:relative;flex-shrink:0;">
+          <svg viewBox="0 0 160 160" width="160" height="160">${rings}</svg>
+          <div class="stat-donut-center">
+            <div class="lbl">${h(totalLabel)}</div>
+            <div class="val">${h(totalValue)}</div>
+          </div>
+        </div>
+        <div style="flex:1;min-width:150px;">${legend}</div>
+      </div>
+    </div>`;
+}
+
+// Diagram garis — tren untung bulanan
+function statLine(points) {
+  if (points.length < 2) return '';
+  const W = 640, H = 190, PL = 8, PR = 8, PT = 16, PB = 26;
+  const max = Math.max(...points.map(p => p.value), 1);
+  const min = Math.min(...points.map(p => p.value), 0);
+  const span = (max - min) || 1;
+
+  const xOf = i => PL + (i * (W - PL - PR)) / (points.length - 1);
+  const yOf = v => PT + (1 - (v - min) / span) * (H - PT - PB);
+
+  const line = points.map((p, i) => `${i ? 'L' : 'M'}${xOf(i).toFixed(1)},${yOf(p.value).toFixed(1)}`).join(' ');
+  const area = `${line} L${xOf(points.length - 1).toFixed(1)},${(H - PB).toFixed(1)} L${xOf(0).toFixed(1)},${(H - PB).toFixed(1)} Z`;
+
+  const dots = points.map((p, i) =>
+    `<circle cx="${xOf(i).toFixed(1)}" cy="${yOf(p.value).toFixed(1)}" r="3.5"
+      fill="#fff" stroke="var(--brand-color)" stroke-width="2.5"></circle>`).join('');
+
+  // Label bulan: tampilkan seperlunya supaya tidak tabrakan
+  const step = Math.ceil(points.length / 6);
+  const labels = points.map((p, i) => (i % step === 0 || i === points.length - 1)
+    ? `<text x="${xOf(i).toFixed(1)}" y="${H - 7}" text-anchor="middle"
+         font-family="Inter,sans-serif" font-size="10" fill="#94a3b8">${h(p.label)}</text>` : '').join('');
+
+  return `
+    <div class="stat-chart-card">
+      <div class="stat-chart-title">Tren Untung Bulanan</div>
+      <svg viewBox="0 0 ${W} ${H}" class="stat-svg" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="statLineGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="var(--brand-color)" stop-opacity="0.22"></stop>
+            <stop offset="100%" stop-color="var(--brand-color)" stop-opacity="0"></stop>
+          </linearGradient>
+        </defs>
+        <path d="${area}" fill="url(#statLineGrad)"></path>
+        <path d="${line}" fill="none" stroke="var(--brand-color)" stroke-width="2.5"
+              stroke-linejoin="round" stroke-linecap="round"></path>
+        ${dots}${labels}
+      </svg>
+    </div>`;
+}
+
+// Diagram batang mendatar — peringkat daerah paling menguntungkan
+function statBars(rows, title) {
+  if (!rows.length) return '';
+  const max = Math.max(...rows.map(r => r.value), 1);
+  return `
+    <div class="stat-chart-card">
+      <div class="stat-chart-title">${h(title)}</div>
+      ${rows.map(r => `
+        <div class="stat-bar-row">
+          <div class="stat-bar-head">
+            <span class="stat-bar-name">${h(r.label)}</span>
+            <span class="stat-bar-val">Rp ${fmtRupiah(Math.round(r.value))}</span>
+          </div>
+          <div class="stat-bar-track">
+            <div class="stat-bar-fill" style="width:${Math.max(3, (r.value / max) * 100)}%;"></div>
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
 // ── (b2) Statistik di halaman Profile ────────────────────────
 const statFilter = { brand: 'all', year: 'all', month: 'all' };
 
@@ -4770,6 +4881,51 @@ function renderProfitStats() {
   const monthKeys = Object.keys(perMonth).sort().reverse().slice(0, 12);
   const maxMonth = Math.max(1, ...monthKeys.map(k => perMonth[k]));
 
+  // ── Data untuk diagram ──
+  const perBrand = {};
+  filtered.forEach(e => {
+    const b = e.profit.brand || e.brand || 'citicon';
+    perBrand[b] = (perBrand[b] || 0) + e.profit.untung;
+  });
+  const brandNames = { citicon: 'Citicon', bricon: 'Bricon', grandel: 'Grand Elephant' };
+  const donutParts = Object.keys(perBrand)
+    .filter(b => perBrand[b] > 0)
+    .sort((a, b) => perBrand[b] - perBrand[a])
+    .map(b => ({ label: brandNames[b] || b, value: perBrand[b], color: STAT_PALETTE[b] || '#64748b' }));
+
+  const linePoints = monthKeys.slice().reverse().map(k => {
+    const [y, m] = k.split('-');
+    return { label: STAT_MONTHS[Number(m)].slice(0, 3), value: perMonth[k] };
+  });
+
+  const perRegion = {};
+  filtered.forEach(e => {
+    const key = e.profit.regionKey;
+    if (!key) return;
+    const nm = costRegionInfo(key).name;
+    perRegion[nm] = (perRegion[nm] || 0) + e.profit.untung;
+  });
+  const regionRows = Object.keys(perRegion)
+    .sort((a, b) => perRegion[b] - perRegion[a])
+    .slice(0, 6)
+    .map(nm => ({ label: nm, value: perRegion[nm] }));
+
+  const monthRows = monthKeys.map(k => {
+    const [y, m] = k.split('-');
+    return { label: `${STAT_MONTHS[Number(m)]} ${y}`, value: perMonth[k] };
+  });
+
+  const ringkas = totalUntung >= 1000000
+    ? 'Rp ' + (totalUntung / 1000000).toFixed(1).replace('.', ',') + ' jt'
+    : 'Rp ' + fmtRupiah(Math.round(totalUntung));
+
+  const chartsHtml = [
+    donutParts.length > 1 ? statDonut(donutParts, 'Total', ringkas) : '',
+    linePoints.length > 1 ? statLine(linePoints) : '',
+    regionRows.length ? statBars(regionRows, 'Untung Terbesar per Daerah') : '',
+    monthRows.length ? statBars(monthRows, 'Untung per Bulan') : '',
+  ].filter(Boolean).join('') || '<div class="stat-empty">Tidak ada data pada filter ini.</div>';
+
   const brandLabel = { all: 'Semua Merek', citicon: 'Citicon', grandel: 'Grand Elephant', bricon: 'Bricon' };
   const periodLabel = statFilter.month !== 'all'
     ? `${STAT_MONTHS[Number(statFilter.month)]}${statFilter.year !== 'all' ? ' ' + statFilter.year : ''}`
@@ -4814,22 +4970,7 @@ function renderProfitStats() {
       </div>
     </div>
 
-    ${monthKeys.length ? `
-      <div class="stat-section-title">Untung per Bulan</div>
-      ${monthKeys.map(k => {
-        const [y, m] = k.split('-');
-        const v = perMonth[k];
-        return `
-          <div class="stat-bar-row">
-            <div class="stat-bar-head">
-              <span class="stat-bar-name">${STAT_MONTHS[Number(m)]} ${y}</span>
-              <span class="stat-bar-val">Rp ${fmtRupiah(Math.round(v))}</span>
-            </div>
-            <div class="stat-bar-track">
-              <div class="stat-bar-fill" style="width:${Math.max(3, (v / maxMonth) * 100)}%;"></div>
-            </div>
-          </div>`;
-      }).join('')}` : `<div class="stat-empty">Tidak ada data pada filter ini.</div>`}
+    ${chartsHtml}
   `;
 }
 
