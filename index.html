@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Invoice Generator · v1.0.45</title>
-<!-- v1.0.45 -->
+<title>Invoice Generator · v1.0.46</title>
+<!-- v1.0.46 -->
 <meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai multi-brand">
 <meta name="theme-color" content="#0e9e4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -709,45 +709,99 @@
   .cost-summary-box .val { font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 800; color: #0f172a; margin-top: 3px; }
   .cost-summary-box .val.profit { color: #0a7a38; }
 
-  /* Kartu daerah + swipe untuk hapus */
-  .cost-region {
-    position: relative; overflow: hidden; border-radius: 12px;
-    margin-bottom: 8px; background: #dc2626;
+  /* ─── v1.0.46: TANYA HARGA — status filter, peta, kontak, larangan truk ─── */
+  .il-status-filter { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .il-status-chip {
+    padding: 7px 12px; border-radius: 20px; border: 1.5px solid #e2e8f0;
+    background: #fff; color: #64748b; cursor: pointer;
+    font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 700;
+    transition: all 0.15s; white-space: nowrap;
   }
-  .cost-region-del {
-    position: absolute; right: 0; top: 0; bottom: 0; width: 96px;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    color: #fff; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700;
-    border: none; background: none; cursor: pointer;
-  }
-  .cost-region-face {
-    position: relative; z-index: 2; display: flex; align-items: center; gap: 11px;
-    background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
-    padding: 12px 14px; transition: transform 0.22s cubic-bezier(.22,.61,.36,1);
-    touch-action: pan-y;
-  }
-  .cost-region-face.swiped { transform: translateX(-96px); }
-  .cost-region-ico {
-    flex-shrink: 0; width: 34px; height: 34px; border-radius: 9px;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .cost-region-ico.tinggi { background: #ecfdf5; color: #047857; }
-  .cost-region-ico.rendah { background: #eff6ff; color: #1d4ed8; }
-  .cost-region-ico svg { width: 19px; height: 19px; }
-  .cost-region-name { font-size: 13.5px; font-weight: 700; color: #0f172a; line-height: 1.3; }
-  .cost-region-sub  { font-size: 11px; color: #94a3b8; margin-top: 1px; }
-  .cost-region-price { margin-left: auto; text-align: right; flex-shrink: 0; }
-  .cost-region-price .jual { font-family: 'JetBrains Mono', monospace; font-size: 13.5px; font-weight: 800; color: #0f172a; }
-  .cost-region-price .laba { font-size: 10.5px; color: #0a7a38; font-weight: 700; margin-top: 1px; }
+  .il-status-chip.active[data-st="all"]         { background: #0f172a; border-color: #0f172a; color: #fff; }
+  .il-status-chip.active[data-st="nanya"]       { background: #fef3c7; border-color: #fde68a; color: #92400e; }
+  .il-status-chip.active[data-st="closing"]     { background: #dcfce7; border-color: #bbf7d0; color: #0a7a38; }
+  .il-status-chip.active[data-st="nggak_cocok"] { background: #f1f5f9; border-color: #cbd5e1; color: #475569; }
+  .il-status-chip.active[data-st="ghosting"]    { background: #fee2e2; border-color: #fecaca; color: #b91c1c; }
 
-  .cost-add-region {
+  .il-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 10.5px; font-weight: 700; padding: 2.5px 8px; border-radius: 999px; flex-shrink: 0;
+  }
+  .il-badge.nanya       { background: #fef3c7; color: #92400e; }
+  .il-badge.closing     { background: #dcfce7; color: #0a7a38; }
+  .il-badge.nggak_cocok { background: #f1f5f9; color: #64748b; }
+  .il-badge.ghosting    { background: #fee2e2; color: #b91c1c; }
+
+  .il-status-row { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .il-status-btn {
+    flex: 1 1 auto; min-width: 80px; height: 38px; border-radius: 9px; cursor: pointer;
+    font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 700;
+    border: 1px solid #e2e8f0; background: #f8fafc; color: #475569;
+  }
+  .il-status-btn.sel-nanya       { background: #fef3c7; border-color: #fde68a; color: #92400e; }
+  .il-status-btn.sel-closing     { background: #dcfce7; border-color: #bbf7d0; color: #0a7a38; }
+  .il-status-btn.sel-nggak_cocok { background: #f1f5f9; border-color: #e2e8f0; color: #475569; }
+  .il-status-btn.sel-ghosting    { background: #fee2e2; border-color: #fecaca; color: #b91c1c; }
+
+  .il-item-addr { font-size: 11.5px; color: #64748b; margin-top: 2px; line-height: 1.4; }
+  .il-item-price { font-family: 'JetBrains Mono', monospace; font-size: 13.5px; font-weight: 800; color: #0f172a; }
+  .il-item-margin { font-size: 10.5px; color: #0a7a38; font-weight: 700; }
+
+  .il-suggest-box {
+    background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px;
+    padding: 10px 12px; margin-top: 10px; font-size: 12px; color: #1d4ed8; line-height: 1.6;
+  }
+  .il-suggest-box button {
+    margin-top: 6px; height: 34px; padding: 0 12px; border-radius: 8px; border: none;
+    background: #2563eb; color: #fff; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer;
+  }
+  .il-restrict-box {
+    border-radius: 10px; padding: 10px 12px; margin-top: 8px; font-size: 12px; line-height: 1.6;
+  }
+  .il-restrict-box.warn { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
+  .il-restrict-item {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;
+    padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 7px; background: #fff;
+  }
+  .il-restrict-item .name { font-size: 12.5px; font-weight: 700; color: #0f172a; }
+  .il-restrict-item .note { font-size: 11.5px; color: #64748b; margin-top: 2px; line-height: 1.4; }
+  .il-restrict-del { border: none; background: none; color: #dc2626; font-size: 11px; font-weight: 700; cursor: pointer; flex-shrink: 0; }
+
+  .il-contact-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 12px; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 8px; background: #fff;
+  }
+  .il-contact-avatar {
+    flex-shrink: 0; width: 38px; height: 38px; border-radius: 50%;
+    background: #f1f5f9; color: #475569; display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 14px;
+  }
+  .il-contact-name { font-size: 13px; font-weight: 700; color: #0f172a; }
+  .il-contact-sub { font-size: 11px; color: #94a3b8; margin-top: 1px; }
+  .il-contact-actions { margin-left: auto; display: flex; gap: 6px; flex-shrink: 0; }
+  .il-icon-btn {
+    width: 34px; height: 34px; border-radius: 9px; border: 1px solid #e2e8f0; background: #f8fafc;
+    color: #475569; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .il-icon-btn.wa { color: #0a7a38; border-color: #bbf7d0; background: #f0fdf4; }
+  .il-icon-btn:hover { border-color: var(--brand-color); color: var(--brand-dark); }
+
+  .il-add-region {
     width: 100%; height: 46px; border-radius: 12px; border: 1px dashed #cbd5e1;
     background: #fff; color: #475569; cursor: pointer; margin-top: 4px;
     font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 700;
     display: inline-flex; align-items: center; justify-content: center; gap: 7px;
     transition: all 0.15s;
   }
-  .cost-add-region:hover { border-color: var(--brand-color); color: var(--brand-dark); }
+  .il-add-region:hover { border-color: var(--brand-color); color: var(--brand-dark); }
+
+  /* Peta SVG kabupaten — nyala sesuai intensitas transaksi */
+  .il-map-svg { width: 100%; height: auto; display: block; }
+  .il-map-node { cursor: pointer; transition: filter 0.2s; }
+  .il-map-node:hover { filter: brightness(1.15); }
+  .il-map-node-label { font-family: 'Inter', sans-serif; font-size: 6px; font-weight: 700; pointer-events: none; }
+  .il-map-legend { display: flex; align-items: center; gap: 10px; margin-top: 8px; font-size: 10.5px; color: #94a3b8; }
+  .il-map-legend .sw { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
 
   /* Modal */
   .cost-modal {
@@ -1182,7 +1236,7 @@
     </div>
     <div class="min-w-0">
       <div class="text-[14px] font-bold text-slate-900 truncate leading-tight">Invoice Generator</div>
-      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.45</div>
+      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.46</div>
     </div>
   </div>
 
@@ -1347,6 +1401,9 @@
         </div>
         <div id="bata-rows"></div>
         <div class="calc-badge" id="bata-summary">—</div>
+        <button class="add-btn" style="margin-top:8px;width:100%;justify-content:center;" onclick="applyMortarPromo()">
+          🎁 Terapkan Promo Mortar Gratis (8 sak / 11,52 m³)
+        </button>
       </div>
       <div class="card mt-3">
         <div class="label-section mb-3">Info Pembayaran</div>
@@ -1562,12 +1619,12 @@
 <!-- ═══════════ END HISTORY PAGE VIEW ═══════════ -->
 
 
-<!-- ═══════════ COST PAGE VIEW (v1.0.44) ═══════════ -->
+<!-- ═══════════ COST PAGE VIEW — "Tanya Harga" (v1.0.46) ═══════════ -->
 <div id="cost-view" style="display:none;flex-direction:column;min-height:100dvh;">
   <header class="bg-white border-b border-slate-200 flex items-center flex-shrink-0" style="height:60px;padding:0 16px;gap:12px;">
     <div class="min-w-0 flex-1">
-      <div class="text-[15px] font-bold text-slate-900 truncate leading-tight">Cost</div>
-      <div class="text-[11px] text-slate-400 truncate leading-tight">Harga acuan &amp; laba per daerah</div>
+      <div class="text-[15px] font-bold text-slate-900 truncate leading-tight">Tanya Harga</div>
+      <div class="text-[11px] text-slate-400 truncate leading-tight">Catatan lead, kontak & harga dari Pak Bima</div>
     </div>
     <div class="topnav-slot"></div>
   </header>
@@ -1587,7 +1644,7 @@
         <button class="cost-tab" data-cprod="panel" onclick="costSetProduct('panel')">Panel Lantai</button>
       </div>
 
-      <!-- Harga patokan dari sales -->
+      <!-- Harga patokan dari sales (tetap dicatat — bukan sistem, cuma histori angka) -->
       <div class="cost-card">
         <div class="cost-card-title">Harga Patokan dari Sales saat ini</div>
 
@@ -1626,49 +1683,56 @@
             <span class="suffix" id="costUnitC">/Kubik</span>
           </div>
         </div>
-        <div style="font-size:11px;color:#94a3b8;margin-top:8px;line-height:1.6;">
-          Ambil sendiri tidak ikut kategori laba per daerah, karena semua customer
-          mengambil di pabrik yang sama — jadi labanya satu nilai saja.
+      </div>
+
+      <!-- Peta Jatim — gimmick visual, nyala per kabupaten yang pernah tercatat -->
+      <div class="cost-card">
+        <div class="cost-card-title">Peta Sebaran Tanya Harga</div>
+        <div id="ilMapWrap"></div>
+        <div id="ilMapDetail"></div>
+      </div>
+
+      <!-- Alert cepat: cek daerah kena larangan/limitasi truk -->
+      <div class="cost-card">
+        <div class="cost-card-title">Cek Daerah — Larangan / Limitasi Truk</div>
+        <div style="position:relative;">
+          <input class="input text-sm" id="ilRestrictionCheck" placeholder="Ketik kecamatan / kawasan..."
+                 oninput="ilRenderRestrictionCheck()" style="padding:10px 12px;">
+        </div>
+        <div id="ilRestrictionCheckResult"></div>
+        <div id="ilRestrictionList" style="margin-top:10px;"></div>
+        <button class="plog-add-btn" onclick="ilOpenAddRestriction()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Tambah Daerah Larangan/Limitasi
+        </button>
+      </div>
+
+      <!-- Kontak yang pernah closing -->
+      <div class="cost-card" id="ilContactsCard" style="display:none;">
+        <div class="cost-card-title">Kontak Pernah Closing</div>
+        <div id="ilContactsList"></div>
+      </div>
+
+      <!-- Catatan Tanya Harga -->
+      <div class="cost-card">
+        <div class="cost-card-title">Catatan Tanya Harga</div>
+
+        <div class="il-status-filter" id="ilStatusFilter">
+          <button class="il-status-chip active" data-st="all" onclick="ilSetFilter('all')">Semua</button>
+          <button class="il-status-chip" data-st="nanya" onclick="ilSetFilter('nanya')">Nanya</button>
+          <button class="il-status-chip" data-st="closing" onclick="ilSetFilter('closing')">Closing</button>
+          <button class="il-status-chip" data-st="nggak_cocok" onclick="ilSetFilter('nggak_cocok')">Nggak Cocok</button>
+          <button class="il-status-chip" data-st="ghosting" onclick="ilSetFilter('ghosting')">Ghosting</button>
         </div>
 
-        <button class="plog-add-btn" onclick="plogOpenAdd()">
+        <div id="ilList"></div>
+        <div id="ilEmpty" class="plog-empty" style="display:none;">Belum ada catatan. Mulai catat tiap kali ada yang tanya harga.</div>
+
+        <button class="plog-add-btn" onclick="ilOpenAdd()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Catat Kejadian Tanya Harga
         </button>
       </div>
-
-      <!-- Catatan harga (price log) -->
-      <div class="cost-card" id="plogCard" style="display:none;">
-        <div class="cost-card-title">Catatan Tanya Harga</div>
-        <div id="plogList"></div>
-      </div>
-
-      <!-- Kategori laba -->
-      <div class="cost-card">
-        <div class="cost-card-title">Kategori Laba per Daerah</div>
-        <div class="cost-markup-row" id="costMarkupRow"></div>
-      </div>
-
-      <!-- Ringkasan harga jual kategori aktif -->
-      <div class="cost-summary" id="costSummary"></div>
-
-      <!-- Pencarian -->
-      <div class="cost-search-wrap">
-        <div style="position:relative;">
-          <span class="cost-search-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          </span>
-          <input class="cost-search" id="costSearch" placeholder="Cari kota / kabupaten..." oninput="costRenderRegions()">
-        </div>
-      </div>
-
-      <!-- Daftar daerah -->
-      <div id="costRegionList"></div>
-
-      <button class="cost-add-region" onclick="costOpenAddRegion()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Tambah Daerah
-      </button>
 
       <div style="height:26px;"></div>
     </div>
@@ -2496,7 +2560,7 @@ function onDateChange() {
 const BRAND_META = {
   citicon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.45 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.46 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI CITICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -2508,7 +2572,7 @@ const BRAND_META = {
   },
   bricon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.45 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.46 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI BRICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -2520,7 +2584,7 @@ const BRAND_META = {
   },
   grandel: {
     name:    'Invoice Generator',
-    sub:     'v1.0.45 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.46 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI GRAND ELEPHANT',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -2684,6 +2748,26 @@ function updateBataRowSubtotal(i) {
   if (badge) badge.textContent = grand > 0 ? `Grand Total: Rp ${fmtRupiah(grand)}` : '—';
 }
 
+// v1.0.46: pilihan cepat qty bata dalam satuan palet — 1 palet = 1,92 m³ = ±160 biji,
+// 6 palet = 1 truk/rit = 11,52 m³ = ±960 biji. Dropdown ini cuma pengisi cepat;
+// field qty di bawahnya tetap bisa diisi manual untuk kombinasi non-standar.
+function bataQtyPaletOptions() {
+  const opts = ['<option value="">— pilih cepat (palet) —</option>'];
+  for (let palet = 1; palet <= 18; palet++) {
+    const m3 = palet * 1.92;
+    const biji = palet * 160;
+    const truk = palet % 6 === 0 ? ` = ${palet / 6} truk/rit` : '';
+    opts.push(`<option value="${fmtQty(m3)}">${palet} palet${truk} — ${fmtQty(m3)} m³ (±${biji} biji)</option>`);
+  }
+  return opts.join('');
+}
+function onBataQtyPaletPick(i, val) {
+  if (!val) return;
+  bataRows[i].qty = val;
+  renderBataRows();
+  updatePreview();
+}
+
 // STABILITY: oninput only writes to data model + updates preview + subtotal label.
 // Never calls renderBataRows() → keyboard / focus stays on input.
 function renderBataRows() {
@@ -2708,7 +2792,9 @@ function renderBataRows() {
           <label class="label-field text-[10.5px]">Qty</label>
           <input class="input text-xs" value="${h(r.qty)}" inputmode="decimal"
             oninput="bataRows[${i}].qty=this.value;updateBataRowSubtotal(${i});updatePreview();"
-            placeholder="11,52" style="padding:7px 10px;">
+            placeholder="${isM3 ? '11,52' : '8'}" style="padding:7px 10px;">
+          ${isM3 ? `<select class="input text-xs" style="padding:6px 22px 6px 8px;margin-top:5px;font-size:10.5px;"
+            onchange="onBataQtyPaletPick(${i}, this.value)">${bataQtyPaletOptions()}</select>` : ''}
         </div>
         <div style="flex:1;">
           <label class="label-field text-[10.5px]">Satuan</label>
@@ -2756,6 +2842,27 @@ function onBataUnitChange(i, newUnit) {
   if (newUnit === 'M3' && !bataRows[i].size) bataRows[i].size = '10cm';
   renderBataRows();
   updatePreview();
+}
+
+// v1.0.46: Promo — tiap pemesanan 11,52 m³ bata dapat 8 sak mortar gratis.
+// Dihitung dari total qty semua baris M3, lalu diisikan ke baris SAK pertama
+// (dibuat baru kalau belum ada). Harga satuan diset kosong-eksplisit '0' → tampil "Free".
+function applyMortarPromo() {
+  if (isReadOnly) return;
+  const totalM3 = bataRows.filter(r => r.unit === 'M3').reduce((s, r) => s + parseNum(r.qty), 0);
+  const freeSak = Math.floor((totalM3 + 0.001) / 11.52) * 8;
+  if (freeSak <= 0) { toast('Belum ada order 11,52 m³ — promo belum berlaku', 'error'); return; }
+
+  let sakRow = bataRows.find(r => r.unit === 'SAK');
+  if (!sakRow) {
+    sakRow = { qty: '', unit: 'SAK', size: '', price: '' };
+    bataRows.push(sakRow);
+  }
+  sakRow.qty = fmtQty(freeSak);
+  sakRow.price = '0';
+  renderBataRows();
+  updatePreview();
+  toast(`✓ ${freeSak} sak mortar gratis diterapkan`);
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -3190,8 +3297,9 @@ function buildFoot() {
 function buildBata({ docNo, dateStr, salute, custName, custAddr, custPhone, custPhone2, bankInfo, deliveryMethod, pickupAddr }) {
   const rows = bataRows.map(r => {
     const qty = parseNum(r.qty);
-    const price = parseNum(r.price);
-    return { ...r, qty, price, total: qty * price, displayName: bataRowName(r) };
+    const priceRaw = r.price;
+    const price = parseNum(priceRaw);
+    return { ...r, qty, price, priceRaw, total: qty * price, displayName: bataRowName(r) };
   });
   const grand = rows.reduce((s,r) => s + r.total, 0);
 
@@ -3208,10 +3316,10 @@ function buildBata({ docNo, dateStr, salute, custName, custAddr, custPhone, cust
         ${h(r.displayName)}
       </td>
       <td style="border:1px solid #444;padding:9px 12px;text-align:right;font-family:Arial,sans-serif;font-size:11.5px;">
-        ${fmtPriceOrFree(r.price)}
+        ${r.priceRaw === '' ? '' : fmtPriceOrFree(r.price)}
       </td>
       <td style="border:1px solid #444;padding:9px 12px;text-align:right;font-family:Arial,sans-serif;font-size:11.5px;">
-        ${fmtPriceOrFree(r.total) || '0'}
+        ${r.priceRaw === '' ? '' : (fmtPriceOrFree(r.total) || '0')}
       </td>
     </tr>`).join('');
 
@@ -3688,13 +3796,10 @@ const JATIM_REGIONS = [{"n":"Kota Batu","T":["Batu","Bumiaji","Junrejo"],"R":[]}
 //  v1.0.44: HALAMAN COST — harga patokan sales & laba per daerah
 // ════════════════════════════════════════════════════════════════
 
-// Ikon topografi
-const COST_ICON_TINGGI = '<svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.88 2.53c-.35-.66-1.42-.66-1.77 0l-8.99 17c-.16.31-.15.68.03.98s.51.48.86.48h18c.35 0 .68-.18.86-.48s.19-.67.03-.98zM12 5.13l3.07 5.81-1.07.81-1.4-1.05a.99.99 0 0 0-1.2 0L10 11.75l-1.07-.81zM4.66 18.99l3.32-6.27 1.42 1.07c.36.27.84.27 1.2 0l1.4-1.05 1.4 1.05c.18.13.39.2.6.2s.42-.07.6-.2l1.42-1.07 3.32 6.27z"/></svg>';
-const COST_ICON_RENDAH = '<svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 12.5c-.07 0-.12.01-.19.01a5.992 5.992 0 0 0-11.78.99H6c-.76 0-1.09-.17-1.55-.39-.54-.27-1.21-.61-2.45-.61v2c.76 0 1.09.17 1.55.39.54.27 1.21.61 2.45.61s1.91-.34 2.45-.61c.46-.23.79-.39 1.55-.39s1.09.17 1.55.39c.54.27 1.21.61 2.45.61s1.91-.34 2.45-.61c.46-.23.79-.39 1.56-.39s1.1.17 1.56.39c.54.27 1.21.61 2.45.61v-2c-.77 0-1.1-.17-1.56-.39-.54-.27-1.21-.61-2.45-.61Zm-4 1c-.76 0-1.09-.17-1.55-.39-.54-.27-1.21-.61-2.45-.61-.8 0-1.35.14-1.79.32.51-1.63 2.01-2.82 3.8-2.82s3.39 1.26 3.85 2.96c-.1.05-.21.1-.3.14-.46.23-.79.39-1.56.39ZM11 3h2v3h-2zm6.71 5.71 1-1 1-1L19 6l-.71-.71-1 1-1 1L17 8zm-11.42 0L7 8l.71-.71-1-1-1-1L5 6l-.71.71 1 1zM18 17c-1.24 0-1.91.34-2.45.61-.46.23-.79.39-1.56.39s-1.09-.17-1.55-.39c-.54-.27-1.21-.61-2.45-.61s-1.91.34-2.45.61c-.46.23-.79.39-1.55.39s-1.09-.17-1.55-.39C3.9 17.34 3.23 17 1.99 17v2c.76 0 1.09.17 1.55.39.54.27 1.21.61 2.45.61s1.91-.34 2.45-.61c.46-.23.79-.39 1.55-.39s1.09.17 1.55.39c.54.27 1.21.61 2.45.61s1.91-.34 2.45-.61c.46-.23.79-.39 1.56-.39s1.1.17 1.56.39c.54.27 1.21.61 2.45.61v-2c-.77 0-1.1-.17-1.56-.39-.54-.27-1.21-.61-2.45-.61"/></svg>';
 
 // ── State ────────────────────────────────────────────────────
-const costState = { brand: 'bricon', product: 'bata', catId: null };
-const costStore = {};          // "brand|product" -> data
+const costState = { brand: 'bricon', product: 'bata' };
+const costStore = {};          // "brand|product" -> data (harga patokan saja, bukan sistem laba)
 let _costSaveTimer = null;
 let _costLoaded = {};          // "brand|product" -> true
 
@@ -3702,7 +3807,7 @@ function costKey() { return `${costState.brand}|${costState.product}`; }
 function costUnit() { return costState.product === 'bata' ? 'Kubik' : 'm²'; }
 
 function costBlank() {
-  return { deliverPrice: 0, pickupPrice: 0, pickupMarkup: 0, categories: [], priceHistory: [], priceLog: [] };
+  return { deliverPrice: 0, pickupPrice: 0, pickupMarkup: 0, priceHistory: [] };
 }
 function costData() {
   const k = costKey();
@@ -3747,13 +3852,11 @@ async function costSaveNow() {
 // ── Tab merek & produk ───────────────────────────────────────
 function costSetBrand(b) {
   costState.brand = b;
-  costState.catId = null;
   if (!_costLoaded[costKey()]) costLoadFromCloud(b, costState.product);
   costRenderAll();
 }
 function costSetProduct(p) {
   costState.product = p;
-  costState.catId = null;
   if (!_costLoaded[costKey()]) costLoadFromCloud(costState.brand, p);
   costRenderAll();
 }
@@ -3771,8 +3874,6 @@ function costOnPriceInput(field) {
   if (!el) return;
   const digits = el.value.replace(/\D/g, '');
   el.value = digits ? fmtRupiah(parseInt(digits, 10)) : '';
-  costRenderSummary();
-  costRenderRegions();
 }
 
 function costCommitPrice(field) {
@@ -3788,8 +3889,6 @@ function costCommitPrice(field) {
   d.priceHistory.unshift({ ts: Date.now(), field, from: prev, to: next });
   if (d.priceHistory.length > 120) d.priceHistory.length = 120;
   costSaveSoon();
-  costRenderSummary();
-  costRenderRegions();
   toast('✓ Harga patokan diperbarui');
 }
 
@@ -3833,168 +3932,513 @@ function costShowHistory(field) {
   `);
 }
 
-// ── Catatan Tanya Harga (price log) ─────────────────────────────
-// Beda dengan priceHistory (log otomatis tiap harga patokan berubah):
-// plog ini catatan MANUAL per "kejadian nanya harga" ke Pak Bima,
-// termasuk yang belum tentu jadi closing. Disimpan per brand|produk,
-// sama seperti data cost lainnya, supaya ikut sinkron ke Supabase.
+// ── v1.0.46: TANYA HARGA — modul pencatatan lead & harga dari Pak Bima ──
+// Menggantikan sistem "kategori laba per daerah" yang lama. Sekarang cuma
+// mencatat kejadian: siapa nanya, daerah mana, harga dari Pak Bima berapa,
+// laba yang diambil saat itu berapa (bukan aturan tetap), dan hasil akhirnya.
 
-function plogList() {
-  const d = costData();
-  if (!d.priceLog) d.priceLog = [];
-  return d.priceLog;
+// ── Data kabupaten/kecamatan (dari JATIM_REGIONS yang sudah ada, tanpa topografi) ──
+function ilKabList() { return JATIM_REGIONS.map(r => r.n).sort(); }
+function ilKecOfKab(kabName) {
+  const reg = JATIM_REGIONS.find(r => r.n === kabName);
+  if (!reg) return [];
+  return [...reg.T, ...reg.R].sort();
 }
 
-function plogOpenAdd() {
-  const opts = JATIM_REGIONS.map(r => `<option value="${h(r.n)}">${h(r.n)}</option>`).join('');
-  const d = costData();
-  const currentPrice = d.deliverPrice ? fmtRupiah(d.deliverPrice) : '';
+// ── State & penyimpanan (Supabase langsung, bukan JSONB blob) ───────────
+const ilState = { filter: 'all', loaded: false };
+let ilStore = [];          // semua baris inquiry_log milik user
+let ilRestrictions = [];   // semua baris delivery_restrictions milik user
+let ilMapSelectedKab = null;
 
+async function ilLoadAll() {
+  const uid = currentUser ? currentUser.id : null;
+  if (!uid) return;
+  try {
+    const [{ data: rows, error: e1 }, { data: rest, error: e2 }] = await Promise.all([
+      _sb.from('inquiry_log').select('*').eq('user_id', uid).order('ts', { ascending: false }),
+      _sb.from('delivery_restrictions').select('*').eq('user_id', uid).order('created_at', { ascending: false }),
+    ]);
+    if (e1) console.error('ilLoadAll:', e1);
+    if (e2) console.error('ilLoadAll restrictions:', e2);
+    ilStore = rows || [];
+    ilRestrictions = rest || [];
+    ilState.loaded = true;
+    ilRenderAll();
+  } catch (e) { console.error('ilLoadAll:', e); }
+}
+
+function ilEntriesForTab() {
+  return ilStore.filter(e => e.brand === costState.brand && e.product === costState.product);
+}
+
+function ilSetFilter(st) {
+  ilState.filter = st;
+  document.querySelectorAll('.il-status-chip').forEach(el =>
+    el.classList.toggle('active', el.dataset.st === st));
+  ilRenderList();
+}
+
+// ── Cek larangan/limitasi truk ───────────────────────────────
+function ilMatchRestrictions(text) {
+  const q = (text || '').toLowerCase().trim();
+  if (!q) return [];
+  return ilRestrictions.filter(r => {
+    const kaw = (r.kawasan || '').toLowerCase();
+    return kaw && (kaw.includes(q) || q.includes(kaw));
+  });
+}
+
+function ilRenderRestrictionCheck() {
+  const box = document.getElementById('ilRestrictionCheckResult');
+  const input = document.getElementById('ilRestrictionCheck');
+  if (!box || !input) return;
+  const hits = ilMatchRestrictions(input.value);
+  if (!input.value.trim()) { box.innerHTML = ''; return; }
+  if (!hits.length) {
+    box.innerHTML = `<div class="il-restrict-box" style="background:#f0fdf4;border:1px solid #bbf7d0;color:#0a7a38;">Tidak ada catatan larangan untuk daerah ini.</div>`;
+    return;
+  }
+  box.innerHTML = hits.map(r => `
+    <div class="il-restrict-box warn">
+      <b>${h(r.kawasan)}</b> — ${h(r.note || 'Ada catatan, tapi belum diisi keterangan.')}
+      ${r.wa_number ? `<br>No referensi: ${h(r.wa_number)}` : ''}
+    </div>`).join('');
+}
+
+function ilRenderRestrictions() {
+  const list = document.getElementById('ilRestrictionList');
+  if (!list) return;
+  if (!ilRestrictions.length) { list.innerHTML = ''; return; }
+  list.innerHTML = ilRestrictions.map(r => `
+    <div class="il-restrict-item">
+      <div style="min-width:0;">
+        <div class="name">${h(r.kawasan)}</div>
+        ${r.note ? `<div class="note">${h(r.note)}</div>` : ''}
+        ${r.wa_number ? `<div class="note">No: ${h(r.wa_number)}</div>` : ''}
+      </div>
+      <button class="il-restrict-del" onclick="ilRemoveRestriction(${r.id})">Hapus</button>
+    </div>`).join('');
+}
+
+function ilOpenAddRestriction() {
+  costModal(`
+    <div class="cost-modal-title">Tambah Daerah Larangan/Limitasi</div>
+    <div class="cost-modal-sub">Isi kawasan yang truk tidak bisa masuk atau ada syarat minimal order. Nanti langsung kelihatan begitu daerah ini dicari.</div>
+    <label class="cost-modal-label">Kawasan (kecamatan/desa/nama umum)</label>
+    <input class="input" id="ilNewRestrictKawasan" placeholder="Contoh: Tosari, Bromo">
+    <div style="height:12px;"></div>
+    <label class="cost-modal-label">Catatan</label>
+    <textarea class="input" id="ilNewRestrictNote" rows="2" placeholder="Contoh: jalan sempit, minimal order 5 palet"></textarea>
+    <div style="height:12px;"></div>
+    <label class="cost-modal-label">No WA referensi (opsional)</label>
+    <input class="input" id="ilNewRestrictWa" placeholder="08xxxxxxxxxx">
+    <div class="cost-modal-actions">
+      <button class="cost-btn" onclick="costCloseModal()">Batal</button>
+      <button class="cost-btn primary" onclick="ilSaveRestriction()">Simpan</button>
+    </div>
+  `);
+  setTimeout(() => { const i = document.getElementById('ilNewRestrictKawasan'); if (i) i.focus(); }, 60);
+}
+
+async function ilSaveRestriction() {
+  const uid = currentUser ? currentUser.id : null;
+  if (!uid) return;
+  const kawasan = (document.getElementById('ilNewRestrictKawasan') || {}).value?.trim() || '';
+  const note = (document.getElementById('ilNewRestrictNote') || {}).value?.trim() || '';
+  const wa = (document.getElementById('ilNewRestrictWa') || {}).value?.trim() || '';
+  if (!kawasan) { toast('Nama kawasan belum diisi', 'error'); return; }
+  try {
+    const { data, error } = await _sb.from('delivery_restrictions')
+      .insert({ user_id: uid, kawasan, note, wa_number: wa }).select().single();
+    if (error) { console.error(error); toast('Gagal menyimpan', 'error'); return; }
+    ilRestrictions.unshift(data);
+    costCloseModal();
+    ilRenderRestrictions();
+    ilRenderRestrictionCheck();
+    toast('✓ Daerah larangan ditambahkan');
+  } catch (e) { console.error(e); toast('Gagal menyimpan', 'error'); }
+}
+
+async function ilRemoveRestriction(id) {
+  if (!confirm('Hapus daerah larangan ini?')) return;
+  try {
+    const { error } = await _sb.from('delivery_restrictions').delete().eq('id', id);
+    if (error) { console.error(error); toast('Gagal menghapus', 'error'); return; }
+    ilRestrictions = ilRestrictions.filter(r => r.id !== id);
+    ilRenderRestrictions();
+    ilRenderRestrictionCheck();
+    toast('Dihapus');
+  } catch (e) { console.error(e); }
+}
+
+// ── Saran daerah berdekatan (kecamatan sama, lalu kabupaten sama) ───────
+function ilSuggestFor(kab, kec) {
+  const pool = ilEntriesForTab().filter(e => e.modal_price > 0);
+  if (kec) {
+    const sameKec = pool.filter(e => e.kecamatan && e.kecamatan.toLowerCase() === kec.toLowerCase());
+    if (sameKec.length) return { entry: sameKec[0], via: 'kecamatan' };
+  }
+  if (kab) {
+    const sameKab = pool.filter(e => e.kabupaten && e.kabupaten.toLowerCase() === kab.toLowerCase());
+    if (sameKab.length) return { entry: sameKab[0], via: 'kabupaten' };
+  }
+  return null;
+}
+
+function ilDaysAgo(ts) {
+  return Math.floor((Date.now() - new Date(ts).getTime()) / 86400000);
+}
+
+// ── Form tambah catatan ──────────────────────────────────────
+function ilOpenAdd() {
+  const kabOpts = ilKabList().map(k => `<option value="${h(k)}">${h(k)}</option>`).join('');
   costModal(`
     <div class="cost-modal-title">Catat Kejadian Tanya Harga</div>
-    <div class="cost-modal-sub">Isi ini tiap habis nanya Pak Bima — walau belum tau jadi atau tidak. Ini beda dari harga patokan resmi di atas, jadi aman diisi kapan saja.</div>
+    <div class="cost-modal-sub">Isi sebisanya dulu — harga & laba boleh nanti kalau belum dijawab Pak Bima.</div>
 
-    <label class="cost-modal-label">Daerah</label>
-    <select class="input" id="plogRegion">
-      <option value="">— Belum tentu / umum —</option>
-      ${opts}
+    <label class="cost-modal-label">Kabupaten / Kota</label>
+    <select class="input" id="ilKab" onchange="ilOnKabChanged()">
+      <option value="">— Belum tahu —</option>
+      ${kabOpts}
     </select>
 
+    <div style="height:10px;"></div>
+    <label class="cost-modal-label">Kecamatan</label>
+    <select class="input" id="ilKec" onchange="ilOnKecChanged()"><option value="">— Pilih kabupaten dulu —</option></select>
+
+    <div style="height:10px;"></div>
+    <label class="cost-modal-label">Desa / Kelurahan (opsional)</label>
+    <input class="input" id="ilDesa" placeholder="Ketik manual, misal: Landep">
+
+    <div id="ilFormAlerts"></div>
+
     <div style="height:12px;"></div>
-    <label class="cost-modal-label">Harga dari Pak Bima (Rp)</label>
+    <label class="cost-modal-label">Nama Customer (opsional)</label>
+    <input class="input" id="ilCustName" placeholder="Contoh: Pak Joko">
+
+    <div style="height:10px;"></div>
+    <label class="cost-modal-label">No WA Customer (opsional)</label>
+    <input class="input" id="ilCustPhone" placeholder="08xxxxxxxxxx" inputmode="tel">
+
+    <div style="height:12px;"></div>
+    <label class="cost-modal-label">Harga dari Pak Bima (Rp, opsional)</label>
     <div class="cost-price-box">
       <span class="rp">Rp</span>
-      <input id="plogPrice" inputmode="numeric" placeholder="0" value="${currentPrice}"
+      <input id="ilModal" inputmode="numeric" placeholder="0"
+             oninput="this.value=this.value.replace(/\\D/g,'') ? fmtRupiah(parseInt(this.value.replace(/\\D/g,''),10)) : ''">
+      <span class="suffix">/${costUnit()}</span>
+    </div>
+
+    <div style="height:10px;"></div>
+    <label class="cost-modal-label">Labaku (Rp, opsional — sesuai selera saat itu)</label>
+    <div class="cost-price-box">
+      <span class="rp">Rp</span>
+      <input id="ilMargin" inputmode="numeric" placeholder="0"
              oninput="this.value=this.value.replace(/\\D/g,'') ? fmtRupiah(parseInt(this.value.replace(/\\D/g,''),10)) : ''">
       <span class="suffix">/${costUnit()}</span>
     </div>
 
     <div style="height:12px;"></div>
-    <label class="cost-modal-label">Catatan (opsional — misal: dari siapa yang nanya)</label>
-    <textarea class="input" id="plogNote" rows="2" placeholder="Contoh: ditanyain nomor asing, proyek ruko 2 lantai"></textarea>
+    <label class="cost-modal-label">Catatan (opsional)</label>
+    <textarea class="input" id="ilNote" rows="2" placeholder="Contoh: proyek ruko 2 lantai"></textarea>
 
     <div class="cost-modal-actions">
       <button class="cost-btn" onclick="costCloseModal()">Batal</button>
-      <button class="cost-btn primary" onclick="plogSaveNew()">Simpan</button>
+      <button class="cost-btn primary" onclick="ilSaveNew()">Simpan</button>
     </div>
   `);
-  setTimeout(() => { const i = document.getElementById('plogPrice'); if (i) i.focus(); }, 60);
 }
 
-function plogSaveNew() {
-  const regionEl = document.getElementById('plogRegion');
-  const priceEl = document.getElementById('plogPrice');
-  const noteEl = document.getElementById('plogNote');
+function ilOnKabChanged() {
+  const kabSel = document.getElementById('ilKab');
+  const kecSel = document.getElementById('ilKec');
+  if (!kabSel || !kecSel) return;
+  const kecs = ilKecOfKab(kabSel.value);
+  kecSel.innerHTML = `<option value="">— Belum tahu —</option>` +
+    kecs.map(k => `<option value="${h(k)}">${h(k)}</option>`).join('');
+  ilRenderFormAlerts();
+}
+function ilOnKecChanged() { ilRenderFormAlerts(); }
 
-  const price = parseInt((priceEl ? priceEl.value : '').replace(/\D/g, ''), 10) || 0;
-  if (price <= 0) { toast('Harga belum diisi', 'error'); return; }
+function ilRenderFormAlerts() {
+  const box = document.getElementById('ilFormAlerts');
+  if (!box) return;
+  const kab = (document.getElementById('ilKab') || {}).value || '';
+  const kec = (document.getElementById('ilKec') || {}).value || '';
+  let html = '';
 
-  const entry = {
-    id: 'p' + Date.now(),
-    ts: Date.now(),
-    region: regionEl ? regionEl.value : '',
-    price,
-    note: noteEl ? noteEl.value.trim() : '',
-    status: 'belum', // belum | jadi | tidakjadi
+  const restrictHits = ilMatchRestrictions(kec) .concat(ilMatchRestrictions(kab));
+  if (restrictHits.length) {
+    html += `<div class="il-restrict-box warn" style="margin-top:10px;">
+      ⚠️ <b>${h(restrictHits[0].kawasan)}</b> — ${h(restrictHits[0].note || 'Ada catatan larangan/limitasi.')}
+    </div>`;
+  }
+
+  const sugg = ilSuggestFor(kab, kec);
+  if (sugg) {
+    const e = sugg.entry;
+    const via = sugg.via === 'kecamatan' ? 'kecamatan yang sama' : 'kabupaten yang sama';
+    html += `<div class="il-suggest-box">
+      Pernah tanya di ${via} — modal terakhir <b>Rp ${fmtRupiah(e.modal_price)}</b>
+      (${ilDaysAgo(e.ts)} hari lalu${e.kecamatan ? ', ' + h(e.kecamatan) : ''}).
+      <br><button onclick="ilApplySuggested(${e.modal_price})">Pakai harga ini</button>
+    </div>`;
+  }
+  box.innerHTML = html;
+}
+
+function ilApplySuggested(modalPrice) {
+  const el = document.getElementById('ilModal');
+  if (el) el.value = fmtRupiah(modalPrice);
+  toast('✓ Harga modal diisi dari catatan sebelumnya');
+}
+
+async function ilSaveNew() {
+  const uid = currentUser ? currentUser.id : null;
+  if (!uid) return;
+  const kab = (document.getElementById('ilKab') || {}).value || '';
+  const kec = (document.getElementById('ilKec') || {}).value || '';
+  const desa = (document.getElementById('ilDesa') || {}).value?.trim() || '';
+  const custName = (document.getElementById('ilCustName') || {}).value?.trim() || '';
+  const custPhone = (document.getElementById('ilCustPhone') || {}).value?.trim() || '';
+  const modal = parseInt((document.getElementById('ilModal') || {}).value?.replace(/\D/g, '') || '0', 10) || 0;
+  const margin = parseInt((document.getElementById('ilMargin') || {}).value?.replace(/\D/g, '') || '0', 10) || 0;
+  const note = (document.getElementById('ilNote') || {}).value?.trim() || '';
+
+  const row = {
+    user_id: uid, brand: costState.brand, product: costState.product,
+    kabupaten: kab, kecamatan: kec, desa,
+    customer_name: custName, customer_phone: custPhone ? normalizePhone(custPhone) : '',
+    modal_price: modal, margin, sell_price: modal + margin,
+    status: 'nanya', note,
   };
-
-  plogList().unshift(entry);
-  costSaveSoon();
-  costCloseModal();
-  plogRender();
-  toast('✓ Catatan tersimpan');
+  try {
+    const { data, error } = await _sb.from('inquiry_log').insert(row).select().single();
+    if (error) { console.error(error); toast('Gagal menyimpan catatan', 'error'); return; }
+    ilStore.unshift(data);
+    costCloseModal();
+    ilRenderAll();
+    toast('✓ Catatan tersimpan');
+  } catch (e) { console.error(e); toast('Gagal menyimpan catatan', 'error'); }
 }
 
-function plogSetStatus(id, status) {
-  const entry = plogList().find(x => x.id === id);
-  if (!entry) return;
-  entry.status = status;
-  costSaveSoon();
-  plogRender();
-  costCloseModal();
-  toast(status === 'jadi' ? '✓ Ditandai jadi closing' : status === 'tidakjadi' ? 'Ditandai tidak jadi' : 'Ditandai belum jelas');
+// ── Detail / edit entri ──────────────────────────────────────
+const IL_STATUS_LABEL = { nanya: 'Nanya', closing: 'Closing', nggak_cocok: 'Nggak Cocok', ghosting: 'Ghosting' };
+
+function ilBadgeHtml(status) {
+  const lbl = IL_STATUS_LABEL[status] || 'Nanya';
+  return `<span class="il-badge ${status}">${lbl}</span>`;
 }
 
-function plogOpenDetail(id) {
-  const entry = plogList().find(x => x.id === id);
-  if (!entry) return;
-  const regionLabel = entry.region || 'Belum tentu / umum';
-  const dateLabel = new Date(entry.ts).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+function ilOpenDetail(id) {
+  const e = ilStore.find(x => x.id === id);
+  if (!e) return;
+  const lokasi = [e.desa, e.kecamatan, e.kabupaten].filter(Boolean).join(', ') || 'Daerah belum diisi';
+  const dateLabel = new Date(e.ts).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
   costModal(`
-    <div class="cost-modal-title">${h(regionLabel)}</div>
-    <div class="cost-modal-sub">${dateLabel}</div>
-    <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:800;color:#0f172a;margin-bottom:4px;">
-      Rp ${fmtRupiah(entry.price)}<span style="font-size:12px;color:#94a3b8;font-weight:600;">/${costUnit()}</span>
+    <div class="cost-modal-title">${h(lokasi)}</div>
+    <div class="cost-modal-sub">${dateLabel}${e.customer_name ? ' · ' + h(e.customer_name) : ''}</div>
+
+    <label class="cost-modal-label">Harga dari Pak Bima (Rp)</label>
+    <div class="cost-price-box">
+      <span class="rp">Rp</span>
+      <input id="ilDetModal" inputmode="numeric" value="${e.modal_price ? fmtRupiah(e.modal_price) : ''}"
+             oninput="ilDetRecalc()">
+      <span class="suffix">/${costUnit()}</span>
     </div>
-    ${entry.note ? `<div style="font-size:12.5px;color:#64748b;line-height:1.6;margin-top:6px;">${h(entry.note)}</div>` : ''}
+
+    <div style="height:10px;"></div>
+    <label class="cost-modal-label">Labaku (Rp)</label>
+    <div class="cost-price-box">
+      <span class="rp">Rp</span>
+      <input id="ilDetMargin" inputmode="numeric" value="${e.margin ? fmtRupiah(e.margin) : ''}"
+             oninput="ilDetRecalc()">
+      <span class="suffix">/${costUnit()}</span>
+    </div>
+
+    <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:800;color:#0f172a;">
+      Harga jual: Rp <span id="ilDetSell">${fmtRupiah(e.sell_price || 0)}</span>
+    </div>
+
+    ${e.note ? `<div style="font-size:12.5px;color:#64748b;line-height:1.6;margin-top:8px;">${h(e.note)}</div>` : ''}
 
     <div class="cost-modal-label" style="margin-top:16px;">Status</div>
-    <div class="plog-status-row">
-      <button class="plog-status-btn${entry.status === 'belum' ? ' sel-belum' : ''}" onclick="plogSetStatus('${entry.id}','belum')">Belum Jelas</button>
-      <button class="plog-status-btn${entry.status === 'jadi' ? ' sel-jadi' : ''}" onclick="plogSetStatus('${entry.id}','jadi')">Jadi Closing</button>
-      <button class="plog-status-btn${entry.status === 'tidakjadi' ? ' sel-tidakjadi' : ''}" onclick="plogSetStatus('${entry.id}','tidakjadi')">Tidak Jadi</button>
+    <div class="il-status-row">
+      <button class="il-status-btn${e.status === 'nanya' ? ' sel-nanya' : ''}" onclick="ilSetStatus(${e.id},'nanya')">Nanya</button>
+      <button class="il-status-btn${e.status === 'closing' ? ' sel-closing' : ''}" onclick="ilSetStatus(${e.id},'closing')">Closing</button>
+      <button class="il-status-btn${e.status === 'nggak_cocok' ? ' sel-nggak_cocok' : ''}" onclick="ilSetStatus(${e.id},'nggak_cocok')">Nggak Cocok</button>
+      <button class="il-status-btn${e.status === 'ghosting' ? ' sel-ghosting' : ''}" onclick="ilSetStatus(${e.id},'ghosting')">Ghosting</button>
     </div>
 
+    ${e.status === 'closing' ? `
+      <div style="height:12px;"></div>
+      <label class="cost-modal-label">Estimasi volume order (${costUnit()}, opsional — biar untung bersihnya kehitung di Profile)</label>
+      <input class="input" id="ilDetVolume" inputmode="decimal" value="${e.est_volume || ''}" placeholder="Contoh: 11,52">
+      ${e.customer_phone ? `
+        <div style="height:12px;"></div>
+        <div style="display:flex;gap:8px;">
+          <button class="cost-btn" onclick="ilCopyEntry(${e.id})">Salin Kontak</button>
+          <button class="cost-btn" style="border-color:#bbf7d0;color:#0a7a38;" onclick="ilOpenWa('${e.customer_phone}')">Chat WA</button>
+        </div>` : ''}
+    ` : ''}
+
     <div class="cost-modal-actions">
-      <button class="cost-btn" onclick="costCloseModal()">Tutup</button>
-      <button class="cost-btn" style="border-color:#fecaca;color:#dc2626;" onclick="plogRemove('${entry.id}')">Hapus</button>
+      <button class="cost-btn" onclick="ilSaveDetailAndClose(${e.id})">Simpan &amp; Tutup</button>
+      <button class="cost-btn" style="border-color:#fecaca;color:#dc2626;" onclick="ilRemove(${e.id})">Hapus</button>
     </div>
   `);
 }
 
-function plogRemove(id) {
-  if (!confirm('Hapus catatan ini?')) return;
-  const d = costData();
-  d.priceLog = plogList().filter(x => x.id !== id);
-  costSaveSoon();
+function ilDetRecalc() {
+  const modal = parseInt((document.getElementById('ilDetModal') || {}).value?.replace(/\D/g, '') || '0', 10) || 0;
+  const margin = parseInt((document.getElementById('ilDetMargin') || {}).value?.replace(/\D/g, '') || '0', 10) || 0;
+  const el = document.getElementById('ilDetSell');
+  if (el) el.textContent = fmtRupiah(modal + margin);
+  ['ilDetModal', 'ilDetMargin'].forEach(id => {
+    const inp = document.getElementById(id);
+    if (inp) { const digits = inp.value.replace(/\D/g, ''); inp.value = digits ? fmtRupiah(parseInt(digits, 10)) : ''; }
+  });
+}
+
+async function ilUpdateEntry(id, patch) {
+  try {
+    const { data, error } = await _sb.from('inquiry_log').update(patch).eq('id', id).select().single();
+    if (error) { console.error(error); toast('Gagal menyimpan', 'error'); return null; }
+    const idx = ilStore.findIndex(x => x.id === id);
+    if (idx >= 0) ilStore[idx] = data;
+    return data;
+  } catch (e) { console.error(e); return null; }
+}
+
+async function ilSetStatus(id, status) {
+  await ilUpdateEntry(id, { status, updated_at: new Date().toISOString() });
+  ilOpenDetail(id); // buka ulang biar field volume/kontak muncul sesuai status baru
+  ilRenderAll();
+}
+
+async function ilSaveDetailAndClose(id) {
+  const modal = parseInt((document.getElementById('ilDetModal') || {}).value?.replace(/\D/g, '') || '0', 10) || 0;
+  const margin = parseInt((document.getElementById('ilDetMargin') || {}).value?.replace(/\D/g, '') || '0', 10) || 0;
+  const volEl = document.getElementById('ilDetVolume');
+  const patch = { modal_price: modal, margin, sell_price: modal + margin, updated_at: new Date().toISOString() };
+  if (volEl) patch.est_volume = parseNum(volEl.value) || null;
+  await ilUpdateEntry(id, patch);
   costCloseModal();
-  plogRender();
-  toast('Catatan dihapus');
+  ilRenderAll();
+  toast('✓ Tersimpan');
 }
 
-function plogBadgeHtml(status) {
-  if (status === 'jadi') return `<span class="plog-badge jadi">✓ Jadi</span>`;
-  if (status === 'tidakjadi') return `<span class="plog-badge tidakjadi">Tidak Jadi</span>`;
-  return `<span class="plog-badge belum">Belum Jelas</span>`;
+async function ilRemove(id) {
+  if (!confirm('Hapus catatan ini?')) return;
+  try {
+    const { error } = await _sb.from('inquiry_log').delete().eq('id', id);
+    if (error) { console.error(error); toast('Gagal menghapus', 'error'); return; }
+    ilStore = ilStore.filter(x => x.id !== id);
+    costCloseModal();
+    ilRenderAll();
+    toast('Catatan dihapus');
+  } catch (e) { console.error(e); }
 }
 
-function plogRender() {
-  const card = document.getElementById('plogCard');
-  const list = document.getElementById('plogList');
+function ilOpenWa(phone) {
+  window.open(`https://wa.me/${normalizePhone(phone)}`, '_blank');
+}
+
+function ilCopyEntry(id) {
+  const e = ilStore.find(x => x.id === id);
+  if (!e) return;
+  const lokasi = [e.desa, e.kecamatan, e.kabupaten].filter(Boolean).join(', ');
+  const text = `${e.customer_name || '-'}\n${e.customer_phone ? '+' + e.customer_phone : '-'}\n${lokasi || '-'}`;
+  navigator.clipboard.writeText(text).then(
+    () => toast('✓ Kontak disalin'),
+    () => toast('Gagal menyalin', 'error')
+  );
+}
+
+// ── Kontak yang pernah closing ───────────────────────────────
+function ilContactGroups() {
+  const closing = ilStore.filter(e => e.status === 'closing' && e.customer_phone);
+  const byPhone = {};
+  closing.forEach(e => {
+    if (!byPhone[e.customer_phone]) byPhone[e.customer_phone] = [];
+    byPhone[e.customer_phone].push(e);
+  });
+  return Object.keys(byPhone).map(phone => {
+    const list = byPhone[phone].sort((a, b) => new Date(b.ts) - new Date(a.ts));
+    return { phone, latest: list[0], count: list.length };
+  }).sort((a, b) => new Date(b.latest.ts) - new Date(a.latest.ts));
+}
+
+function ilRenderContacts() {
+  const card = document.getElementById('ilContactsCard');
+  const list = document.getElementById('ilContactsList');
   if (!card || !list) return;
-
-  const entries = plogList();
-  if (!entries.length) { card.style.display = 'none'; return; }
+  const groups = ilContactGroups();
+  if (!groups.length) { card.style.display = 'none'; return; }
   card.style.display = '';
+  list.innerHTML = groups.map(g => {
+    const e = g.latest;
+    const lokasi = [e.kecamatan, e.kabupaten].filter(Boolean).join(', ');
+    const initial = (e.customer_name || '?').trim().charAt(0).toUpperCase();
+    return `
+      <div class="il-contact-item">
+        <div class="il-contact-avatar">${h(initial)}</div>
+        <div style="min-width:0;">
+          <div class="il-contact-name">${h(e.customer_name || 'Tanpa nama')}</div>
+          <div class="il-contact-sub">${h(lokasi || '—')} · ${g.count} kali closing</div>
+        </div>
+        <div class="il-contact-actions">
+          <button class="il-icon-btn" onclick="ilCopyEntry(${e.id})" title="Salin kontak">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          </button>
+          <button class="il-icon-btn wa" onclick="ilOpenWa('${g.phone}')" title="Chat WA">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 6.32A7.85 7.85 0 0012.05 4 7.94 7.94 0 004.1 12a7.86 7.86 0 001.05 3.94L4 20l4.2-1.1a7.9 7.9 0 003.85 1h.01a7.94 7.94 0 007.94-7.94 7.86 7.86 0 00-2.4-5.64zM12.06 18.3h-.01a6.6 6.6 0 01-3.36-.92l-.24-.14-2.5.65.67-2.44-.16-.25a6.58 6.58 0 01-1.01-3.5 6.6 6.6 0 016.6-6.6 6.55 6.55 0 014.67 1.94 6.55 6.55 0 011.93 4.66 6.6 6.6 0 01-6.59 6.6zm3.62-4.94c-.2-.1-1.17-.58-1.35-.64-.18-.07-.32-.1-.45.1-.13.2-.51.64-.63.77-.12.13-.23.15-.43.05-.2-.1-.83-.31-1.58-.98-.58-.52-.98-1.16-1.09-1.36-.12-.2-.01-.31.09-.4.09-.1.2-.24.3-.37.1-.12.13-.2.2-.34.07-.13.03-.25-.02-.35-.05-.1-.45-1.08-.61-1.48-.16-.38-.33-.33-.45-.34h-.39c-.13 0-.35.05-.53.25-.18.2-.7.68-.7 1.66s.72 1.93.82 2.06c.1.13 1.41 2.16 3.43 3.03.48.2.85.33 1.14.42.48.15.92.13 1.26.08.38-.06 1.17-.48 1.34-.94.16-.46.16-.86.11-.94-.05-.08-.18-.13-.38-.23z"/></svg>
+          </button>
+        </div>
+      </div>`;
+  }).join('');
+}
 
-  // Kelompokkan per daerah, tiap grup diurutkan terbaru dulu.
-  // Grup diurutkan berdasarkan catatan terbaru di dalamnya, jadi daerah
-  // yang baru saja ditanyakan selalu naik ke atas.
+// ── Daftar catatan (dikelompokkan per daerah) ────────────────
+function ilRenderList() {
+  const list = document.getElementById('ilList');
+  const empty = document.getElementById('ilEmpty');
+  if (!list || !empty) return;
+
+  let entries = ilEntriesForTab();
+  if (ilState.filter !== 'all') entries = entries.filter(e => e.status === ilState.filter);
+
+  if (!entries.length) { list.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+
   const groups = {};
   entries.forEach(e => {
-    const key = e.region || '— Belum tentu / umum —';
+    const key = e.kabupaten || '— Belum tentu / umum —';
     if (!groups[key]) groups[key] = [];
     groups[key].push(e);
   });
-  Object.values(groups).forEach(g => g.sort((a, b) => b.ts - a.ts));
-  const groupNames = Object.keys(groups).sort((a, b) => groups[b][0].ts - groups[a][0].ts);
+  Object.values(groups).forEach(g => g.sort((a, b) => new Date(b.ts) - new Date(a.ts)));
+  const groupNames = Object.keys(groups).sort((a, b) => new Date(groups[b][0].ts) - new Date(groups[a][0].ts));
 
   list.innerHTML = groupNames.map(name => {
     const items = groups[name];
     const itemsHtml = items.map(e => {
       const dateLabel = new Date(e.ts).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+      const lokasi = [e.desa, e.kecamatan].filter(Boolean).join(', ');
       return `
         <div class="plog-item">
-          <button class="plog-item-del" onclick="plogRemove('${e.id}')">Hapus</button>
-          <div class="plog-item-face" onclick="plogOpenDetail('${e.id}')">
+          <button class="plog-item-del" onclick="ilRemove(${e.id})">Hapus</button>
+          <div class="plog-item-face" onclick="ilOpenDetail(${e.id})">
             <div class="plog-item-top">
-              <span class="plog-item-price">Rp ${fmtRupiah(e.price)}</span>
+              <span class="il-item-price">${e.sell_price ? 'Rp ' + fmtRupiah(e.sell_price) : (e.customer_name || 'Belum ada harga')}</span>
               <span class="plog-item-date">${dateLabel}</span>
             </div>
+            ${lokasi ? `<div class="il-item-addr">${h(lokasi)}</div>` : ''}
             <div class="plog-item-meta">
-              ${plogBadgeHtml(e.status)}
-              ${e.note ? `<span class="plog-item-note">${h(e.note.length > 40 ? e.note.slice(0,40) + '…' : e.note)}</span>` : ''}
+              ${ilBadgeHtml(e.status)}
+              ${e.customer_name ? `<span class="plog-item-note">${h(e.customer_name)}</span>` : ''}
             </div>
           </div>
         </div>`;
@@ -4011,174 +4455,102 @@ function plogRender() {
   }).join('');
 }
 
-// ── Kategori laba ────────────────────────────────────────────
-function costActiveCat() {
-  const d = costData();
-  if (!d.categories.length) return null;
-  let c = d.categories.find(x => x.id === costState.catId);
-  if (!c) { c = d.categories[0]; costState.catId = c.id; }
-  return c;
-}
+// ── Peta sebaran (SVG sketsa posisi relatif, bukan GIS presisi) ────────
+const KAB_COORDS = {
+  'Kota Batu': [178,118], 'Kota Blitar': [168,168], 'Kota Kediri': [152,138],
+  'Kota Madiun': [88,100], 'Kota Malang': [192,132], 'Kota Mojokerto': [178,88],
+  'Kota Pasuruan': [228,96], 'Kota Probolinggo': [258,92], 'Kota Surabaya': [214,64],
+  'Kabupaten Bangkalan': [232,42], 'Kabupaten Banyuwangi': [340,150], 'Kabupaten Blitar': [172,178],
+  'Kabupaten Bojonegoro': [96,52], 'Kabupaten Bondowoso': [292,118], 'Kabupaten Gresik': [196,52],
+  'Kabupaten Jember': [278,152], 'Kabupaten Jombang': [148,92], 'Kabupaten Kediri': [140,150],
+  'Kabupaten Lamongan': [164,44], 'Kabupaten Lumajang': [240,150], 'Kabupaten Madiun': [78,88],
+  'Kabupaten Magetan': [52,104], 'Kabupaten Malang': [202,150], 'Kabupaten Mojokerto': [168,76],
+  'Kabupaten Nganjuk': [106,86], 'Kabupaten Ngawi': [34,78], 'Kabupaten Pacitan': [66,196],
+  'Kabupaten Pamekasan': [292,38], 'Kabupaten Pasuruan': [232,110], 'Kabupaten Ponorogo': [60,146],
+  'Kabupaten Probolinggo': [264,110], 'Kabupaten Sampang': [262,36], 'Kabupaten Sidoarjo': [204,78],
+  'Kabupaten Situbondo': [300,92], 'Kabupaten Sumenep': [330,30], 'Kabupaten Trenggalek': [90,178],
+  'Kabupaten Tuban': [130,30], 'Kabupaten Tulungagung': [112,172],
+};
 
-function costOpenAddCategory() {
-  costModal(`
-    <div class="cost-modal-title">Tambah Kategori Laba</div>
-    <div class="cost-modal-sub">Isi nominal laba per ${costUnit()} untuk kategori baru. Contoh: 30000 akan tampil sebagai +30k, 20500 jadi +20,5k.</div>
-    <label class="cost-modal-label">Nominal laba (Rp)</label>
-    <div class="cost-price-box">
-      <span class="rp">Rp</span>
-      <input id="costNewMarkup" inputmode="numeric" placeholder="30000" style="font-size:17px;"
-             oninput="this.value=this.value.replace(/\\D/g,'')">
-    </div>
-    <div class="cost-modal-actions">
-      <button class="cost-btn" onclick="costCloseModal()">Batal</button>
-      <button class="cost-btn primary" onclick="costAddCategory()">Simpan</button>
-    </div>
-  `);
-  setTimeout(() => { const i = document.getElementById('costNewMarkup'); if (i) i.focus(); }, 60);
-}
-
-function costAddCategory() {
-  const el = document.getElementById('costNewMarkup');
-  const v = parseInt((el ? el.value : '').replace(/\D/g, ''), 10) || 0;
-  if (v <= 0) { toast('Nominal laba belum diisi', 'error'); return; }
-  const d = costData();
-  if (d.categories.some(c => c.markup === v)) { toast('Kategori itu sudah ada', 'error'); return; }
-  const cat = { id: 'c' + Date.now(), markup: v, regions: [] };
-  d.categories.push(cat);
-  d.categories.sort((a, b) => a.markup - b.markup);
-  costState.catId = cat.id;
-  costSaveSoon();
-  costCloseModal();
-  costRenderAll();
-}
-
-function costSelectCat(id) { costState.catId = id; costRenderAll(); }
-
-function costDeleteCategory() {
-  const c = costActiveCat();
-  if (!c) return;
-  if (!confirm(`Hapus kategori ${costMarkupLabel(c.markup)} beserta ${c.regions.length} daerah di dalamnya?`)) return;
-  const d = costData();
-  d.categories = d.categories.filter(x => x.id !== c.id);
-  costState.catId = d.categories.length ? d.categories[0].id : null;
-  costSaveSoon();
-  costRenderAll();
-  toast('Kategori dihapus');
-}
-
-// ── Daerah ───────────────────────────────────────────────────
-function costRegionInfo(key) {
-  const [name, topo] = key.split('|');
-  const reg = JATIM_REGIONS.find(r => r.n === name);
-  const kecs = reg ? (topo === 'T' ? reg.T : reg.R) : [];
-  return { name, topo, kecs, reg };
-}
-
-function costUsedKeys() {
-  const d = costData();
-  const set = new Set();
-  d.categories.forEach(c => c.regions.forEach(k => set.add(k)));
-  return set;
-}
-
-function costFindCatOf(key) {
-  return costData().categories.find(c => c.regions.includes(key)) || null;
-}
-
-function costOpenAddRegion() {
-  const d = costData();
-  if (!d.categories.length) { toast('Buat kategori laba dulu', 'error'); return; }
-  const cat = costActiveCat();
-  const used = costUsedKeys();
-
-  const avail = JATIM_REGIONS.filter(r => {
-    const keys = [];
-    if (r.T.length) keys.push(r.n + '|T');
-    if (r.R.length) keys.push(r.n + '|R');
-    return keys.some(k => !used.has(k));
+function ilMapCounts() {
+  const counts = {};
+  ilEntriesForTab().forEach(e => {
+    if (!e.kabupaten) return;
+    counts[e.kabupaten] = (counts[e.kabupaten] || 0) + 1;
   });
+  return counts;
+}
 
-  if (!avail.length) { toast('Semua daerah sudah masuk kategori', 'error'); return; }
+function ilRenderMap() {
+  const wrap = document.getElementById('ilMapWrap');
+  if (!wrap) return;
+  const counts = ilMapCounts();
+  const max = Math.max(1, ...Object.values(counts));
 
-  const opts = avail.map(r => `<option value="${h(r.n)}">${h(r.n)}</option>`).join('');
-  costModal(`
-    <div class="cost-modal-title">Tambah Daerah</div>
-    <div class="cost-modal-sub">Daerah akan masuk kategori <b>${costMarkupLabel(cat.markup)}</b>. Daerah yang sudah dipakai tidak muncul lagi di daftar.</div>
+  const nodes = Object.keys(KAB_COORDS).map(name => {
+    const [x, y] = KAB_COORDS[name];
+    const c = counts[name] || 0;
+    const opacity = c === 0 ? 0.12 : Math.min(1, 0.35 + (c / max) * 0.65);
+    const r = c === 0 ? 4.5 : 5.5 + Math.min(4, c);
+    const glow = c > 0 ? `filter="drop-shadow(0 0 4px rgba(37,99,235,${opacity}))"` : '';
+    return `<circle class="il-map-node" cx="${x}" cy="${y}" r="${r}" fill="#2563eb" opacity="${opacity}" ${glow}
+              onclick="ilMapSelect('${name.replace(/'/g, "\\'")}')"></circle>`;
+  }).join('');
 
-    <label class="cost-modal-label">Kabupaten / Kota</label>
-    <select class="input" id="costPickRegion" onchange="costRefreshTopoOptions()">${opts}</select>
-
-    <div style="height:12px;"></div>
-    <label class="cost-modal-label">Wilayah</label>
-    <select class="input" id="costPickTopo" onchange="costRefreshKecList()"></select>
-
-    <div id="costKecInfo" style="margin-top:12px;font-size:11.5px;color:#64748b;line-height:1.65;"></div>
-
-    <div class="cost-modal-actions">
-      <button class="cost-btn" onclick="costCloseModal()">Batal</button>
-      <button class="cost-btn primary" onclick="costAddRegion()">Tambahkan</button>
+  wrap.innerHTML = `
+    <svg class="il-map-svg" viewBox="0 0 360 210" xmlns="http://www.w3.org/2000/svg">
+      ${nodes}
+    </svg>
+    <div class="il-map-legend">
+      <span class="sw" style="background:#2563eb;opacity:0.15;"></span> Belum pernah
+      <span class="sw" style="background:#2563eb;opacity:1;"></span> Sering ditanya
     </div>
-  `);
-  costRefreshTopoOptions();
+    <div style="font-size:10.5px;color:#94a3b8;margin-top:4px;">Sketsa posisi relatif tiap kabupaten/kota, bukan peta GIS presisi. Ketuk titik untuk lihat rincian kecamatan.</div>`;
 }
 
-function costRefreshTopoOptions() {
-  const sel = document.getElementById('costPickRegion');
-  const topoSel = document.getElementById('costPickTopo');
-  if (!sel || !topoSel) return;
-  const reg = JATIM_REGIONS.find(r => r.n === sel.value);
-  const used = costUsedKeys();
-  const opts = [];
-  if (reg) {
-    if (reg.T.length && !used.has(reg.n + '|T')) opts.push(`<option value="T">Dataran Tinggi</option>`);
-    if (reg.R.length && !used.has(reg.n + '|R')) opts.push(`<option value="R">Dataran Rendah</option>`);
+function ilMapSelect(kabName) {
+  ilMapSelectedKab = kabName;
+  const box = document.getElementById('ilMapDetail');
+  if (!box) return;
+  const entries = ilEntriesForTab().filter(e => e.kabupaten === kabName);
+  if (!entries.length) {
+    box.innerHTML = `<div style="margin-top:10px;font-size:12.5px;color:#94a3b8;">${h(kabName)} — belum ada catatan.</div>`;
+    return;
   }
-  topoSel.innerHTML = opts.join('') || `<option value="">— tidak ada sisa —</option>`;
-  costRefreshKecList();
+  const byKec = {};
+  entries.forEach(e => {
+    const k = e.kecamatan || '(kecamatan belum diisi)';
+    byKec[k] = (byKec[k] || 0) + 1;
+  });
+  box.innerHTML = `
+    <div style="margin-top:10px;padding:10px 12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;">
+      <div style="font-size:12.5px;font-weight:800;color:#0f172a;margin-bottom:6px;">${h(kabName)} · ${entries.length} catatan</div>
+      ${Object.keys(byKec).map(k => `
+        <div style="display:flex;justify-content:space-between;font-size:11.5px;color:#64748b;padding:3px 0;">
+          <span>${h(k)}</span><span>${byKec[k]}</span>
+        </div>`).join('')}
+    </div>`;
 }
 
-function costRefreshKecList() {
-  const sel = document.getElementById('costPickRegion');
-  const topoSel = document.getElementById('costPickTopo');
-  const info = document.getElementById('costKecInfo');
-  if (!sel || !topoSel || !info) return;
-  const reg = JATIM_REGIONS.find(r => r.n === sel.value);
-  const topo = topoSel.value;
-  if (!reg || !topo) { info.innerHTML = ''; return; }
-  const kecs = topo === 'T' ? reg.T : reg.R;
-  info.innerHTML = `<b>Mencakup ${kecs.length} kecamatan:</b><br>${h(kecs.join(', '))}`;
+// ── Modal generik (dipakai bareng harga patokan) ─────────────
+function costModal(innerHTML) {
+  let el = document.getElementById('costModal');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'costModal';
+    el.className = 'cost-modal';
+    el.addEventListener('click', ev => { if (ev.target === el) costCloseModal(); });
+    document.body.appendChild(el);
+  }
+  el.innerHTML = `<div class="cost-modal-box">${innerHTML}</div>`;
+  el.classList.add('show');
+}
+function costCloseModal() {
+  const el = document.getElementById('costModal');
+  if (el) el.classList.remove('show');
 }
 
-function costAddRegion() {
-  const sel = document.getElementById('costPickRegion');
-  const topoSel = document.getElementById('costPickTopo');
-  if (!sel || !topoSel || !topoSel.value) { toast('Wilayah belum dipilih', 'error'); return; }
-  const key = `${sel.value}|${topoSel.value}`;
-  const cat = costActiveCat();
-  if (!cat) return;
-  if (costUsedKeys().has(key)) { toast('Daerah itu sudah dipakai', 'error'); return; }
-  cat.regions.push(key);
-  cat.regions.sort();
-  costSaveSoon();
-  costCloseModal();
-  costRenderAll();
-  toast('✓ Daerah ditambahkan');
-}
-
-function costRemoveRegion(key) {
-  const cat = costFindCatOf(key);
-  if (!cat) return;
-  const info = costRegionInfo(key);
-  const label = `${info.name} (${info.topo === 'T' ? 'Dataran Tinggi' : 'Dataran Rendah'})`;
-  if (!confirm(`Hapus ${label} dari kategori ${costMarkupLabel(cat.markup)}?`)) return;
-  cat.regions = cat.regions.filter(k => k !== key);
-  costSaveSoon();
-  costRenderAll();
-  toast('Daerah dihapus');
-}
-
-// ── Render ───────────────────────────────────────────────────
+// ── Render gabungan & init ───────────────────────────────────
 function costRenderAll() {
   document.querySelectorAll('[data-cbrand]').forEach(el =>
     el.classList.toggle('active', el.dataset.cbrand === costState.brand));
@@ -4198,169 +4570,27 @@ function costRenderAll() {
   const pm = document.getElementById('costPickupMarkup');
   if (pm && document.activeElement !== pm) pm.value = d.pickupMarkup ? fmtRupiah(d.pickupMarkup) : '';
 
-  costRenderMarkupRow();
-  costRenderSummary();
-  costRenderRegions();
-  plogRender();
+  ilRenderAll();
 }
 
-function costRenderMarkupRow() {
-  const row = document.getElementById('costMarkupRow');
-  if (!row) return;
-  const d = costData();
-  const active = costActiveCat();
-  let html = d.categories.map(c =>
-    `<button class="cost-markup-tab${active && c.id === active.id ? ' active' : ''}"
-             onclick="costSelectCat('${c.id}')">${costMarkupLabel(c.markup)}</button>`).join('');
-  html += `<button class="cost-markup-add" onclick="costOpenAddCategory()" title="Tambah kategori laba">+</button>`;
-  if (active) {
-    html += `<button class="cost-markup-add" onclick="costDeleteCategory()" title="Hapus kategori aktif"
-                     style="border-color:#fecaca;color:#dc2626;font-size:15px;">&times;</button>`;
-  }
-  row.innerHTML = html;
-}
-
-function costRenderSummary() {
-  const box = document.getElementById('costSummary');
-  if (!box) return;
-  const d = costData();
-  const cat = costActiveCat();
-  const inputDeliver = document.getElementById('costDeliverPrice');
-  const base = inputDeliver
-    ? (parseInt(inputDeliver.value.replace(/\D/g, ''), 10) || 0)
-    : (d.deliverPrice || 0);
-
-  if (!cat) {
-    box.innerHTML = `<div class="cost-summary-box" style="flex:1 1 100%;">
-      <div class="lbl">Kategori laba</div>
-      <div class="val" style="font-size:13px;font-family:'Inter',sans-serif;font-weight:600;color:#64748b;">
-        Belum ada kategori — tekan tombol + di atas.
-      </div></div>`;
-    return;
-  }
-  const jual = base + cat.markup;
-  const unit = costUnit();
-  box.innerHTML = `
-    <div class="cost-summary-box">
-      <div class="lbl">Harga Jual ${costMarkupLabel(cat.markup)}</div>
-      <div class="val">Rp ${fmtRupiah(jual)}<span style="font-size:11px;color:#94a3b8;font-weight:600;">/${unit}</span></div>
-    </div>
-    <div class="cost-summary-box">
-      <div class="lbl">Untung Bersih</div>
-      <div class="val profit">+Rp ${fmtRupiah(cat.markup)}<span style="font-size:11px;color:#94a3b8;font-weight:600;">/${unit}</span></div>
-    </div>`;
-}
-
-function costRenderRegions() {
-  const list = document.getElementById('costRegionList');
-  if (!list) return;
-  const d = costData();
-  const cat = costActiveCat();
-  const q = (document.getElementById('costSearch')?.value || '').trim().toLowerCase();
-  const inputDeliver = document.getElementById('costDeliverPrice');
-  const base = inputDeliver
-    ? (parseInt(inputDeliver.value.replace(/\D/g, ''), 10) || 0)
-    : (d.deliverPrice || 0);
-
-  // Saat mencari: telusuri semua kategori. Tanpa pencarian: hanya kategori aktif.
-  let entries = [];
-  if (q) {
-    d.categories.forEach(c => c.regions.forEach(k => entries.push({ key: k, cat: c })));
-    entries = entries.filter(e => {
-      const i = costRegionInfo(e.key);
-      return i.name.toLowerCase().includes(q) ||
-             i.kecs.some(x => x.toLowerCase().includes(q));
-    });
-  } else if (cat) {
-    entries = cat.regions.map(k => ({ key: k, cat }));
-  }
-
-  if (!entries.length) {
-    list.innerHTML = `<div style="padding:26px 14px;text-align:center;font-size:13px;color:#94a3b8;">
-      ${q ? 'Daerah tidak ditemukan.' : (cat ? 'Belum ada daerah di kategori ini.' : 'Buat kategori laba dulu.')}
-    </div>`;
-    return;
-  }
-
-  entries.sort((a, b) => costRegionInfo(a.key).name.localeCompare(costRegionInfo(b.key).name));
-
-  list.innerHTML = entries.map(e => {
-    const i = costRegionInfo(e.key);
-    const jual = base + e.cat.markup;
-    const isT = i.topo === 'T';
-    return `
-      <div class="cost-region">
-        <button class="cost-region-del" onclick="costRemoveRegion('${e.key.replace(/'/g, "\\'")}')">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-          Hapus
-        </button>
-        <div class="cost-region-face" data-key="${e.key}">
-          <div class="cost-region-ico ${isT ? 'tinggi' : 'rendah'}">${isT ? COST_ICON_TINGGI : COST_ICON_RENDAH}</div>
-          <div style="min-width:0;">
-            <div class="cost-region-name">${h(i.name)}</div>
-            <div class="cost-region-sub">${isT ? 'Dataran Tinggi' : 'Dataran Rendah'} · ${i.kecs.length} kec.${q ? ' · ' + costMarkupLabel(e.cat.markup) : ''}</div>
-          </div>
-          <div class="cost-region-price">
-            <div class="jual">Rp ${fmtRupiah(jual)}</div>
-            <div class="laba">+Rp ${fmtRupiah(e.cat.markup)}/${costUnit()}</div>
-          </div>
-        </div>
-      </div>`;
-  }).join('');
-
-  costBindSwipe();
-}
-
-// ── Geser ke kiri untuk memunculkan tombol hapus ─────────────
-function costBindSwipe() {
-  document.querySelectorAll('.cost-region-face').forEach(face => {
-    if (face.dataset.swipeBound === '1') return;
-    face.dataset.swipeBound = '1';
-    let sx = 0, sy = 0, active = false;
-
-    face.addEventListener('touchstart', ev => {
-      sx = ev.touches[0].clientX; sy = ev.touches[0].clientY; active = true;
-    }, { passive: true });
-
-    face.addEventListener('touchmove', ev => {
-      if (!active) return;
-      const dx = ev.touches[0].clientX - sx;
-      const dy = ev.touches[0].clientY - sy;
-      if (Math.abs(dy) > Math.abs(dx)) { active = false; return; }
-      if (dx < -32) { face.classList.add('swiped'); active = false; }
-      else if (dx > 32) { face.classList.remove('swiped'); active = false; }
-    }, { passive: true });
-
-    face.addEventListener('touchend', () => { active = false; }, { passive: true });
-
-    // Di desktop: klik kartu untuk buka/tutup tombol hapus
-    face.addEventListener('click', () => face.classList.toggle('swiped'));
-  });
-}
-
-// ── Modal ────────────────────────────────────────────────────
-function costModal(innerHTML) {
-  let el = document.getElementById('costModal');
-  if (!el) {
-    el = document.createElement('div');
-    el.id = 'costModal';
-    el.className = 'cost-modal';
-    el.addEventListener('click', ev => { if (ev.target === el) costCloseModal(); });
-    document.body.appendChild(el);
-  }
-  el.innerHTML = `<div class="cost-modal-box">${innerHTML}</div>`;
-  el.classList.add('show');
-}
-function costCloseModal() {
-  const el = document.getElementById('costModal');
-  if (el) el.classList.remove('show');
+function ilRenderAll() {
+  if (!ilState.loaded) return;
+  ilRenderMap();
+  ilMapSelectedKab = null;
+  const detailBox = document.getElementById('ilMapDetail'); if (detailBox) detailBox.innerHTML = '';
+  ilRenderRestrictions();
+  ilRenderRestrictionCheck();
+  ilRenderContacts();
+  ilRenderList();
 }
 
 // ── Inisialisasi saat tab Cost dibuka ────────────────────────
 function costInit() {
   if (!_costLoaded[costKey()]) costLoadFromCloud(costState.brand, costState.product);
+  if (!ilState.loaded) ilLoadAll();
   costRenderAll();
 }
+
 
 
 // ════════════════════════════════════════════════════════════════
@@ -4496,10 +4726,16 @@ async function costEnsureLoaded(brand, product) {
   await costLoadFromCloud(brand, product);
 }
 
+// v1.0.46: daerah tanpa topografi lagi — cukup nama kabupaten/kota
+function costRegionInfo(key) {
+  const name = (key || '').split('|')[0];
+  return { name };
+}
+
 /**
- * Hitung harga jual & modal untuk sebuah daerah.
- * Dikirim ke alamat → modal = harga patokan kirim, laba = nominal kategori daerah itu.
- * Ambil sendiri     → modal = harga patokan pabrik, laba = laba ambil sendiri (satu nilai).
+ * Saran harga untuk sebuah daerah, diambil dari catatan Tanya Harga terakhir
+ * di kabupaten itu (bukan aturan tetap — cuma referensi histori).
+ * Ambil sendiri tetap pakai harga patokan pabrik + laba ambil sendiri (satu nilai, tidak berubah per daerah).
  */
 function costQuote(regionKey) {
   const brand = currentBrand;
@@ -4508,20 +4744,20 @@ function costQuote(regionKey) {
   if (!d) return null;
 
   const pickup = (deliveryMethod === 'ambil');
-  const modal = pickup ? (d.pickupPrice || 0) : (d.deliverPrice || 0);
-  if (!modal) return null;
-
-  let markup = 0, catLabel = '';
   if (pickup) {
-    markup = d.pickupMarkup || 0;
-    catLabel = markup ? costMarkupLabel(markup) : '';
-  } else {
-    const cat = (d.categories || []).find(c => (c.regions || []).includes(regionKey));
-    if (!cat) return { modal, markup: 0, jual: modal, noCategory: true, pickup };
-    markup = cat.markup;
-    catLabel = costMarkupLabel(cat.markup);
+    const modal = d.pickupPrice || 0;
+    if (!modal) return null;
+    const markup = d.pickupMarkup || 0;
+    return { modal, markup, jual: modal + markup, catLabel: markup ? costMarkupLabel(markup) : '', pickup };
   }
-  return { modal, markup, jual: modal + markup, catLabel, pickup };
+
+  const kab = costRegionInfo(regionKey).name;
+  const hist = ilStore
+    .filter(e => e.brand === brand && e.product === product && e.kabupaten === kab && e.modal_price > 0)
+    .sort((a, b) => new Date(b.ts) - new Date(a.ts))[0];
+  if (!hist) return { modal: d.deliverPrice || 0, markup: 0, jual: d.deliverPrice || 0, noHistory: true, pickup };
+
+  return { modal: hist.modal_price, markup: hist.margin || 0, jual: hist.sell_price || (hist.modal_price + (hist.margin || 0)), catLabel: hist.margin ? costMarkupLabel(hist.margin) : '', pickup, via: 'catatan' };
 }
 
 // ── (a3) Tampilan kotak saran ────────────────────────────────
@@ -4546,6 +4782,7 @@ async function refreshPriceSuggestion() {
   if (res.keys.length === 1) suggState.chosen = res.keys[0];
 
   await costEnsureLoaded(currentBrand, costProductForMode());
+  if (!ilState.loaded) await ilLoadAll();
   renderPriceSuggestion();
 }
 
@@ -4579,7 +4816,7 @@ function renderPriceSuggestion() {
       <div class="sugg-choices">
         ${suggState.keys.map(k => {
           const i = costRegionInfo(k);
-          return `<button class="sugg-choice" onclick="suggChoose('${k.replace(/'/g, "\\'")}')">${h(i.name)} · ${i.topo === 'T' ? 'Dt. Tinggi' : 'Dt. Rendah'}</button>`;
+          return `<button class="sugg-choice" onclick="suggChoose('${k.replace(/'/g, "\\'")}')">${h(i.name)}</button>`;
         }).join('')}
       </div>`;
     return;
@@ -4596,21 +4833,21 @@ function renderPriceSuggestion() {
       <div class="sugg-head">
         <div class="sugg-ico">${iconInfo}</div>
         <div style="min-width:0;">
-          <div class="sugg-title">${h(info.name)} · ${info.topo === 'T' ? 'Dataran Tinggi' : 'Dataran Rendah'}</div>
-          <div class="sugg-sub">Harga patokan di halaman Cost belum diisi untuk merek ini.</div>
+          <div class="sugg-title">${h(info.name)}</div>
+          <div class="sugg-sub">Harga patokan di halaman Tanya Harga belum diisi untuk merek ini.</div>
         </div>
       </div>`;
     return;
   }
 
-  if (q.noCategory) {
+  if (q.noHistory) {
     box.className = 'sugg-box show warn';
     box.innerHTML = `
       <div class="sugg-head">
         <div class="sugg-ico">${iconInfo}</div>
         <div style="min-width:0;">
-          <div class="sugg-title">${h(info.name)} · ${info.topo === 'T' ? 'Dataran Tinggi' : 'Dataran Rendah'}</div>
-          <div class="sugg-sub">Daerah ini belum masuk kategori laba mana pun di halaman Cost.</div>
+          <div class="sugg-title">${h(info.name)}</div>
+          <div class="sugg-sub">Belum ada catatan Tanya Harga untuk daerah ini. Modal patokan: Rp ${fmtRupiah(q.modal)}.</div>
         </div>
       </div>`;
     return;
@@ -4621,8 +4858,8 @@ function renderPriceSuggestion() {
     <div class="sugg-head">
       <div class="sugg-ico">${iconInfo}</div>
       <div style="min-width:0;">
-        <div class="sugg-title">${h(info.name)} · ${info.topo === 'T' ? 'Dataran Tinggi' : 'Dataran Rendah'}</div>
-        <div class="sugg-sub">Modal Rp ${fmtRupiah(q.modal)} · laba ${q.catLabel}</div>
+        <div class="sugg-title">${h(info.name)}</div>
+        <div class="sugg-sub">Dari catatan terakhir — modal Rp ${fmtRupiah(q.modal)}${q.catLabel ? ' · laba ' + q.catLabel : ''}</div>
       </div>
       <div class="sugg-price">Rp ${fmtRupiah(q.jual)}<small>per ${unit}</small></div>
     </div>
@@ -4630,7 +4867,7 @@ function renderPriceSuggestion() {
       <div class="sugg-choices">
         ${suggState.keys.filter(k => k !== key).map(k => {
           const i = costRegionInfo(k);
-          return `<button class="sugg-choice" onclick="suggChoose('${k.replace(/'/g, "\\'")}')">Ganti: ${h(i.name)} · ${i.topo === 'T' ? 'Dt. Tinggi' : 'Dt. Rendah'}</button>`;
+          return `<button class="sugg-choice" onclick="suggChoose('${k.replace(/'/g, "\\'")}')">Ganti: ${h(i.name)}</button>`;
         }).join('')}
       </div>` : ''}
     <div class="sugg-actions">
@@ -4643,7 +4880,7 @@ function applySuggestedPrice(manual) {
   const key = suggState.chosen;
   if (!key) return;
   const q = costQuote(key);
-  if (!q || q.noCategory) return;
+  if (!q || q.noHistory) return;
 
   if (mode === 'bata') {
     let touched = 0;
