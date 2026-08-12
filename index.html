@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Invoice Generator · v1.0.47</title>
-<!-- v1.0.47 -->
+<title>Invoice Generator · v1.0.48</title>
+<!-- v1.0.48 -->
 <meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai multi-brand">
 <meta name="theme-color" content="#0e9e4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -806,6 +806,15 @@
   }
   .il-add-region:hover { border-color: var(--brand-color); color: var(--brand-dark); }
 
+  /* v1.0.48: batasi tinggi list biar nggak scroll kepanjangan di halaman utama */
+  .il-list-scroll { max-height: 440px; overflow-y: auto; }
+  .il-more-btn {
+    width: 100%; height: 38px; border-radius: 10px; border: 1px solid #e2e8f0;
+    background: #f8fafc; color: #475569; cursor: pointer; margin-top: 8px;
+    font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700;
+  }
+  .il-more-btn:hover { border-color: var(--brand-color); color: var(--brand-dark); }
+
   /* Peta SVG kabupaten — nyala sesuai intensitas transaksi */
   .il-map-svg { width: 100%; height: auto; display: block; }
   .il-map-node { cursor: pointer; transition: filter 0.2s; }
@@ -823,7 +832,7 @@
   .cost-modal.show { display: flex; }
   .cost-modal-box {
     position: relative; width: 100%; max-width: 460px; background: #fff;
-    border-radius: 18px 18px 0 0; padding: 20px 18px 24px;
+    border-radius: 18px 18px 0 0; padding: 44px 18px 24px;
     max-height: 82vh; overflow: auto;
     animation: cost-sheet-up 0.24s cubic-bezier(.22,.61,.36,1);
   }
@@ -1253,7 +1262,7 @@
     </div>
     <div class="min-w-0">
       <div class="text-[14px] font-bold text-slate-900 truncate leading-tight">Invoice Generator</div>
-      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.47</div>
+      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.48</div>
     </div>
   </div>
 
@@ -1636,7 +1645,7 @@
 <!-- ═══════════ END HISTORY PAGE VIEW ═══════════ -->
 
 
-<!-- ═══════════ COST PAGE VIEW — "Tanya Harga" (v1.0.47) ═══════════ -->
+<!-- ═══════════ COST PAGE VIEW — "Tanya Harga" (v1.0.48) ═══════════ -->
 <div id="cost-view" style="display:none;flex-direction:column;min-height:100dvh;">
   <header class="bg-white border-b border-slate-200 flex items-center flex-shrink-0" style="height:60px;padding:0 16px;gap:12px;">
     <div class="min-w-0 flex-1">
@@ -1677,8 +1686,9 @@
           <button class="il-status-chip" data-st="ghosting" onclick="ilSetFilter('ghosting')">Ghosting</button>
         </div>
 
-        <div id="ilList"></div>
+        <div id="ilList" class="il-list-scroll"></div>
         <div id="ilEmpty" class="plog-empty" style="display:none;">Belum ada catatan. Mulai catat tiap kali ada yang tanya harga.</div>
+        <button class="il-more-btn" id="ilMoreBtn" onclick="ilOpenFullList()" style="display:none;">Selengkapnya →</button>
       </div>
 
       <!-- Peta — visual, dilihat sesekali -->
@@ -1714,6 +1724,50 @@
   </main>
 </div>
 <!-- ═══════════ END COST PAGE VIEW ═══════════ -->
+
+<!-- ═══════════ SUBPAGE: SEMUA CATATAN TANYA HARGA (v1.0.48) ═══════════ -->
+<div id="il-fulllist-view" style="display:none;flex-direction:column;position:fixed;inset:0;z-index:4500;background:#f8fafc;">
+  <header class="bg-white border-b border-slate-200 flex items-center flex-shrink-0" style="height:60px;padding:0 16px;gap:12px;">
+    <button class="il-icon-btn" onclick="ilCloseFullList()" aria-label="Kembali">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="min-w-0 flex-1">
+      <div class="text-[15px] font-bold text-slate-900 truncate leading-tight">Semua Catatan Tanya Harga</div>
+    </div>
+  </header>
+  <main class="flex-1 overflow-auto" style="background:#f8fafc;">
+    <div class="page-wrap" style="max-width:760px;">
+
+      <div style="position:relative;margin-top:14px;">
+        <input class="input text-sm" id="ilFullSearch" placeholder="Cari nama, desa, kecamatan..."
+               oninput="ilRenderFullList()" style="padding:10px 12px;">
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <select class="input text-sm" id="ilFullKab" style="padding:9px 26px 9px 10px;" onchange="ilFullKabChanged()">
+          <option value="">Semua Kabupaten</option>
+        </select>
+        <select class="input text-sm" id="ilFullKec" style="padding:9px 26px 9px 10px;" onchange="ilRenderFullList()">
+          <option value="">Semua Kecamatan</option>
+        </select>
+      </div>
+
+      <div class="il-status-filter" id="ilFullStatusFilter" style="margin-top:10px;">
+        <button class="il-status-chip active" data-st="all" onclick="ilFullSetFilter('all')">Semua</button>
+        <button class="il-status-chip" data-st="nanya" onclick="ilFullSetFilter('nanya')">Nanya</button>
+        <button class="il-status-chip" data-st="closing" onclick="ilFullSetFilter('closing')">Closing</button>
+        <button class="il-status-chip" data-st="nggak_cocok" onclick="ilFullSetFilter('nggak_cocok')">Nggak Cocok</button>
+        <button class="il-status-chip" data-st="ghosting" onclick="ilFullSetFilter('ghosting')">Ghosting</button>
+      </div>
+
+      <div id="ilFullList" style="margin-top:14px;"></div>
+      <div id="ilFullEmpty" class="plog-empty" style="display:none;">Tidak ada catatan yang cocok.</div>
+
+      <div style="height:26px;"></div>
+    </div>
+  </main>
+</div>
+<!-- ═══════════ END SUBPAGE ═══════════ -->
 
 
 <!-- ═══════════ PROFILE PAGE VIEW (v1.0.44) ═══════════ -->
@@ -2537,7 +2591,7 @@ function onDateChange() {
 const BRAND_META = {
   citicon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.47 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.48 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI CITICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -2549,7 +2603,7 @@ const BRAND_META = {
   },
   bricon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.47 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.48 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI BRICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -2561,7 +2615,7 @@ const BRAND_META = {
   },
   grandel: {
     name:    'Invoice Generator',
-    sub:     'v1.0.47 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.48 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI GRAND ELEPHANT',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -2767,8 +2821,10 @@ function renderBataRows() {
       <div class="flex gap-2 mb-2">
         <div style="flex:1;">
           <label class="label-field text-[10.5px]">Qty</label>
-          <input class="input text-xs" value="${h(r.qty)}" inputmode="decimal"
-            oninput="bataRows[${i}].qty=this.value;updateBataRowSubtotal(${i});updatePreview();"
+          <input class="input text-xs" value="${h(r.qty)}" inputmode="${isM3 ? 'decimal' : 'numeric'}"
+            oninput="${isM3
+              ? `bataRows[${i}].qty=this.value;updateBataRowSubtotal(${i});updatePreview();`
+              : `bataRows[${i}].qty=this.value.replace(/\\D/g,'');this.value=bataRows[${i}].qty;updateBataRowSubtotal(${i});updatePreview();`}"
             placeholder="${isM3 ? '11,52' : '8'}" style="padding:7px 10px;">
           ${isM3 ? `<select class="input text-xs" style="padding:6px 22px 6px 8px;margin-top:5px;font-size:10.5px;"
             onchange="onBataQtyPaletPick(${i}, this.value)">${bataQtyPaletOptions()}</select>` : ''}
@@ -2813,8 +2869,12 @@ function renderBataRows() {
 function onBataUnitChange(i, newUnit) {
   if (isReadOnly) return;
   bataRows[i].unit = newUnit;
-  // When switching to SAK, clear size
-  if (newUnit === 'SAK') bataRows[i].size = '';
+  // When switching to SAK, clear size + bulatkan qty (sak fisiknya nggak bisa desimal)
+  if (newUnit === 'SAK') {
+    bataRows[i].size = '';
+    const q = parseNum(bataRows[i].qty);
+    bataRows[i].qty = q ? String(Math.round(q)) : bataRows[i].qty;
+  }
   // When switching to M3, default size
   if (newUnit === 'M3' && !bataRows[i].size) bataRows[i].size = '10cm';
   renderBataRows();
@@ -3274,7 +3334,8 @@ function buildFoot() {
 // ═══════════════ BATA INVOICE BUILDER ═══════════════
 function buildBata({ docNo, dateStr, salute, custName, custAddr, custPhone, custPhone2, bankInfo, deliveryMethod, pickupAddr }) {
   const rows = bataRows.map(r => {
-    const qty = parseNum(r.qty);
+    // Sak fisiknya bulat, jaga-jaga kalau ada data lama yang masih desimal
+    const qty = r.unit === 'SAK' ? Math.round(parseNum(r.qty)) : parseNum(r.qty);
     const priceRaw = r.price;
     const price = parseNum(priceRaw);
     return { ...r, qty, price, priceRaw, total: qty * price, displayName: bataRowName(r) };
@@ -3295,7 +3356,10 @@ function buildBata({ docNo, dateStr, salute, custName, custAddr, custPhone, cust
     const qtyCell = r.qty ? `${fmtQty(r.qty)} ${h(unitLabel(r.unit))}` : '';
     const isFree = r.priceRaw !== '' && r.price === 0;
     const priceCell = r.priceRaw === '' ? '' : (isFree ? 'Free' : fmtRupiah(r.price));
-    const totalCell = r.priceRaw === '' ? '' : (isFree ? 'Free' : fmtRupiah(r.total));
+    // v1.0.48: kalau gratis, kolom "JUMLAH" (total harga) jangan nulis "Free" lagi
+    // (membingungkan, dikira jumlah barangnya nol) — tulis ulang qty-nya biar jelas
+    // itu jumlah barang yang diberikan gratis, bukan hasil kali harga.
+    const totalCell = r.priceRaw === '' ? '' : (isFree ? qtyCell : fmtRupiah(r.total));
     return `
     <tr>
       <td style="border:1px solid #444;padding:9px 12px;text-align:center;font-family:Arial,sans-serif;font-size:11.5px;">
@@ -3670,6 +3734,7 @@ function buildSalesMessage() {
     bataRows.forEach(r => {
       const qty = parseNum(r.qty);
       if (qty <= 0) return;
+      if (r.price === '0') return; // v1.0.48: item promo gratis nggak usah masuk PO ke Pak Bima
       items.push(`\u2022 ${bataRowName(r)} : ${fmtQty(qty)} ${unitLabel(r.unit)}`);
     });
   } else {
@@ -4180,10 +4245,6 @@ function ilOpenDetail(id) {
           <button class="cost-btn" style="border-color:#bbf7d0;color:#0a7a38;" onclick="ilOpenWa('${e.customer_phone}')">Chat WA</button>
         </div>` : ''}
     ` : ''}
-
-    <div class="cost-modal-actions">
-      <button class="cost-btn" style="border-color:#fecaca;color:#dc2626;" onclick="ilRemove(${e.id})">Hapus</button>
-    </div>
   `, `ilSaveDetailAndClose(${e.id})`);
 
   if (e.status === 'closing' && isBata) {
@@ -4316,18 +4377,30 @@ function ilRenderContacts() {
   }).join('');
 }
 
-// ── Daftar catatan (dikelompokkan per daerah) ────────────────
-function ilRenderList() {
-  const list = document.getElementById('ilList');
-  const empty = document.getElementById('ilEmpty');
-  if (!list || !empty) return;
+// ── Item & grup catatan — dipakai bareng oleh list ringkas & subpage lengkap ──
+function ilItemHtml(e) {
+  const dateLabel = new Date(e.ts).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+  const lokasi = [e.desa, e.kecamatan].filter(Boolean).join(', ');
+  return `
+    <div class="plog-item">
+      <button class="plog-item-del" onclick="ilRemove(${e.id})" aria-label="Hapus">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M17 6V4c0-1.1-.9-2-2-2H9c-1.1 0-2 .9-2 2v2H2v2h2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8h2V6zM9 4h6v2H9zM6 20V8h12v12z"></path><path d="M9 10h2v8H9zm4 0h2v8h-2z"></path></svg>
+      </button>
+      <div class="plog-item-face" data-il-id="${e.id}">
+        <div class="plog-item-top">
+          <span class="il-item-price">${e.sell_price ? 'Rp ' + fmtRupiah(e.sell_price) : (e.customer_name || 'Belum ada harga')}</span>
+          <span class="plog-item-date">${dateLabel}</span>
+        </div>
+        ${lokasi ? `<div class="il-item-addr">${h(lokasi)}</div>` : ''}
+        <div class="plog-item-meta">
+          ${ilBadgeHtml(e.status)}
+          ${e.customer_name ? `<span class="plog-item-note">${h(e.customer_name)}</span>` : ''}
+        </div>
+      </div>
+    </div>`;
+}
 
-  let entries = ilEntriesForTab();
-  if (ilState.filter !== 'all') entries = entries.filter(e => e.status === ilState.filter);
-
-  if (!entries.length) { list.innerHTML = ''; empty.style.display = ''; return; }
-  empty.style.display = 'none';
-
+function ilGroupedHtml(entries) {
   const groups = {};
   entries.forEach(e => {
     const key = e.kabupaten || '— Belum tentu / umum —';
@@ -4337,51 +4410,100 @@ function ilRenderList() {
   Object.values(groups).forEach(g => g.sort((a, b) => new Date(b.ts) - new Date(a.ts)));
   const groupNames = Object.keys(groups).sort((a, b) => new Date(groups[b][0].ts) - new Date(groups[a][0].ts));
 
-  list.innerHTML = groupNames.map(name => {
-    const items = groups[name];
-    const itemsHtml = items.map(e => {
-      const dateLabel = new Date(e.ts).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
-      const lokasi = [e.desa, e.kecamatan].filter(Boolean).join(', ');
-      return `
-        <div class="plog-item">
-          <button class="plog-item-del" onclick="ilRemove(${e.id})" aria-label="Hapus">
-            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M17 6V4c0-1.1-.9-2-2-2H9c-1.1 0-2 .9-2 2v2H2v2h2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8h2V6zM9 4h6v2H9zM6 20V8h12v12z"></path><path d="M9 10h2v8H9zm4 0h2v8h-2z"></path></svg>
-          </button>
-          <div class="plog-item-face" data-il-id="${e.id}">
-            <div class="plog-item-top">
-              <span class="il-item-price">${e.sell_price ? 'Rp ' + fmtRupiah(e.sell_price) : (e.customer_name || 'Belum ada harga')}</span>
-              <span class="plog-item-date">${dateLabel}</span>
-            </div>
-            ${lokasi ? `<div class="il-item-addr">${h(lokasi)}</div>` : ''}
-            <div class="plog-item-meta">
-              ${ilBadgeHtml(e.status)}
-              ${e.customer_name ? `<span class="plog-item-note">${h(e.customer_name)}</span>` : ''}
-            </div>
-          </div>
-        </div>`;
-    }).join('');
-
-    return `
+  return groupNames.map(name => `
       <div class="plog-group">
         <div class="plog-group-head">
           <span class="plog-group-name">${h(name)}</span>
-          <span class="plog-group-count">${items.length} catatan</span>
+          <span class="plog-group-count">${groups[name].length} catatan</span>
         </div>
-        ${itemsHtml}
-      </div>`;
-  }).join('');
-
-  ilBindSwipe();
+        ${groups[name].map(ilItemHtml).join('')}
+      </div>`).join('');
 }
 
-// Swipe-ke-kiri untuk buka tombol hapus (mobile), tap biasa untuk buka detail.
-// Kalau lagi ke-swipe, tap sekali dulu buat nutup (bukan langsung buka detail).
-function ilBindSwipe() {
-  document.querySelectorAll('#ilList .plog-item-face[data-il-id]').forEach(face => {
+// ── Daftar catatan ringkas (halaman utama Cost) ──────────────
+function ilRenderList() {
+  const list = document.getElementById('ilList');
+  const empty = document.getElementById('ilEmpty');
+  const moreBtn = document.getElementById('ilMoreBtn');
+  if (!list || !empty) return;
+
+  let entries = ilEntriesForTab();
+  if (ilState.filter !== 'all') entries = entries.filter(e => e.status === ilState.filter);
+
+  if (moreBtn) moreBtn.style.display = entries.length > 5 ? '' : 'none';
+
+  if (!entries.length) { list.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+
+  list.innerHTML = ilGroupedHtml(entries);
+  ilBindSwipeIn('#ilList');
+}
+
+// ── Subpage: semua catatan, dengan pencarian & filter kabupaten/kecamatan ──
+const ilFullState = { filter: 'all' };
+
+function ilOpenFullList() {
+  const view = document.getElementById('il-fulllist-view');
+  if (!view) return;
+  view.style.display = 'flex';
+  const kabSel = document.getElementById('ilFullKab');
+  if (kabSel && kabSel.options.length <= 1) {
+    kabSel.innerHTML = '<option value="">Semua Kabupaten</option>' +
+      ilKabList().map(k => `<option value="${h(k)}">${h(k)}</option>`).join('');
+  }
+  ilRenderFullList();
+}
+function ilCloseFullList() {
+  const view = document.getElementById('il-fulllist-view');
+  if (view) view.style.display = 'none';
+}
+function ilFullKabChanged() {
+  const kabSel = document.getElementById('ilFullKab');
+  const kecSel = document.getElementById('ilFullKec');
+  if (!kabSel || !kecSel) return;
+  const kecs = kabSel.value ? ilKecOfKab(kabSel.value) : [];
+  kecSel.innerHTML = '<option value="">Semua Kecamatan</option>' +
+    kecs.map(k => `<option value="${h(k)}">${h(k)}</option>`).join('');
+  ilRenderFullList();
+}
+function ilFullSetFilter(st) {
+  ilFullState.filter = st;
+  document.querySelectorAll('#ilFullStatusFilter .il-status-chip').forEach(el =>
+    el.classList.toggle('active', el.dataset.st === st));
+  ilRenderFullList();
+}
+function ilRenderFullList() {
+  const list = document.getElementById('ilFullList');
+  const empty = document.getElementById('ilFullEmpty');
+  if (!list || !empty) return;
+
+  let entries = ilEntriesForTab();
+  if (ilFullState.filter !== 'all') entries = entries.filter(e => e.status === ilFullState.filter);
+
+  const q = ((document.getElementById('ilFullSearch') || {}).value || '').toLowerCase().trim();
+  const kab = (document.getElementById('ilFullKab') || {}).value || '';
+  const kec = (document.getElementById('ilFullKec') || {}).value || '';
+  if (kab) entries = entries.filter(e => e.kabupaten === kab);
+  if (kec) entries = entries.filter(e => e.kecamatan === kec);
+  if (q) entries = entries.filter(e =>
+    [e.customer_name, e.desa, e.kecamatan, e.kabupaten].filter(Boolean)
+      .some(v => v.toLowerCase().includes(q)));
+
+  if (!entries.length) { list.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+  list.innerHTML = ilGroupedHtml(entries);
+  ilBindSwipeIn('#ilFullList');
+}
+
+// Swipe-ke-kiri untuk buka tombol hapus (mobile & desktop, pakai Pointer Events
+// biar satu logika buat sentuh & mouse). Gerakan vertikal (scroll) dibedakan dari
+// swipe horizontal supaya scroll biasa nggak kepencet kebuka jadi modal detail.
+function ilBindSwipeIn(containerSelector) {
+  document.querySelectorAll(`${containerSelector} .plog-item-face[data-il-id]`).forEach(face => {
     if (face.dataset.swipeBound) return;
     face.dataset.swipeBound = '1';
     const id = parseInt(face.dataset.ilId, 10);
-    let startX = 0, startY = 0, dragging = false, moved = false;
+    let startX = 0, startY = 0, dragging = false, moved = false, anyMoved = false, pid = null;
 
     function settle(open) {
       face.style.transition = 'transform 0.22s cubic-bezier(.22,.61,.36,1)';
@@ -4389,40 +4511,44 @@ function ilBindSwipe() {
       face.classList.toggle('swiped', open);
     }
 
-    face.addEventListener('touchstart', e => {
-      startX = e.touches[0].clientX; startY = e.touches[0].clientY;
-      dragging = true; moved = false;
+    face.addEventListener('pointerdown', e => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      startX = e.clientX; startY = e.clientY;
+      dragging = true; moved = false; anyMoved = false; pid = e.pointerId;
       face.style.transition = 'none';
-    }, { passive: true });
+    });
 
-    face.addEventListener('touchmove', e => {
-      if (!dragging) return;
-      const dx = e.touches[0].clientX - startX;
-      const dy = e.touches[0].clientY - startY;
-      if (!moved && Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) moved = true;
+    face.addEventListener('pointermove', e => {
+      if (!dragging || e.pointerId !== pid) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      if (Math.abs(dx) > 6 || Math.abs(dy) > 6) anyMoved = true;
+      if (!moved && Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+        moved = true;
+        try { face.setPointerCapture(pid); } catch (err) {}
+      }
       if (moved) face.style.transform = `translateX(${Math.max(-96, Math.min(0, dx))}px)`;
-    }, { passive: true });
+    });
 
-    face.addEventListener('touchend', e => {
+    function finish(e) {
+      if (!dragging || e.pointerId !== pid) return;
       dragging = false;
-      const dx = e.changedTouches[0].clientX - startX;
-      e.preventDefault();
+      const dx = e.clientX - startX;
       if (moved) {
         settle(dx < -40);
+      } else if (anyMoved) {
+        // gerakan cuma scroll vertikal — jangan buka apa pun
       } else if (face.classList.contains('swiped')) {
         settle(false);
       } else {
         ilOpenDetail(id);
       }
-    });
-
-    // Desktop / non-touch: klik biasa
-    face.addEventListener('click', () => {
-      if (face.classList.contains('swiped')) { settle(false); return; }
-      ilOpenDetail(id);
-    });
+    }
+    face.addEventListener('pointerup', finish);
+    face.addEventListener('pointercancel', finish);
   });
 }
+function ilBindSwipe() { ilBindSwipeIn('#ilList'); }
 
 // ── Peta sebaran (SVG sketsa posisi relatif, bukan GIS presisi) ────────
 const KAB_COORDS = {
