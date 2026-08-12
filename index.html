@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Invoice Generator · v1.0.46</title>
-<!-- v1.0.46 -->
+<title>Invoice Generator · v1.0.47</title>
+<!-- v1.0.47 -->
 <meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai multi-brand">
 <meta name="theme-color" content="#0e9e4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -709,7 +709,18 @@
   .cost-summary-box .val { font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 800; color: #0f172a; margin-top: 3px; }
   .cost-summary-box .val.profit { color: #0a7a38; }
 
-  /* ─── v1.0.46: TANYA HARGA — status filter, peta, kontak, larangan truk ─── */
+  /* ─── v1.0.47: tombol utama "Catat Tanya Harga" — paling sering dipakai ─── */
+  .il-primary-add {
+    width: 100%; height: 52px; border-radius: 13px; border: none; cursor: pointer;
+    background: var(--brand-color); color: #fff;
+    font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 800;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    box-shadow: 0 4px 14px rgba(var(--brand-rgb),0.32);
+    transition: all 0.15s;
+  }
+  .il-primary-add:hover { filter: brightness(1.06); transform: translateY(-1px); }
+
+  /* ─── v1.0.47: TANYA HARGA — status filter, peta, kontak, larangan truk ─── */
   .il-status-filter { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
   .il-status-chip {
     padding: 7px 12px; border-radius: 20px; border: 1.5px solid #e2e8f0;
@@ -1236,7 +1247,7 @@
     </div>
     <div class="min-w-0">
       <div class="text-[14px] font-bold text-slate-900 truncate leading-tight">Invoice Generator</div>
-      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.46</div>
+      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.47</div>
     </div>
   </div>
 
@@ -1619,7 +1630,7 @@
 <!-- ═══════════ END HISTORY PAGE VIEW ═══════════ -->
 
 
-<!-- ═══════════ COST PAGE VIEW — "Tanya Harga" (v1.0.46) ═══════════ -->
+<!-- ═══════════ COST PAGE VIEW — "Tanya Harga" (v1.0.47) ═══════════ -->
 <div id="cost-view" style="display:none;flex-direction:column;min-height:100dvh;">
   <header class="bg-white border-b border-slate-200 flex items-center flex-shrink-0" style="height:60px;padding:0 16px;gap:12px;">
     <div class="min-w-0 flex-1">
@@ -1644,79 +1655,14 @@
         <button class="cost-tab" data-cprod="panel" onclick="costSetProduct('panel')">Panel Lantai</button>
       </div>
 
-      <!-- Harga patokan dari sales (tetap dicatat — bukan sistem, cuma histori angka) -->
+      <!-- Catatan Tanya Harga — paling sering dipakai, jadi paling atas -->
       <div class="cost-card">
-        <div class="cost-card-title">Harga Patokan dari Sales saat ini</div>
-
-        <div class="cost-price-label">Dikirim ke Alamat</div>
-        <div class="cost-price-row">
-          <div class="cost-price-box">
-            <span class="rp">Rp</span>
-            <input id="costDeliverPrice" inputmode="numeric" placeholder="0"
-                   oninput="costOnPriceInput('deliver')" onblur="costCommitPrice('deliver')">
-            <span class="suffix" id="costUnitA">/Kubik</span>
-          </div>
-          <button class="cost-icon-btn" onclick="costShowHistory('deliver')" title="Riwayat perubahan harga">
-            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21.21 8.11c-.25-.59-.56-1.16-.92-1.7-.36-.53-.77-1.03-1.22-1.48s-.95-.86-1.48-1.22c-.54-.36-1.11-.67-1.7-.92-.6-.26-1.24-.45-1.88-.58-1.31-.27-2.72-.27-4.03 0-.64.13-1.27.33-1.88.58-.59.25-1.16.56-1.7.92-.53.36-1.03.77-1.48 1.22-.17.17-.32.35-.48.52L1.99 3v6h6L5.86 6.87c.15-.18.31-.36.48-.52.36-.36.76-.69 1.18-.98.43-.29.89-.54 1.36-.74.48-.2.99-.36 1.5-.47 1.05-.21 2.18-.21 3.23 0 .51.11 1.02.26 1.5.47.47.2.93.45 1.36.74.42.29.82.62 1.18.98s.69.76.98 1.18c.29.43.54.89.74 1.36.2.48.36.99.47 1.5.11.53.16 1.07.16 1.61a7.85 7.85 0 0 1-.63 3.11c-.2.47-.45.93-.74 1.36-.29.42-.62.82-.98 1.18s-.76.69-1.18.98c-.43.29-.89.54-1.36.74-.48.2-.99.36-1.5.47-1.05.21-2.18.21-3.23 0a8 8 0 0 1-1.5-.47c-.47-.2-.93-.45-1.36-.74-.42-.29-.82-.62-1.18-.98s-.69-.76-.98-1.18c-.29-.43-.54-.89-.74-1.36-.2-.48-.36-.99-.47-1.5A8 8 0 0 1 3.99 12h-2c0 .68.07 1.35.2 2.01.13.64.33 1.27.58 1.88.25.59.56 1.16.92 1.7.36.53.77 1.03 1.22 1.48s.95.86 1.48 1.22c.54.36 1.11.67 1.7.92.6.26 1.24.45 1.88.58.66.13 1.33.2 2.01.2s1.36-.07 2.01-.2c.64-.13 1.27-.33 1.88-.58.59-.25 1.16-.56 1.7-.92.53-.36 1.03-.77 1.48-1.22s.86-.95 1.22-1.48c.36-.54.67-1.11.92-1.7.26-.6.45-1.24.58-1.88.13-.66.2-1.34.2-2.01s-.07-1.35-.2-2.01c-.13-.64-.33-1.27-.58-1.88Z"/><path d="M11 7v6h6v-2h-4V7z"/></svg>
-          </button>
-        </div>
-
-        <div class="cost-price-label">Ambil Sendiri di Pabrik</div>
-        <div class="cost-price-row" style="margin-bottom:0;">
-          <div class="cost-price-box">
-            <span class="rp">Rp</span>
-            <input id="costPickupPrice" inputmode="numeric" placeholder="0"
-                   oninput="costOnPriceInput('pickup')" onblur="costCommitPrice('pickup')">
-            <span class="suffix" id="costUnitB">/Kubik</span>
-          </div>
-          <button class="cost-icon-btn" onclick="costShowHistory('pickup')" title="Riwayat perubahan harga">
-            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21.21 8.11c-.25-.59-.56-1.16-.92-1.7-.36-.53-.77-1.03-1.22-1.48s-.95-.86-1.48-1.22c-.54-.36-1.11-.67-1.7-.92-.6-.26-1.24-.45-1.88-.58-1.31-.27-2.72-.27-4.03 0-.64.13-1.27.33-1.88.58-.59.25-1.16.56-1.7.92-.53.36-1.03.77-1.48 1.22-.17.17-.32.35-.48.52L1.99 3v6h6L5.86 6.87c.15-.18.31-.36.48-.52.36-.36.76-.69 1.18-.98.43-.29.89-.54 1.36-.74.48-.2.99-.36 1.5-.47 1.05-.21 2.18-.21 3.23 0 .51.11 1.02.26 1.5.47.47.2.93.45 1.36.74.42.29.82.62 1.18.98s.69.76.98 1.18c.29.43.54.89.74 1.36.2.48.36.99.47 1.5.11.53.16 1.07.16 1.61a7.85 7.85 0 0 1-.63 3.11c-.2.47-.45.93-.74 1.36-.29.42-.62.82-.98 1.18s-.76.69-1.18.98c-.43.29-.89.54-1.36.74-.48.2-.99.36-1.5.47-1.05.21-2.18.21-3.23 0a8 8 0 0 1-1.5-.47c-.47-.2-.93-.45-1.36-.74-.42-.29-.82-.62-1.18-.98s-.69-.76-.98-1.18c-.29-.43-.54-.89-.74-1.36-.2-.48-.36-.99-.47-1.5A8 8 0 0 1 3.99 12h-2c0 .68.07 1.35.2 2.01.13.64.33 1.27.58 1.88.25.59.56 1.16.92 1.7.36.53.77 1.03 1.22 1.48s.95.86 1.48 1.22c.54.36 1.11.67 1.7.92.6.26 1.24.45 1.88.58.66.13 1.33.2 2.01.2s1.36-.07 2.01-.2c.64-.13 1.27-.33 1.88-.58.59-.25 1.16-.56 1.7-.92.53-.36 1.03-.77 1.48-1.22s.86-.95 1.22-1.48c.36-.54.67-1.11.92-1.7.26-.6.45-1.24.58-1.88.13-.66.2-1.34.2-2.01s-.07-1.35-.2-2.01c-.13-.64-.33-1.27-.58-1.88Z"/><path d="M11 7v6h6v-2h-4V7z"/></svg>
-          </button>
-        </div>
-        <div style="height:12px;"></div>
-        <div class="cost-price-label">Labaku untuk Ambil Sendiri</div>
-        <div class="cost-price-row" style="margin-bottom:0;">
-          <div class="cost-price-box">
-            <span class="rp">Rp</span>
-            <input id="costPickupMarkup" inputmode="numeric" placeholder="0"
-                   oninput="costOnMarkupInput()" onblur="costCommitPickupMarkup()">
-            <span class="suffix" id="costUnitC">/Kubik</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Peta Jatim — gimmick visual, nyala per kabupaten yang pernah tercatat -->
-      <div class="cost-card">
-        <div class="cost-card-title">Peta Sebaran Tanya Harga</div>
-        <div id="ilMapWrap"></div>
-        <div id="ilMapDetail"></div>
-      </div>
-
-      <!-- Alert cepat: cek daerah kena larangan/limitasi truk -->
-      <div class="cost-card">
-        <div class="cost-card-title">Cek Daerah — Larangan / Limitasi Truk</div>
-        <div style="position:relative;">
-          <input class="input text-sm" id="ilRestrictionCheck" placeholder="Ketik kecamatan / kawasan..."
-                 oninput="ilRenderRestrictionCheck()" style="padding:10px 12px;">
-        </div>
-        <div id="ilRestrictionCheckResult"></div>
-        <div id="ilRestrictionList" style="margin-top:10px;"></div>
-        <button class="plog-add-btn" onclick="ilOpenAddRestriction()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Tambah Daerah Larangan/Limitasi
+        <button class="il-primary-add" onclick="ilOpenAdd()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Catat Kejadian Tanya Harga
         </button>
-      </div>
 
-      <!-- Kontak yang pernah closing -->
-      <div class="cost-card" id="ilContactsCard" style="display:none;">
-        <div class="cost-card-title">Kontak Pernah Closing</div>
-        <div id="ilContactsList"></div>
-      </div>
-
-      <!-- Catatan Tanya Harga -->
-      <div class="cost-card">
-        <div class="cost-card-title">Catatan Tanya Harga</div>
-
+        <div class="cost-card-title" style="margin-top:16px;">Catatan Tanya Harga</div>
         <div class="il-status-filter" id="ilStatusFilter">
           <button class="il-status-chip active" data-st="all" onclick="ilSetFilter('all')">Semua</button>
           <button class="il-status-chip" data-st="nanya" onclick="ilSetFilter('nanya')">Nanya</button>
@@ -1727,10 +1673,33 @@
 
         <div id="ilList"></div>
         <div id="ilEmpty" class="plog-empty" style="display:none;">Belum ada catatan. Mulai catat tiap kali ada yang tanya harga.</div>
+      </div>
 
-        <button class="plog-add-btn" onclick="ilOpenAdd()">
+      <!-- Peta — visual, dilihat sesekali -->
+      <div class="cost-card">
+        <div class="cost-card-title">Peta Sebaran Tanya Harga</div>
+        <div id="ilMapWrap"></div>
+        <div id="ilMapDetail"></div>
+      </div>
+
+      <!-- Kontak yang pernah closing — referensi sesekali -->
+      <div class="cost-card" id="ilContactsCard" style="display:none;">
+        <div class="cost-card-title">Kontak Pernah Closing</div>
+        <div id="ilContactsList"></div>
+      </div>
+
+      <!-- Larangan/limitasi truk — setup, jarang diubah setelah awal.
+           Pengecekannya sendiri OTOMATIS jalan di dalam form "Catat" di atas,
+           jadi di sini cuma untuk kelola daftarnya. -->
+      <div class="cost-card">
+        <div class="cost-card-title">Daftar Larangan / Limitasi Truk</div>
+        <div style="font-size:11px;color:#94a3b8;margin-bottom:10px;line-height:1.5;">
+          Daerah di sini otomatis muncul sebagai peringatan begitu kamu pilih kecamatan yang cocok saat mencatat di atas.
+        </div>
+        <div id="ilRestrictionList"></div>
+        <button class="plog-add-btn" onclick="ilOpenAddRestriction()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Catat Kejadian Tanya Harga
+          Tambah Daerah Larangan/Limitasi
         </button>
       </div>
 
@@ -2007,8 +1976,9 @@ function applyUserProfile() {
   applySalesButtonVisibility();
   mountTopNavEverywhere();
   costState.brand = DEFAULT_BRAND_BY_USER[id] || 'bricon';
-  _costLoaded = {};
-  for (const k in costStore) delete costStore[k];
+  ilState.loaded = false;
+  ilStore = [];
+  ilRestrictions = [];
 }
 
 // v1.0.44: pastikan rekening yang terpilih selalu opsi pertama (rekening default)
@@ -2560,7 +2530,7 @@ function onDateChange() {
 const BRAND_META = {
   citicon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.46 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.47 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI CITICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -2572,7 +2542,7 @@ const BRAND_META = {
   },
   bricon: {
     name:    'Invoice Generator',
-    sub:     'v1.0.46 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.47 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI BRICON',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -2584,7 +2554,7 @@ const BRAND_META = {
   },
   grandel: {
     name:    'Invoice Generator',
-    sub:     'v1.0.46 · Procon Persada · Krian Sidoarjo',
+    sub:     'v1.0.47 · Procon Persada · Krian Sidoarjo',
     company: 'BATA RINGAN DAN PANEL LANTAI GRAND ELEPHANT',
     role_bata:  'Distributor',
     role_panel: 'Aplikator',
@@ -2748,7 +2718,7 @@ function updateBataRowSubtotal(i) {
   if (badge) badge.textContent = grand > 0 ? `Grand Total: Rp ${fmtRupiah(grand)}` : '—';
 }
 
-// v1.0.46: pilihan cepat qty bata dalam satuan palet — 1 palet = 1,92 m³ = ±160 biji,
+// v1.0.47: pilihan cepat qty bata dalam satuan palet — 1 palet = 1,92 m³ = ±160 biji,
 // 6 palet = 1 truk/rit = 11,52 m³ = ±960 biji. Dropdown ini cuma pengisi cepat;
 // field qty di bawahnya tetap bisa diisi manual untuk kombinasi non-standar.
 function bataQtyPaletOptions() {
@@ -2844,7 +2814,7 @@ function onBataUnitChange(i, newUnit) {
   updatePreview();
 }
 
-// v1.0.46: Promo — tiap pemesanan 11,52 m³ bata dapat 8 sak mortar gratis.
+// v1.0.47: Promo — tiap pemesanan 11,52 m³ bata dapat 8 sak mortar gratis.
 // Dihitung dari total qty semua baris M3, lalu diisikan ke baris SAK pertama
 // (dibuat baru kalau belum ada). Harga satuan diset kosong-eksplisit '0' → tampil "Free".
 function applyMortarPromo() {
@@ -3793,71 +3763,22 @@ function applySalesButtonVisibility() {
 const JATIM_REGIONS = [{"n":"Kota Batu","T":["Batu","Bumiaji","Junrejo"],"R":[]},{"n":"Kota Blitar","T":[],"R":["Kepanjenkidul","Sananwetan","Sukorejo"]},{"n":"Kota Kediri","T":[],"R":["Kota","Mojoroto","Pesantren"]},{"n":"Kota Madiun","T":[],"R":["Kartoharjo","Manguharjo","Taman"]},{"n":"Kota Malang","T":["Blimbing","Kedungkandang","Klojen","Lowokwaru","Sukun"],"R":[]},{"n":"Kota Mojokerto","T":[],"R":["Kranggan","Magersari","Prajurit Kulon"]},{"n":"Kota Pasuruan","T":[],"R":["Bugul Kidul","Gadingrejo","Panggungrejo","Purworejo"]},{"n":"Kota Probolinggo","T":[],"R":["Kademangan","Kanigaran","Kedopok","Mayangan","Wonoasih"]},{"n":"Kota Surabaya","T":[],"R":["Asemrowo","Benowo","Bubutan","Bulak","Dukuh Pakis","Gayungan","Genteng","Gubeng","Gunung Anyar","Jambangan","Karangpilang","Kenjeran","Krembangan","Lakarsantri","Mulyorejo","Pakal","Pabean Cantian","Rungkut","Sambikerep","Sawahan","Semampir","Simokerto","Sukolilo","Sukomanunggal","Tambaksari","Tandes","Tegalsari","Tenggilis Mejoyo","Wiyung","Wonocolo","Wonokromo"]},{"n":"Kabupaten Bangkalan","T":[],"R":["Arosbaya","Bangkalan","Blega","Burneh","Galis","Geger","Kamal","Kokop","Kwanyar","Labang","Modung","Sepulu","Socah","Tanah Merah","Tanjungbumi","Tragah"]},{"n":"Kabupaten Banyuwangi","T":["Glagah","Glenmore","Kalibaru","Licin","Songgon"],"R":["Bangorejo","Banyuwangi","Blimbingsari","Cluring","Gambiran","Genteng","Giri","Kabat","Kalipuro","Muncar","Pesanggaran","Purwoharjo","Rogojampi","Sempu","Siliragung","Singojuruh","Srono","Tegaldlimo","Tegalsari","Wongsorejo"]},{"n":"Kabupaten Blitar","T":["Bakung","Doko","Gandusari","Garum","Nglegok","Panggungrejo","Selorejo","Wlingi"],"R":["Binangun","Kademangan","Kanigoro","Kesamben","Ponggok","Sanankulon","Selopuro","Srengat","Sutojayan","Talun","Udanawu","Wonodadi","Wonotirto"]},{"n":"Kabupaten Bojonegoro","T":[],"R":["Balen","Baureno","Bojonegoro","Bubulan","Dander","Gayam","Gondang","Kalitidu","Kasiman","Kedewan","Kedungadem","Kepohbaru","Margomulyo","Ngambon","Ngasem","Ngraho","Padangan","Purwosari","Sekar","Sugihwaras","Sukosewu","Sumberejo","Tambakrejo","Temayang","Trucuk","Ukui"]},{"n":"Kabupaten Bondowoso","T":["Binakal","Botolinggo","Curahdami","Grujugan","Ijen (Sempol)","Maesan","Pakem","Sumberwringin","Tlogosari"],"R":["Bondowoso","Cermee","Jambesari Darus Sholah","Klabang","Prajekan","Pujer","Sukosari","Tamanan","Taman Krocok","Tapen","Tenggarang","Wonosari","Wringin"]},{"n":"Kabupaten Gresik","T":[],"R":["Balongpanggang","Benjeng","Bungah","Cerme","Driyorejo","Duduksampeyan","Dukun","Gresik","Kebomas","Kedamean","Manyar","Menganti","Panceng","Sangkapura","Sidayu","Tambak","Ujungpangkah","Wringinanom"]},{"n":"Kabupaten Jember","T":["Arjasa","Jelbuk","Panti","Silo","Sukorambi","Sumberbaru","Tanggul","Tempurejo"],"R":["Ajung","Ambulu","Balung","Bangsalsari","Gumukmas","Jombang","Kalisat","Kaliwates","Kencong","Ledokombo","Mayang","Mumbulsari","Pakusari","Patrang","Puger","Rambipuji","Semboro","Sumbersari","Sukowono","Umbulsari","Wuluhan"]},{"n":"Kabupaten Jombang","T":["Bareng","Wonosalam"],"R":["Bandar Kedungmulyo","Diwek","Gudo","Jombang","Kabuh","Kesamben","Kudu","Megaluh","Mojowarno","Ngoro","Ngusikan","Perak","Peterongan","Plandaan","Ploso","Sumobito","Tembelang"]},{"n":"Kabupaten Kediri","T":["Banyakan","Mojo","Ngancar","Plosoklaten","Puncu","Semen"],"R":["Badas","Gampengrejo","Gurah","Kandangan","Kandat","Kayen Kidul","Kepung","Kras","Kunjang","Ngadiluwih","Ngasem","Pagu","Papar","Pare","Plemahan","Purwoasri","Ringinrejo","Tarokan","Wates"]},{"n":"Kabupaten Lamongan","T":[],"R":["Babat","Bluluk","Brondong","Deket","Glagah","Kalitengah","Karangbinangun","Karanggeneng","Kedungpring","Kembangbahu","Lamongan","Laren","Maduran","Mantup","Modo","Ngimbang","Paciran","Pucuk","Sambeng","Sarirejo","Sekaran","Solokuro","Sugio","Sukodadi","Sukorame","Tikung","Turi"]},{"n":"Kabupaten Lumajang","T":["Candipuro","Gucialit","Pasrujambe","Pronojiwo","Senduro","Tempursari"],"R":["Jatiroto","Kedungjajang","Klakah","Kunir","Lumajang","Padang","Pasirian","Ranuyoso","Randuagung","Rowokangkung","Sukodono","Sumbersuko","Tekung","Tempeh","Yosowilangun"]},{"n":"Kabupaten Madiun","T":["Kare","Gemarang","Dagangan","Wungu","Dolopo"],"R":["Balerejo","Geger","Jiwan","Kebonsari","Madiun","Mejayan","Pilangkenceng","Saradan","Sawahan","Wonoasri"]},{"n":"Kabupaten Magetan","T":["Panekan","Plaosan","Poncol","Sidorejo"],"R":["Barat","Bendo","Karanganyar","Karangrejo","Karas","Kartoharjo","Kawedanan","Lembeyan","Magetan","Maospati","Ngariboyo","Parang","Sukomoro","Takeran"]},{"n":"Kabupaten Malang","T":["Ampelgading","Dau","Jabung","Karangploso","Kasembon","Lawang","Ngantang","Poncokusumo","Pujon","Tirtoyudo","Wagir","Wonosari"],"R":["Bantur","Bululawang","Dampit","Donomulyo","Gedangan","Gondanglegi","Kalipare","Kepanjen","Kromengan","Ngajum","Pagak","Pagelaran","Pakis","Singosari","Sumbermanjing Wetan","Sumberpucung","Tajinan","Turen","Wajak"]},{"n":"Kabupaten Mojokerto","T":["Gondang","Jatirejo","Pacet","Trawas"],"R":["Bangsal","Dawarblandong","Dlanggu","Gedeg","Jetis","Kemlagi","Kutorejo","Mojoanyar","Mojosari","Ngoro","Pungging","Puri","Sooko","Trowulan"]},{"n":"Kabupaten Nganjuk","T":["Loceret","Ngetos","Sawahan"],"R":["Bagor","Baron","Berbek","Gondang","Jatikalen","Kertosono","Lengkong","Nganjuk","Ngluyu","Pace","Patianrowo","Prambon","Rejoso","Sukomoro","Tanjunganom","Wilangan"]},{"n":"Kabupaten Ngawi","T":["Jogorogo","Kendal","Ngrambe","Sine"],"R":["Bringin","Geneng","Gerih","Karangjati","Kasreman","Kedunggalar","Kwadungan","Mantingan","Ngawi","Padas","Pangkur","Paron","Pituruh","Widodaren"]},{"n":"Kabupaten Pacitan","T":["Arjosari","Bandar","Donorojo","Kebonagung","Nawangan","Ngadirojo","Pringkuku","Punung","Sudimoro","Tegalombo","Tulakan"],"R":["Pacitan"]},{"n":"Kabupaten Pamekasan","T":[],"R":["Batu Marmar","Galis","Kadur","Larangan","Pademawu","Pakong","Palengaan","Pamekasan","Pasean","Pegantenan","Proppo","Tlanakan","Waru"]},{"n":"Kabupaten Pasuruan","T":["Lumbang","Prigen","Purwodadi","Puspo","Tosari","Tutur (Nongkojajar)"],"R":["Bangil","Beji","Gempol","Gondangwetan","Grati","Kejayan","Kraton","Lekok","Nguling","Pandaan","Pasrepan","Pohjentrek","Purwosari","Rejoso","Rembang","Sukorejo","Winongan","Wonorejo"]},{"n":"Kabupaten Ponorogo","T":["Badegan","Ngebel","Ngrayun","Pudak","Pulung","Sampung","Sawoo","Sooko"],"R":["Babadan","Balong","Bungkal","Jambon","Jenangan","Jetis","Kauman","Mlarak","Ponorogo","Sambit","Siman","Slahung","Sukorejo"]},{"n":"Kabupaten Probolinggo","T":["Bantaran","Krucil","Kuripan","Lumbang","Sukapura","Sumber","Tiris"],"R":["Banyuanyar","Besuk","Dringu","Gading","Gampingan","Kotaanyar","Kraksaan","Krejengan","Leces","Maron","Paiton","Pajarakan","Pakuniran","Sumberasih","Tegalsiwalan","Tongas","Wonomerto"]},{"n":"Kabupaten Sampang","T":[],"R":["Banyuates","Camplong","Jrimpen","Karang Penang","Kedungdung","Ketapang","Omben","Pangarengan","Robatal","Sampang","Sokobanah","Seseh","Tambelangan","Torjun"]},{"n":"Kabupaten Sidoarjo","T":[],"R":["Balongbendo","Buduran","Candi","Gedangan","Jabon","Krembung","Krian","Prambon","Porong","Sedati","Sidoarjo","Sukodono","Taman","Tarik","Tulangan","Waru","Wonoayu"]},{"n":"Kabupaten Situbondo","T":["Jatibanteng","Sumbermalang"],"R":["Arjasa","Asembagus","Banyuglugur","Banyuputih","Besuki","Bungatan","Jangkar","Kapongan","Kendit","Mangaran","Mlandingan","Panarukan","Situbondo","Suboh"]},{"n":"Kabupaten Sumenep","T":[],"R":["Ambunten","Arjasa","Batuputih","Batuan","Batang Batang","Bluto","Dasuk","Dungkek","Gayam","Gape","Ganding","Giligenting","Kalianget","Kangayan","Kota Sumenep","Lenteng","Manding","Masalembu","Nonggunong","Pasongsongan","Pragaan","Raas","Rubaru","Sapeken","Saronggi","Talango"]},{"n":"Kabupaten Trenggalek","T":["Bendungan","Dongko","Kampak","Munjungan","Panggul","Pule","Watulimo"],"R":["Durenan","Gandusari","Karangan","Pogalan","Suruh","Trenggalek","Tugu"]},{"n":"Kabupaten Tuban","T":[],"R":["Bancar","Bangilan","Jatirogo","Jenu","Kenduruan","Kerek","Merakurak","Montong","Palang","Parengan","Plawasan","Rengel","Semanding","Senori","Singgahan","Soko","Tuban","Tambakboyo","Widang"]},{"n":"Kabupaten Tulungagung","T":["Bandung","Besuki","Kalidawir","Pagerwojo","Pucanglaban","Sendang","Tanggunggunung"],"R":["Boyolangu","Campurdarat","Gondang","Karangrejo","Kauman","Kedungwaru","Ngantru","Ngunut","Pakel","Rejotangan","Sumbergempol","Tulungagung"]}];
 
 // ════════════════════════════════════════════════════════════════
-//  v1.0.44: HALAMAN COST — harga patokan sales & laba per daerah
+//  v1.0.47: HALAMAN TANYA HARGA — state tab merek/produk
 // ════════════════════════════════════════════════════════════════
-
 
 // ── State ────────────────────────────────────────────────────
 const costState = { brand: 'bricon', product: 'bata' };
-const costStore = {};          // "brand|product" -> data (harga patokan saja, bukan sistem laba)
-let _costSaveTimer = null;
-let _costLoaded = {};          // "brand|product" -> true
 
 function costKey() { return `${costState.brand}|${costState.product}`; }
 function costUnit() { return costState.product === 'bata' ? 'Kubik' : 'm²'; }
 
-function costBlank() {
-  return { deliverPrice: 0, pickupPrice: 0, pickupMarkup: 0, priceHistory: [] };
-}
-function costData() {
-  const k = costKey();
-  if (!costStore[k]) costStore[k] = costBlank();
-  return costStore[k];
-}
-
-// ── Supabase ─────────────────────────────────────────────────
-async function costLoadFromCloud(brand, product) {
-  const uid = currentUser ? currentUser.id : null;
-  if (!uid) return;
-  const k = `${brand}|${product}`;
-  try {
-    const { data, error } = await _sb.from('cost_data')
-      .select('data').eq('user_id', uid).eq('brand', brand).eq('product', product).maybeSingle();
-    if (error) { console.error('costLoad:', error); return; }
-    costStore[k] = (data && data.data) ? Object.assign(costBlank(), data.data) : costBlank();
-    _costLoaded[k] = true;
-    if (k === costKey()) costRenderAll();
-  } catch (e) { console.error('costLoad:', e); }
-}
-
-function costSaveSoon() {
-  clearTimeout(_costSaveTimer);
-  _costSaveTimer = setTimeout(costSaveNow, 600);
-}
-
-async function costSaveNow() {
-  const uid = currentUser ? currentUser.id : null;
-  if (!uid) return;
-  const brand = costState.brand, product = costState.product;
-  try {
-    const { error } = await _sb.from('cost_data').upsert({
-      user_id: uid, brand, product,
-      data: costStore[`${brand}|${product}`] || costBlank(),
-      updated_at: new Date().toISOString(),
-    }, { onConflict: 'user_id,brand,product' });
-    if (error) { console.error('costSave:', error); toast('Gagal menyimpan data Cost', 'error'); }
-  } catch (e) { console.error('costSave:', e); }
-}
-
 // ── Tab merek & produk ───────────────────────────────────────
 function costSetBrand(b) {
   costState.brand = b;
-  if (!_costLoaded[costKey()]) costLoadFromCloud(b, costState.product);
   costRenderAll();
 }
 function costSetProduct(p) {
   costState.product = p;
-  if (!_costLoaded[costKey()]) costLoadFromCloud(costState.brand, p);
   costRenderAll();
 }
 
@@ -3868,71 +3789,7 @@ function costMarkupLabel(v) {
   return `+${s}k`;
 }
 
-// ── Harga patokan ────────────────────────────────────────────
-function costOnPriceInput(field) {
-  const el = document.getElementById(field === 'deliver' ? 'costDeliverPrice' : 'costPickupPrice');
-  if (!el) return;
-  const digits = el.value.replace(/\D/g, '');
-  el.value = digits ? fmtRupiah(parseInt(digits, 10)) : '';
-}
-
-function costCommitPrice(field) {
-  const el = document.getElementById(field === 'deliver' ? 'costDeliverPrice' : 'costPickupPrice');
-  if (!el) return;
-  const d = costData();
-  const key = field === 'deliver' ? 'deliverPrice' : 'pickupPrice';
-  const next = parseInt(el.value.replace(/\D/g, ''), 10) || 0;
-  const prev = d[key] || 0;
-  if (next === prev) return;
-  d[key] = next;
-  d.priceHistory = d.priceHistory || [];
-  d.priceHistory.unshift({ ts: Date.now(), field, from: prev, to: next });
-  if (d.priceHistory.length > 120) d.priceHistory.length = 120;
-  costSaveSoon();
-  toast('✓ Harga patokan diperbarui');
-}
-
-function costOnMarkupInput() {
-  const el = document.getElementById('costPickupMarkup');
-  if (!el) return;
-  const digits = el.value.replace(/\D/g, '');
-  el.value = digits ? fmtRupiah(parseInt(digits, 10)) : '';
-}
-
-function costCommitPickupMarkup() {
-  const el = document.getElementById('costPickupMarkup');
-  if (!el) return;
-  const d = costData();
-  const next = parseInt(el.value.replace(/\D/g, ''), 10) || 0;
-  if (next === (d.pickupMarkup || 0)) return;
-  d.pickupMarkup = next;
-  costSaveSoon();
-  toast('✓ Laba ambil sendiri diperbarui');
-}
-
-function costShowHistory(field) {
-  const d = costData();
-  const list = (d.priceHistory || []).filter(x => x.field === field);
-  const title = field === 'deliver' ? 'Riwayat Harga — Dikirim ke Alamat' : 'Riwayat Harga — Ambil Sendiri';
-  const body = list.length
-    ? list.map(x => `
-        <div class="cost-hist-item">
-          <div class="cost-hist-date">${new Date(x.ts).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'})}</div>
-          <div class="cost-hist-val">Rp ${fmtRupiah(x.from)} &rarr; Rp ${fmtRupiah(x.to)}</div>
-        </div>`).join('')
-    : `<div style="font-size:13px;color:#94a3b8;padding:14px 0;">Belum ada perubahan harga yang tercatat.</div>`;
-
-  costModal(`
-    <div class="cost-modal-title">${title}</div>
-    <div class="cost-modal-sub">Tercatat otomatis setiap kali kamu mengubah harga patokan.</div>
-    <div>${body}</div>
-    <div class="cost-modal-actions">
-      <button class="cost-btn" onclick="costCloseModal()">Tutup</button>
-    </div>
-  `);
-}
-
-// ── v1.0.46: TANYA HARGA — modul pencatatan lead & harga dari Pak Bima ──
+// ── v1.0.47: TANYA HARGA — modul pencatatan lead & harga dari Pak Bima ──
 // Menggantikan sistem "kategori laba per daerah" yang lama. Sekarang cuma
 // mencatat kejadian: siapa nanya, daerah mana, harga dari Pak Bima berapa,
 // laba yang diambil saat itu berapa (bukan aturan tetap), dan hasil akhirnya.
@@ -3989,23 +3846,6 @@ function ilMatchRestrictions(text) {
   });
 }
 
-function ilRenderRestrictionCheck() {
-  const box = document.getElementById('ilRestrictionCheckResult');
-  const input = document.getElementById('ilRestrictionCheck');
-  if (!box || !input) return;
-  const hits = ilMatchRestrictions(input.value);
-  if (!input.value.trim()) { box.innerHTML = ''; return; }
-  if (!hits.length) {
-    box.innerHTML = `<div class="il-restrict-box" style="background:#f0fdf4;border:1px solid #bbf7d0;color:#0a7a38;">Tidak ada catatan larangan untuk daerah ini.</div>`;
-    return;
-  }
-  box.innerHTML = hits.map(r => `
-    <div class="il-restrict-box warn">
-      <b>${h(r.kawasan)}</b> — ${h(r.note || 'Ada catatan, tapi belum diisi keterangan.')}
-      ${r.wa_number ? `<br>No referensi: ${h(r.wa_number)}` : ''}
-    </div>`).join('');
-}
-
 function ilRenderRestrictions() {
   const list = document.getElementById('ilRestrictionList');
   if (!list) return;
@@ -4055,7 +3895,6 @@ async function ilSaveRestriction() {
     ilRestrictions.unshift(data);
     costCloseModal();
     ilRenderRestrictions();
-    ilRenderRestrictionCheck();
     toast('✓ Daerah larangan ditambahkan');
   } catch (e) { console.error(e); toast('Gagal menyimpan', 'error'); }
 }
@@ -4067,7 +3906,6 @@ async function ilRemoveRestriction(id) {
     if (error) { console.error(error); toast('Gagal menghapus', 'error'); return; }
     ilRestrictions = ilRestrictions.filter(r => r.id !== id);
     ilRenderRestrictions();
-    ilRenderRestrictionCheck();
     toast('Dihapus');
   } catch (e) { console.error(e); }
 }
@@ -4481,6 +4319,11 @@ function ilMapCounts() {
   return counts;
 }
 
+// v1.0.47: siluet pulau — stilasi tangan, bukan data GIS presisi, cuma biar
+// titik-titik kabupaten kelihatan berada "di dalam" pulau, bukan mengambang.
+const JATIM_ISLAND_PATH = 'M30,68 Q20,90 22,110 Q28,140 40,168 Q52,190 70,204 Q95,208 118,198 Q140,192 158,192 Q175,196 190,178 Q205,166 222,162 Q242,158 258,158 Q272,154 288,150 Q304,148 318,146 Q336,148 348,150 Q352,143 340,132 Q325,115 308,104 Q290,96 272,90 Q254,80 236,68 Q218,58 198,54 Q178,46 158,42 Q138,36 118,34 Q98,32 80,36 Q62,42 48,52 Q36,58 30,68 Z';
+const MADURA_ISLAND_PATH = 'M222,38 Q235,26 252,22 Q272,16 292,16 Q312,14 328,18 Q338,22 336,32 Q332,40 318,42 Q296,46 274,44 Q252,44 236,42 Q226,42 222,38 Z';
+
 function ilRenderMap() {
   const wrap = document.getElementById('ilMapWrap');
   if (!wrap) return;
@@ -4490,22 +4333,24 @@ function ilRenderMap() {
   const nodes = Object.keys(KAB_COORDS).map(name => {
     const [x, y] = KAB_COORDS[name];
     const c = counts[name] || 0;
-    const opacity = c === 0 ? 0.12 : Math.min(1, 0.35 + (c / max) * 0.65);
-    const r = c === 0 ? 4.5 : 5.5 + Math.min(4, c);
+    const opacity = c === 0 ? 0.28 : Math.min(1, 0.4 + (c / max) * 0.6);
+    const r = c === 0 ? 4 : 5 + Math.min(4, c);
     const glow = c > 0 ? `filter="drop-shadow(0 0 4px rgba(37,99,235,${opacity}))"` : '';
-    return `<circle class="il-map-node" cx="${x}" cy="${y}" r="${r}" fill="#2563eb" opacity="${opacity}" ${glow}
+    return `<circle class="il-map-node" cx="${x}" cy="${y}" r="${r}" fill="${c === 0 ? '#94a3b8' : '#2563eb'}" opacity="${opacity}" ${glow}
               onclick="ilMapSelect('${name.replace(/'/g, "\\'")}')"></circle>`;
   }).join('');
 
   wrap.innerHTML = `
-    <svg class="il-map-svg" viewBox="0 0 360 210" xmlns="http://www.w3.org/2000/svg">
+    <svg class="il-map-svg" viewBox="0 0 360 215" xmlns="http://www.w3.org/2000/svg">
+      <path d="${JATIM_ISLAND_PATH}" fill="#eef2f9" stroke="#cbd5e1" stroke-width="1.4"></path>
+      <path d="${MADURA_ISLAND_PATH}" fill="#eef2f9" stroke="#cbd5e1" stroke-width="1.4"></path>
       ${nodes}
     </svg>
     <div class="il-map-legend">
-      <span class="sw" style="background:#2563eb;opacity:0.15;"></span> Belum pernah
+      <span class="sw" style="background:#94a3b8;opacity:0.4;"></span> Belum pernah
       <span class="sw" style="background:#2563eb;opacity:1;"></span> Sering ditanya
     </div>
-    <div style="font-size:10.5px;color:#94a3b8;margin-top:4px;">Sketsa posisi relatif tiap kabupaten/kota, bukan peta GIS presisi. Ketuk titik untuk lihat rincian kecamatan.</div>`;
+    <div style="font-size:10.5px;color:#94a3b8;margin-top:4px;">Siluet pulau stilasi tangan (bukan data GIS presisi), cuma biar keliatan seperti peta. Ketuk titik untuk lihat rincian kecamatan.</div>`;
 }
 
 function ilMapSelect(kabName) {
@@ -4557,19 +4402,6 @@ function costRenderAll() {
   document.querySelectorAll('[data-cprod]').forEach(el =>
     el.classList.toggle('active', el.dataset.cprod === costState.product));
 
-  const unit = '/' + costUnit();
-  const ua = document.getElementById('costUnitA'); if (ua) ua.textContent = unit;
-  const ub = document.getElementById('costUnitB'); if (ub) ub.textContent = unit;
-  const uc = document.getElementById('costUnitC'); if (uc) uc.textContent = unit;
-
-  const d = costData();
-  const dp = document.getElementById('costDeliverPrice');
-  const pp = document.getElementById('costPickupPrice');
-  if (dp && document.activeElement !== dp) dp.value = d.deliverPrice ? fmtRupiah(d.deliverPrice) : '';
-  if (pp && document.activeElement !== pp) pp.value = d.pickupPrice ? fmtRupiah(d.pickupPrice) : '';
-  const pm = document.getElementById('costPickupMarkup');
-  if (pm && document.activeElement !== pm) pm.value = d.pickupMarkup ? fmtRupiah(d.pickupMarkup) : '';
-
   ilRenderAll();
 }
 
@@ -4579,14 +4411,12 @@ function ilRenderAll() {
   ilMapSelectedKab = null;
   const detailBox = document.getElementById('ilMapDetail'); if (detailBox) detailBox.innerHTML = '';
   ilRenderRestrictions();
-  ilRenderRestrictionCheck();
   ilRenderContacts();
   ilRenderList();
 }
 
 // ── Inisialisasi saat tab Cost dibuka ────────────────────────
 function costInit() {
-  if (!_costLoaded[costKey()]) costLoadFromCloud(costState.brand, costState.product);
   if (!ilState.loaded) ilLoadAll();
   costRenderAll();
 }
@@ -4715,18 +4545,7 @@ function detectRegionCandidates(addrText) {
 // ── (a2) Perhitungan harga saran ─────────────────────────────
 function costProductForMode() { return mode === 'bata' ? 'bata' : 'panel'; }
 
-function costDataFor(brand, product) {
-  return costStore[`${brand}|${product}`] || null;
-}
-
-// Pastikan data Cost merek+produk yang sedang dipakai sudah diambil dari cloud
-async function costEnsureLoaded(brand, product) {
-  const k = `${brand}|${product}`;
-  if (_costLoaded[k]) return;
-  await costLoadFromCloud(brand, product);
-}
-
-// v1.0.46: daerah tanpa topografi lagi — cukup nama kabupaten/kota
+// v1.0.47: daerah tanpa topografi lagi — cukup nama kabupaten/kota
 function costRegionInfo(key) {
   const name = (key || '').split('|')[0];
   return { name };
@@ -4735,27 +4554,20 @@ function costRegionInfo(key) {
 /**
  * Saran harga untuk sebuah daerah, diambil dari catatan Tanya Harga terakhir
  * di kabupaten itu (bukan aturan tetap — cuma referensi histori).
- * Ambil sendiri tetap pakai harga patokan pabrik + laba ambil sendiri (satu nilai, tidak berubah per daerah).
+ * v1.0.47: tidak ada lagi "harga patokan" tersimpan — modal ambil sendiri pun
+ * sekarang hanya tersedia kalau pernah dicatat di Tanya Harga.
  */
 function costQuote(regionKey) {
   const brand = currentBrand;
   const product = costProductForMode();
-  const d = costDataFor(brand, product);
-  if (!d) return null;
-
   const pickup = (deliveryMethod === 'ambil');
-  if (pickup) {
-    const modal = d.pickupPrice || 0;
-    if (!modal) return null;
-    const markup = d.pickupMarkup || 0;
-    return { modal, markup, jual: modal + markup, catLabel: markup ? costMarkupLabel(markup) : '', pickup };
-  }
+  if (pickup) return null; // tidak ada sumber modal untuk ambil sendiri lagi
 
   const kab = costRegionInfo(regionKey).name;
   const hist = ilStore
     .filter(e => e.brand === brand && e.product === product && e.kabupaten === kab && e.modal_price > 0)
     .sort((a, b) => new Date(b.ts) - new Date(a.ts))[0];
-  if (!hist) return { modal: d.deliverPrice || 0, markup: 0, jual: d.deliverPrice || 0, noHistory: true, pickup };
+  if (!hist) return { modal: 0, markup: 0, jual: 0, noHistory: true, pickup };
 
   return { modal: hist.modal_price, markup: hist.margin || 0, jual: hist.sell_price || (hist.modal_price + (hist.margin || 0)), catLabel: hist.margin ? costMarkupLabel(hist.margin) : '', pickup, via: 'catatan' };
 }
@@ -4781,7 +4593,6 @@ async function refreshPriceSuggestion() {
   suggState.via = res.via;
   if (res.keys.length === 1) suggState.chosen = res.keys[0];
 
-  await costEnsureLoaded(currentBrand, costProductForMode());
   if (!ilState.loaded) await ilLoadAll();
   renderPriceSuggestion();
 }
@@ -4898,13 +4709,13 @@ function applySuggestedPrice(manual) {
 }
 
 // ── (b1) Catatan keuntungan pada tiap invoice ────────────────
-// Dipanggil saat invoice disimpan. Modal diambil dari harga Cost SAAT ITU
-// dan dibekukan, supaya laporan tetap akurat kalau harga sales berubah nanti.
+// Dipanggil saat invoice disimpan. Modal diambil dari catatan Tanya Harga
+// TERAKHIR untuk daerah itu (dibekukan saat itu juga), supaya laporan tetap
+// akurat kalau harga dari Pak Bima berubah nanti. v1.0.47: tidak ada lagi
+// "harga patokan" tersimpan, jadi kalau belum pernah ada catatan untuk
+// daerah/merek itu, untung tidak bisa dihitung (return null).
 function buildProfitSnapshot(prevEntry) {
   const product = costProductForMode();
-  const d = costDataFor(currentBrand, product);
-  if (!d) return prevEntry ? (prevEntry.profit || null) : null;
-
   const pickup = (deliveryMethod === 'ambil');
 
   // Volume & pendapatan sesuai jenis produk
@@ -4928,8 +4739,9 @@ function buildProfitSnapshot(prevEntry) {
   if (prevEntry && prevEntry.profit && typeof prevEntry.profit.modalPerUnit === 'number') {
     modalPerUnit = prevEntry.profit.modalPerUnit;
     regionKey = prevEntry.profit.regionKey || regionKey;
-  } else {
-    modalPerUnit = pickup ? (d.pickupPrice || 0) : (d.deliverPrice || 0);
+  } else if (!pickup && regionKey) {
+    const q = costQuote(regionKey);
+    if (q && !q.noHistory) modalPerUnit = q.modal;
   }
   if (!modalPerUnit) return null;
 
