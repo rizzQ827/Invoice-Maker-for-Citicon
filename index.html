@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Invoice Generator · v1.0.53</title>
-<!-- v1.0.53 -->
+<title>Invoice Generator · v1.0.54</title>
+<!-- v1.0.54 -->
 <meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai multi-brand">
 <meta name="theme-color" content="#0e9e4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1322,7 +1322,7 @@
     </div>
     <div class="min-w-0">
       <div class="text-[14px] font-bold text-slate-900 truncate leading-tight">Invoice Generator</div>
-      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.53</div>
+      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.54</div>
     </div>
   </div>
 
@@ -2425,6 +2425,49 @@ function toast(msg, type='ok') {
 // ════════════════════════════════════════════════════════════════
 //  PHONE SANITIZATION — handles 08xxx, +62xxx, 62xxx, spaces, dashes, dots, parens
 // ════════════════════════════════════════════════════════════════
+// ── v1.0.54: Pencocokan nomor WA yang toleran beda format ──────────────
+// Semua format ini dianggap SATU nomor yang sama:
+//   +628123456789 · +62 812-3456-7890 · 0812-3456-7890 · 628123456789
+//   0812 3456 7890 · (0812) 3456-7890 · 62-812-3456-7890 · 8123456789
+// Caranya: buang semua karakter non-angka, seragamkan awalan jadi "62",
+// lalu bandingkan 9 digit terakhir (bagian yang benar-benar unik per nomor,
+// aman dari salah ketik awalan 0/62/+62 dan dari nomor yang kurang/lebih
+// satu digit di depan).
+function phoneKey(raw) {
+  if (!raw) return '';
+  let d = String(raw).replace(/\D/g, '');
+  if (!d) return '';
+  if (d.startsWith('620')) d = '62' + d.slice(3);   // 62 + 0812... → 62812...
+  else if (d.startsWith('62')) d = d;               // sudah benar
+  else if (d.startsWith('0')) d = '62' + d.slice(1); // 0812... → 62812...
+  else if (d.startsWith('8')) d = '62' + d;          // 812... → 62812...
+  return d;
+}
+
+// Dua nomor dianggap sama kalau 9 digit terakhirnya identik.
+function samePhone(a, b) {
+  const ka = phoneKey(a), kb = phoneKey(b);
+  if (!ka || !kb) return false;
+  if (ka === kb) return true;
+  const ta = ka.slice(-9), tb = kb.slice(-9);
+  return ta.length === 9 && ta === tb;
+}
+
+// Cari catatan Tanya Harga milik customer ini (berdasarkan nomor WA).
+// Kalau ada beberapa, ambil yang paling baru & yang modalnya sudah terisi.
+function ilFindByPhone(phone, brand, product) {
+  if (!phone) return null;
+  const cand = ilStore.filter(e =>
+    samePhone(e.customer_phone, phone) &&
+    (!brand   || e.brand === brand) &&
+    (!product || e.product === product)
+  );
+  if (!cand.length) return null;
+  const withModal = cand.filter(e => Number(e.modal_price) > 0);
+  const pool = withModal.length ? withModal : cand;
+  return pool.sort((a, b) => new Date(b.ts) - new Date(a.ts))[0];
+}
+
 function normalizePhone(raw) {
   if (!raw) return '';
   // Strip all non-digit characters except leading + (we handle + separately)
@@ -3655,9 +3698,23 @@ function buildPanel({ docNo, dateStr, salute, custName, custAddr, custPhone, cus
 // ════════════════════════════════════════════════════════════════
 //  PHONE LIVE PREVIEW (v7.0: WA removed, kept for normalization display)
 // ════════════════════════════════════════════════════════════════
+let _lastPhoneHit = null;
 function onPhoneInput() {
   updatePhonePreview();
   updatePreview();
+
+  // v1.0.54: begitu nomor WA lengkap, cek apakah customer ini sudah pernah
+  // dicatat di Tanya Harga. Kalau ada, kasih tau modalnya berapa — jadi kamu
+  // langsung tahu untungnya sebelum invoice disimpan.
+  const raw = (document.getElementById('custPhone') || {}).value || '';
+  const key = phoneKey(raw);
+  if (key.length < 11) { _lastPhoneHit = null; return; }
+  const inq = ilFindByPhone(raw, currentBrand, costProductForMode());
+  if (!inq || !(Number(inq.modal_price) > 0)) { _lastPhoneHit = null; return; }
+  if (_lastPhoneHit === inq.id) return; // jangan spam toast
+  _lastPhoneHit = inq.id;
+  const unit = inq.product === 'bata' ? 'm³' : 'm²';
+  toast(`✓ Ketemu catatan: ${inq.customer_name || 'customer ini'} · modal Rp ${fmtRupiah(inq.modal_price)}/${unit}`);
 }
 
 // v1.0.44: dua kolom nomor telepon (utama + cadangan untuk sopir)
@@ -5383,13 +5440,27 @@ function buildProfitSnapshot(prevEntry) {
   if (volume <= 0) return null;
 
   // Modal per satuan: kalau invoice ini hasil edit, pakai modal lama (dibekukan)
-  let modalPerUnit = null, regionKey = suggState.chosen || null;
+  let modalPerUnit = null, regionKey = suggState.chosen || null, inquiryId = null;
   if (prevEntry && prevEntry.profit && typeof prevEntry.profit.modalPerUnit === 'number') {
     modalPerUnit = prevEntry.profit.modalPerUnit;
     regionKey = prevEntry.profit.regionKey || regionKey;
-  } else if (!pickup && regionKey) {
-    const q = costQuote(regionKey);
-    if (q && !q.noHistory) modalPerUnit = q.modal;
+    inquiryId = prevEntry.profit.inquiryId || null;
+  } else {
+    // v1.0.54: PRIORITAS 1 — catatan Tanya Harga milik nomor WA customer ini.
+    // Ini yang bikin rantai cost → invoice → history → profit nyambung, dan
+    // tetap jalan walaupun pengiriman "ambil" (loco) karena modalnya sudah
+    // tercatat manual, bukan ditebak dari daerah.
+    const phone = (document.getElementById('custPhone') || {}).value || '';
+    const inq = ilFindByPhone(phone, currentBrand, product);
+    if (inq && Number(inq.modal_price) > 0) {
+      modalPerUnit = Number(inq.modal_price);
+      inquiryId = inq.id;
+      if (!regionKey && inq.kecamatan) regionKey = inq.kecamatan;
+    } else if (!pickup && regionKey) {
+      // PRIORITAS 2 — perkiraan modal dari catatan daerah (cara lama)
+      const q = costQuote(regionKey);
+      if (q && !q.noHistory) modalPerUnit = q.modal;
+    }
   }
   if (!modalPerUnit) return null;
 
@@ -5404,9 +5475,41 @@ function buildProfitSnapshot(prevEntry) {
     volume,
     untung: (jualPerUnit - modalPerUnit) * volume,
     unit: product === 'bata' ? 'm³' : 'm²',
+    inquiryId, // v1.0.54: penghubung ke catatan Tanya Harga asalnya
   };
 }
 
+
+// ── v1.0.54: Sinkronisasi balik — invoice jadi → catatan Tanya Harga ──
+// Begitu invoice disimpan, catatan Tanya Harga milik nomor WA yang sama
+// otomatis ditandai "Closing" dan kubik/m²-nya diisi sesuai isi invoice.
+// Jadi kamu nggak perlu update dua tempat secara manual.
+async function syncInquiryFromInvoice(entry) {
+  try {
+    if (!entry || !entry.profit || !entry.profit.inquiryId) return;
+    const inq = ilStore.find(e => e.id === entry.profit.inquiryId);
+    if (!inq) return;
+
+    const patch = {};
+    if (inq.status !== 'closing') patch.status = 'closing';
+    if (Number(entry.profit.volume) > 0 &&
+        Number(inq.est_volume || 0) !== Number(entry.profit.volume)) {
+      patch.est_volume = Number(entry.profit.volume.toFixed(3));
+    }
+    // Lengkapi nomor WA di catatan kalau sebelumnya kosong
+    if (!inq.customer_phone && entry.custPhone) {
+      patch.customer_phone = phoneKey(entry.custPhone);
+    }
+    if (!Object.keys(patch).length) return;
+
+    patch.updated_at = new Date().toISOString();
+    const { error } = await _sb.from('inquiry_log').update(patch).eq('id', inq.id);
+    if (error) { console.error('syncInquiryFromInvoice:', error); return; }
+
+    Object.assign(inq, patch); // update cache lokal biar UI langsung ikut
+    if (typeof ilRenderAll === 'function') ilRenderAll();
+  } catch (e) { console.error('syncInquiryFromInvoice:', e); }
+}
 
 // ── v1.0.45: Diagram statistik (SVG murni, tanpa library) ────
 const STAT_PALETTE = {
@@ -5841,9 +5944,23 @@ async function saveToHistory() {
   // Fallback: cocokkan docNo+mode (untuk invoice baru yang kebetulan re-save).
   const _prevById = _currentEntryId ? getHistory().find(e => e.id === _currentEntryId) : null;
   const _prev = _prevById || getHistory().find(e => e.docNo === docNo && e.mode === mode);
+  // v1.0.54: Tanggal history mengikuti TANGGAL INVOICE (docDate), bukan jam
+  // pas tombol simpan ditekan. Supaya urutan & statistik bulanan di Profile
+  // cocok sama tanggal yang tertulis di invoice. Jam-nya tetap jam asli
+  // penyimpanan biar dua invoice di tanggal sama tetap bisa diurutkan.
+  const _docDateVal = document.getElementById('docDate').value;
+  const _now = new Date();
+  let _ts = _now.toISOString();
+  if (_docDateVal && /^\d{4}-\d{2}-\d{2}$/.test(_docDateVal)) {
+    const [_y, _m, _d] = _docDateVal.split('-').map(Number);
+    const _dt = new Date(_now);
+    _dt.setFullYear(_y, _m - 1, _d);
+    _ts = _dt.toISOString();
+  }
+
   const entry = {
     id: _prev ? _prev.id : Date.now(),
-    ts: new Date().toISOString(),
+    ts: _ts,
     mode,
     brand: currentBrand,   // v11.0: simpan brand di setiap entry
     docNo,
@@ -5895,6 +6012,9 @@ async function saveToHistory() {
   setHistoryRaw(hist);
 
   _currentEntryId = entry.id; // v1.0.37: setelah save, entry ini jadi acuan id berikutnya
+
+  // v1.0.54: catatan Tanya Harga terkait otomatis jadi "Closing" + kubik terisi
+  await syncInquiryFromInvoice(entry);
 
   // Resync seq for this type against the real history (handles new invoices,
   // manually-edited docNo, and re-saves consistently).
@@ -5967,6 +6087,30 @@ function renderHistory() {
       C18.8,2.8,19.6,2.2,20.4,2.1Z"/>
   </svg>`;
 
+  // v1.0.54: chip kecil di kartu history — nunjukin untung invoice ini dan
+  // dari catatan Tanya Harga siapa modalnya diambil. Klik chip = buka catatan.
+  const histProfitChip = (e) => {
+    const p = e.profit;
+    if (!p || typeof p.untung !== 'number') {
+      return `<div style="margin-top:8px;padding-left:8px;font-size:10.5px;color:#cbd5e1;">
+        Untung belum tercatat · belum ada modal di Tanya Harga
+      </div>`;
+    }
+    const inq = p.inquiryId ? ilStore.find(x => x.id === p.inquiryId) : null;
+    const src = inq
+      ? `<span onclick="event.stopPropagation();ilOpenDetail(${inq.id})"
+              style="color:#2563eb;cursor:pointer;text-decoration:underline;">
+           ${h(inq.customer_name || 'catatan Tanya Harga')}
+         </span>`
+      : '<span style="color:#94a3b8;">perkiraan daerah</span>';
+    return `<div style="margin-top:8px;padding-left:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:10.5px;">
+      <span style="background:#dcfce7;color:#0a7a38;font-weight:800;padding:2px 7px;border-radius:999px;font-family:'JetBrains Mono',monospace;">
+        + Rp ${fmtRupiah(Math.round(p.untung))}
+      </span>
+      <span style="color:#94a3b8;">modal dari ${src}</span>
+    </div>`;
+  };
+
   grid.innerHTML = filtered.map(e => {
     const date = e.docDate ? fmtDateID(e.docDate) : '';
     const modeIcon = e.mode === 'bata' ? SVG_ICON_BATA : SVG_ICON_PANEL;
@@ -5999,6 +6143,7 @@ function renderHistory() {
           Rp ${fmtRupiah(e.total)}
         </span>
       </div>
+      ${histProfitChip(e)}
     </div>`;
   }).join('');
 }
