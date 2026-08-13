@@ -731,8 +731,7 @@
   .il-status-chip.active[data-st="all"]         { background: #0f172a; border-color: #0f172a; color: #fff; }
   .il-status-chip.active[data-st="nanya"]       { background: #fef3c7; border-color: #fde68a; color: #92400e; }
   .il-status-chip.active[data-st="closing"]     { background: #dcfce7; border-color: #bbf7d0; color: #0a7a38; }
-  .il-status-chip.active[data-st="nggak_cocok"] { background: #f1f5f9; border-color: #cbd5e1; color: #475569; }
-  .il-status-chip.active[data-st="ghosting"]    { background: #fee2e2; border-color: #fecaca; color: #b91c1c; }
+  .il-status-chip.active[data-st="batal"]       { background: #f1f5f9; border-color: #cbd5e1; color: #475569; }
 
   .il-badge {
     display: inline-flex; align-items: center; gap: 4px;
@@ -740,8 +739,7 @@
   }
   .il-badge.nanya       { background: #fef3c7; color: #92400e; }
   .il-badge.closing     { background: #dcfce7; color: #0a7a38; }
-  .il-badge.nggak_cocok { background: #f1f5f9; color: #64748b; }
-  .il-badge.ghosting    { background: #fee2e2; color: #b91c1c; }
+  .il-badge.batal       { background: #f1f5f9; color: #64748b; }
 
   .il-status-row { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
   .il-status-btn {
@@ -751,8 +749,7 @@
   }
   .il-status-btn.sel-nanya       { background: #fef3c7; border-color: #fde68a; color: #92400e; }
   .il-status-btn.sel-closing     { background: #dcfce7; border-color: #bbf7d0; color: #0a7a38; }
-  .il-status-btn.sel-nggak_cocok { background: #f1f5f9; border-color: #e2e8f0; color: #475569; }
-  .il-status-btn.sel-ghosting    { background: #fee2e2; border-color: #fecaca; color: #b91c1c; }
+  .il-status-btn.sel-batal       { background: #f1f5f9; border-color: #e2e8f0; color: #475569; }
 
   .il-item-addr { font-size: 11.5px; color: #64748b; margin-top: 2px; line-height: 1.4; }
   .il-item-price { font-family: 'JetBrains Mono', monospace; font-size: 13.5px; font-weight: 800; color: #0f172a; }
@@ -1745,8 +1742,7 @@
           <button class="il-status-chip active" data-st="all" onclick="ilSetFilter('all')">Semua</button>
           <button class="il-status-chip" data-st="nanya" onclick="ilSetFilter('nanya')">Nanya</button>
           <button class="il-status-chip" data-st="closing" onclick="ilSetFilter('closing')">Closing</button>
-          <button class="il-status-chip" data-st="nggak_cocok" onclick="ilSetFilter('nggak_cocok')">Nggak Cocok</button>
-          <button class="il-status-chip" data-st="ghosting" onclick="ilSetFilter('ghosting')">Ghosting</button>
+          <button class="il-status-chip" data-st="batal" onclick="ilSetFilter('batal')">Batal</button>
         </div>
 
         <div id="ilList" class="il-list-scroll"></div>
@@ -1841,8 +1837,7 @@
         <button class="il-status-chip active" data-st="all" onclick="ilFullSetFilter('all')">Semua</button>
         <button class="il-status-chip" data-st="nanya" onclick="ilFullSetFilter('nanya')">Nanya</button>
         <button class="il-status-chip" data-st="closing" onclick="ilFullSetFilter('closing')">Closing</button>
-        <button class="il-status-chip" data-st="nggak_cocok" onclick="ilFullSetFilter('nggak_cocok')">Nggak Cocok</button>
-        <button class="il-status-chip" data-st="ghosting" onclick="ilFullSetFilter('ghosting')">Ghosting</button>
+        <button class="il-status-chip" data-st="batal" onclick="ilFullSetFilter('batal')">Batal</button>
       </div>
 
       <div id="ilFullList" style="margin-top:14px;"></div>
@@ -2750,10 +2745,10 @@ function setBrand(brand) {
 }
 
 function updatePrefixLabels() {
-  // Update "Tambah Item PLC/PLB/PLGE" button label
+  // v1.0.53: label tombol "Tambah Item" pakai nama produk, bukan kode sales (PLC/PLB/PLGE)
   const labelEl = document.getElementById('labelPanelPrefix');
-  if (labelEl) labelEl.textContent = typePrefix('panel');
-  // Re-render rows so badges (BRC/BRB/BRGE, PLC/PLB/PLGE) update instantly
+  if (labelEl) labelEl.textContent = 'Panel Lantai';
+  // Re-render rows so badges update instantly
   renderBataRows();
   renderPanelRows();
   renderGroutingRows();
@@ -2845,7 +2840,9 @@ function removeBataRow(i) {
 
 function bataRowName(r) {
   if (r.unit === 'SAK') return getMortarName();
-  if (r.unit === 'M3') return `${typePrefix('bata')} 60 × 20 × ${r.size || '10cm'}`;
+  // v1.0.53: item invoice pakai nama produk ("Bata Ringan"), bukan kode
+  // internal sales seperti BRC/BRB/BRGE.
+  if (r.unit === 'M3') return `Bata Ringan 60 × 20 × ${r.size || '10cm'}`;
   return '';
 }
 
@@ -2897,7 +2894,7 @@ function renderBataRows() {
     return `
     <div class="item-row${newCls}">
       <div class="flex items-center justify-between mb-2 gap-2">
-        <span class="row-badge">#${i+1} ${isM3 ? typePrefix('bata') : 'MORTAR'}</span>
+        <span class="row-badge">#${i+1} ${isM3 ? 'Bata Ringan' : 'MORTAR'}</span>
         <span class="bata-subtotal text-[10.5px] text-slate-500 font-mono flex-1 text-right truncate" data-idx="${i}">Rp ${fmtRupiah(total)}</span>
         <button class="remove-btn" onclick="removeBataRow(${i})">Hapus</button>
       </div>
@@ -2927,7 +2924,7 @@ function renderBataRows() {
       <!-- M3 → BRC size dropdown ; SAK → static label -->
       <div class="mb-2">
         ${isM3
-          ? `<label class="label-field text-[10.5px]">Ukuran ${typePrefix('bata')}</label>
+          ? `<label class="label-field text-[10.5px]">Ukuran Bata Ringan</label>
              <select class="input text-xs" style="padding:7px 26px 7px 10px;"
                onchange="bataRows[${i}].size=this.value;updatePreview();">
                ${BRC_SIZES.map(s => `<option value="${s}" ${r.size===s?'selected':''}>60 × 20 × ${s}</option>`).join('')}
@@ -3186,7 +3183,7 @@ function renderPanelRows() {
     return `
     <div class="item-row${newCls}">
       <div class="flex items-center justify-between mb-2 gap-2">
-        <span class="row-badge">#${i+1} ${typePrefix('panel')}</span>
+        <span class="row-badge">#${i+1} Panel Lantai</span>
         <span class="panel-area text-[10.5px] text-slate-500 font-mono flex-1 text-right" data-idx="${i}">${fmtM2(area)} m²</span>
         <button class="remove-btn" onclick="removePanelRow(${i})">Hapus</button>
       </div>
@@ -3569,7 +3566,7 @@ function buildPanel({ docNo, dateStr, salute, custName, custAddr, custPhone, cus
       <tr>
         <td style="border:1px solid #444;padding:9px 10px;text-align:center;font-family:Arial,sans-serif;font-size:11.5px;">${i+1}</td>
         <td style="border:1px solid #444;padding:9px 12px;font-family:Arial,sans-serif;font-size:11.5px;">
-          ${typePrefix('panel')} ${r.panjang || '?'} × ${PANEL_WIDTH} × ${PANEL_THICKNESS} cm
+          Panel Lantai ${r.panjang || '?'} × ${PANEL_WIDTH} × ${PANEL_THICKNESS} cm
         </td>
         <td style="border:1px solid #444;padding:9px 10px;text-align:center;font-family:Arial,sans-serif;font-size:11.5px;">
           ${r.qty || '0'} Pcs
@@ -4420,11 +4417,15 @@ async function ilSaveNew() {
 }
 
 // ── Detail / edit entri ──────────────────────────────────────
-const IL_STATUS_LABEL = { nanya: 'Nanya', closing: 'Closing', nggak_cocok: 'Nggak Cocok', ghosting: 'Ghosting' };
+const IL_STATUS_LABEL = { nanya: 'Nanya', closing: 'Closing', batal: 'Batal' };
+// v1.0.53: status lama (nggak_cocok/ghosting) disatukan jadi "batal"
+function ilNormStatus(status) {
+  return (status === 'nggak_cocok' || status === 'ghosting') ? 'batal' : (status || 'nanya');
+}
 
 function ilBadgeHtml(status) {
-  const lbl = IL_STATUS_LABEL[status] || 'Nanya';
-  return `<span class="il-badge ${status}">${lbl}</span>`;
+  const st = ilNormStatus(status);
+  return `<span class="il-badge ${st}">${IL_STATUS_LABEL[st] || 'Nanya'}</span>`;
 }
 
 function ilOpenDetail(id) {
@@ -4465,8 +4466,7 @@ function ilOpenDetail(id) {
     <div class="il-status-row">
       <button class="il-status-btn${e.status === 'nanya' ? ' sel-nanya' : ''}" onclick="ilSetStatus(${e.id},'nanya')">Nanya</button>
       <button class="il-status-btn${e.status === 'closing' ? ' sel-closing' : ''}" onclick="ilSetStatus(${e.id},'closing')">Closing</button>
-      <button class="il-status-btn${e.status === 'nggak_cocok' ? ' sel-nggak_cocok' : ''}" onclick="ilSetStatus(${e.id},'nggak_cocok')">Nggak Cocok</button>
-      <button class="il-status-btn${e.status === 'ghosting' ? ' sel-ghosting' : ''}" onclick="ilSetStatus(${e.id},'ghosting')">Ghosting</button>
+      <button class="il-status-btn${ilNormStatus(e.status) === 'batal' ? ' sel-batal' : ''}" onclick="ilSetStatus(${e.id},'batal')">Batal</button>
     </div>
 
     ${e.status === 'closing' ? `
@@ -4670,7 +4670,7 @@ function ilRenderList() {
   if (!list || !empty) return;
 
   let entries = ilEntriesForTab();
-  if (ilState.filter !== 'all') entries = entries.filter(e => e.status === ilState.filter);
+  if (ilState.filter !== 'all') entries = entries.filter(e => ilNormStatus(e.status) === ilState.filter);
 
   if (moreBtn) moreBtn.style.display = entries.length > 5 ? '' : 'none';
 
@@ -4688,6 +4688,11 @@ function ilOpenFullList() {
   const view = document.getElementById('il-fulllist-view');
   if (!view) return;
   view.style.display = 'flex';
+  // v1.0.53: subpage ini didorong ke history browser supaya tombol back
+  // (device/browser) menutup subpage & kembali ke tab Cost, bukan keluar app.
+  if (history.state?.view !== 'ilfulllist') {
+    history.pushState({ view: 'ilfulllist' }, '', '#tanya-harga-lengkap');
+  }
   ilComboRegister('ilFullKab', ilKabList(), (v) => {
     ilComboReset('ilFullKec');
     ilComboReset('ilFullDesa');
@@ -4706,6 +4711,9 @@ function ilOpenFullList() {
 function ilCloseFullList() {
   const view = document.getElementById('il-fulllist-view');
   if (view) view.style.display = 'none';
+  if (history.state?.view === 'ilfulllist') {
+    history.back();
+  }
 }
 function ilFullSetFilter(st) {
   ilFullState.filter = st;
@@ -4719,7 +4727,7 @@ function ilRenderFullList() {
   if (!list || !empty) return;
 
   let entries = ilEntriesForTab();
-  if (ilFullState.filter !== 'all') entries = entries.filter(e => e.status === ilFullState.filter);
+  if (ilFullState.filter !== 'all') entries = entries.filter(e => ilNormStatus(e.status) === ilFullState.filter);
 
   const q = ((document.getElementById('ilFullSearch') || {}).value || '').toLowerCase().trim();
   const kab = (document.getElementById('ilFullKab') || {}).value || '';
@@ -6133,6 +6141,15 @@ function hideHistoryView() {
 window.addEventListener('popstate', (ev) => {
   const histVisible = document.getElementById('history-view')?.style.display === 'flex';
   const mainVisible = document.getElementById('main-view')?.style.display === 'flex';
+  const ilFullVisible = document.getElementById('il-fulllist-view')?.style.display === 'flex';
+
+  // v1.0.53: Back dari subpage "Selengkapnya" (Tanya Harga) → tutup subpage,
+  // tetap di tab Cost (subpage cuma overlay di atas cost-view, jadi cukup disembunyikan).
+  if (ilFullVisible && ev.state?.view !== 'ilfulllist') {
+    document.getElementById('il-fulllist-view').style.display = 'none';
+    setActiveNav('cost');
+    return;
+  }
 
   // Coming back from a detail view (#detail state was pushed by loadFromHistory)
   if (ev.state?.view === 'history' && mainVisible) {
