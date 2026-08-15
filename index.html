@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Invoice Generator · v1.0.54</title>
-<!-- v1.0.54 -->
+<title>Invoice Generator · v1.0.55</title>
+<!-- v1.0.55 -->
 <meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai multi-brand">
 <meta name="theme-color" content="#0e9e4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1322,7 +1322,7 @@
     </div>
     <div class="min-w-0">
       <div class="text-[14px] font-bold text-slate-900 truncate leading-tight">Invoice Generator</div>
-      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.54</div>
+      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.55</div>
     </div>
   </div>
 
@@ -3699,6 +3699,23 @@ function buildPanel({ docNo, dateStr, salute, custName, custAddr, custPhone, cus
 //  PHONE LIVE PREVIEW (v7.0: WA removed, kept for normalization display)
 // ════════════════════════════════════════════════════════════════
 let _lastPhoneHit = null;
+let _lastNanyaHit = null;
+
+// v1.0.55: dipanggil dari onPhoneInput() DAN onAddrChanged() — supaya nggak
+// masalah nomor WA-nya diisi duluan atau alamatnya duluan, begitu keduanya
+// ada, pengecekan "masih Nanya, belum Closing" tetap jalan.
+function checkOpenInquiryForCustomer() {
+  const phone = (document.getElementById('custPhone') || {}).value || '';
+  const key = phoneKey(phone);
+  if (key.length < 11) return;
+  const cand = ilStore.filter(e => samePhone(e.customer_phone, phone) && e.status === 'nanya');
+  if (!cand.length) return;
+  const hit = cand.sort((a, b) => new Date(b.ts) - new Date(a.ts))[0];
+  if (_lastNanyaHit === hit.id) return;
+  _lastNanyaHit = hit.id;
+  toast(`💬 ${hit.customer_name || 'Customer ini'} masih berstatus "Nanya" di Tanya Harga — mau dijadiin Closing?`, 'info');
+}
+
 function onPhoneInput() {
   updatePhonePreview();
   updatePreview();
@@ -3710,11 +3727,16 @@ function onPhoneInput() {
   const key = phoneKey(raw);
   if (key.length < 11) { _lastPhoneHit = null; return; }
   const inq = ilFindByPhone(raw, currentBrand, costProductForMode());
-  if (!inq || !(Number(inq.modal_price) > 0)) { _lastPhoneHit = null; return; }
-  if (_lastPhoneHit === inq.id) return; // jangan spam toast
-  _lastPhoneHit = inq.id;
-  const unit = inq.product === 'bata' ? 'm³' : 'm²';
-  toast(`✓ Ketemu catatan: ${inq.customer_name || 'customer ini'} · modal Rp ${fmtRupiah(inq.modal_price)}/${unit}`);
+  if (inq && Number(inq.modal_price) > 0) {
+    if (_lastPhoneHit !== inq.id) {
+      _lastPhoneHit = inq.id;
+      const unit = inq.product === 'bata' ? 'm³' : 'm²';
+      toast(`✓ Ketemu catatan: ${inq.customer_name || 'customer ini'} · modal Rp ${fmtRupiah(inq.modal_price)}/${unit}`);
+    }
+  } else {
+    _lastPhoneHit = null;
+    checkOpenInquiryForCustomer();
+  }
 }
 
 // v1.0.44: dua kolom nomor telepon (utama + cadangan untuk sopir)
@@ -5161,6 +5183,27 @@ function costKecIndex() {
   return _kecIndex;
 }
 
+// v1.0.55: index nama desa → { kab, kec } supaya alamat bisa dicocokkan
+// sampai level desa (bukan cuma kabupaten). Nama desa umum ("Sumberejo",
+// "Sidomulyo" muncul puluhan kali) tetap disimpan sebagai daftar — dipilih
+// yang tepat pakai konteks kecamatan/kabupaten yang juga disebut di alamat.
+let _desaIndex = null;
+function costDesaIndex() {
+  if (_desaIndex) return _desaIndex;
+  _desaIndex = {};
+  Object.keys(JATIM_DESA).forEach(kab => {
+    const kecMap = JATIM_DESA[kab];
+    Object.keys(kecMap).forEach(kec => {
+      kecMap[kec].forEach(desa => {
+        const k = desa.toLowerCase();
+        if (!_desaIndex[k]) _desaIndex[k] = [];
+        _desaIndex[k].push({ kab, kec, desa });
+      });
+    });
+  });
+  return _desaIndex;
+}
+
 // Normalisasi teks alamat: huruf kecil semua, tanda baca jadi spasi
 function normAddr(s) {
   return ' ' + (s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim() + ' ';
@@ -5188,6 +5231,39 @@ function regionBareName(fullName) {
 function detectRegionCandidates(addrText) {
   const a = normAddr(addrText);
   if (a.trim().length < 3) return { keys: [], via: '' };
+
+  // ── Lapis 0: nama desa/kelurahan (paling spesifik) ──
+  // Nama desa gampang kembar antar kecamatan/kabupaten (mis. "Sumberejo" ada
+  // di puluhan tempat), jadi hasilnya cuma dipakai kalau sebutan kecamatan
+  // ATAU kabupaten yang sama juga ada di alamat — mengonfirmasi desa mana.
+  const desaIdx = costDesaIndex();
+  let desaHits = [];
+  Object.keys(desaIdx).forEach(desa => {
+    if (KEC_STOPWORDS.has(desa)) return;
+    if (addrHas(a, desa)) desaHits = desaHits.concat(desaIdx[desa]);
+  });
+  if (desaHits.length) {
+    const confirmed = desaHits.filter(x =>
+      addrHas(a, x.kec) || addrHas(a, regionBareName(x.kab)));
+    const maxLen = confirmed.length
+      ? Math.max(...confirmed.map(x => x.desa.length))
+      : Math.max(...desaHits.map(x => x.desa.length));
+    const pool = (confirmed.length ? confirmed : desaHits).filter(x => x.desa.length === maxLen);
+    if (pool.length === 1 || (confirmed.length && pool.length)) {
+      const hit = pool[0];
+      // Cari key kabupaten|T/R yang cocok, supaya tetap kompatibel dengan
+      // sistem restriction/topografi yang sudah ada.
+      const kIdx = costKecIndex();
+      const kecKeys = kIdx[hit.kec.toLowerCase()] || [];
+      const kabKeys = kecKeys.filter(k => k.startsWith(hit.kab + '|'));
+      const keys = kabKeys.length ? kabKeys : [hit.kab + '|T', hit.kab + '|R'].filter(k => {
+        const [nm, topo] = k.split('|');
+        const r = JATIM_REGIONS.find(x => x.n === nm);
+        return r && ((topo === 'T' ? r.T : r.R).length > 0);
+      });
+      if (keys.length) return { keys, via: 'desa', kec: hit.kec, kab: hit.kab, desa: hit.desa };
+    }
+  }
 
   // ── Lapis 1: nama kecamatan ──
   const idx = costKecIndex();
@@ -5261,33 +5337,91 @@ function costRegionInfo(key) {
  * di kabupaten itu (bukan aturan tetap — cuma referensi histori).
  * v1.0.47: tidak ada lagi "harga patokan" tersimpan — modal ambil sendiri pun
  * sekarang hanya tersedia kalau pernah dicatat di Tanya Harga.
+ * v1.0.55: loco sekarang punya sumber sendiri — Harga Ambil Pabrik (factory_price_log)
+ * + margin loco terakhir yang pernah dicatat. Kirim diupgrade ke level desa/kecamatan
+ * (bukan cuma kabupaten), dan tiap saran dikasih umur data supaya kamu tahu kapan
+ * terakhir dicatat.
  */
 function costQuote(regionKey) {
   const brand = currentBrand;
   const product = costProductForMode();
   const pickup = (deliveryMethod === 'ambil');
-  if (pickup) return null; // tidak ada sumber modal untuk ambil sendiri lagi
 
-  const kab = costRegionInfo(regionKey).name;
-  const hist = ilStore
-    .filter(e => e.brand === brand && e.product === product && e.kabupaten === kab && e.modal_price > 0)
-    .sort((a, b) => new Date(b.ts) - new Date(a.ts))[0];
-  if (!hist) return { modal: 0, markup: 0, jual: 0, noHistory: true, pickup };
+  if (pickup) {
+    // v1.0.55: acuan loco = Harga Ambil Pabrik, bukan alamat (loco tidak
+    // kena ongkos kirim, jadi daerah tidak relevan sama sekali).
+    const fp = ilFactoryPrices
+      .filter(r => r.brand === brand && r.product === product)
+      .sort((a, b) => b.effective_date < a.effective_date ? -1 : (b.effective_date > a.effective_date ? 1 : b.id - a.id))[0];
+    if (!fp) return { modal: 0, markup: 0, jual: 0, noHistory: true, pickup, via: 'pabrik' };
 
-  return { modal: hist.modal_price, markup: hist.margin || 0, jual: hist.sell_price || (hist.modal_price + (hist.margin || 0)), catLabel: hist.margin ? costMarkupLabel(hist.margin) : '', pickup, via: 'catatan' };
+    // Margin loco diambil dari catatan Tanya Harga TERAKHIR yang pickup_method-nya
+    // "ambil" (brand+produk sama) — modalnya sendiri TIDAK dipakai dari sini,
+    // karena Harga Ambil Pabrik yang barusan lebih update.
+    const marginHist = ilStore
+      .filter(e => e.brand === brand && e.product === product && e.pickup_method === 'ambil' && Number(e.margin) > 0)
+      .sort((a, b) => new Date(b.ts) - new Date(a.ts))[0];
+    const markup = marginHist ? Number(marginHist.margin) : 0;
+
+    return {
+      modal: fp.price,
+      markup,
+      jual: fp.price + markup,
+      noMargin: !marginHist,
+      pickup,
+      via: 'pabrik',
+      dataDate: fp.effective_date,
+    };
+  }
+
+  // ── Kirim: cari catatan paling spesifik — desa dulu, baru kecamatan, baru kabupaten ──
+  const info = costRegionInfo(regionKey);
+  const kab = info.name;
+  const kecName = suggState.kecName || null;
+  const desaName = suggState.desaName || null;
+
+  const pool = ilStore.filter(e => e.brand === brand && e.product === product && e.kabupaten === kab && e.modal_price > 0);
+  let hist = null, matchLevel = 'kabupaten';
+  if (desaName) hist = pool.filter(e => e.desa === desaName).sort((a, b) => new Date(b.ts) - new Date(a.ts))[0];
+  if (hist) matchLevel = 'desa';
+  if (!hist && kecName) hist = pool.filter(e => e.kecamatan === kecName).sort((a, b) => new Date(b.ts) - new Date(a.ts))[0];
+  if (hist && matchLevel === 'kabupaten') matchLevel = 'kecamatan';
+  if (!hist) hist = pool.sort((a, b) => new Date(b.ts) - new Date(a.ts))[0];
+
+  if (!hist) return { modal: 0, markup: 0, jual: 0, noHistory: true, pickup, via: 'catatan' };
+
+  return {
+    modal: hist.modal_price, markup: hist.margin || 0,
+    jual: hist.sell_price || (hist.modal_price + (hist.margin || 0)),
+    catLabel: hist.margin ? costMarkupLabel(hist.margin) : '',
+    pickup, via: 'catatan', matchLevel, dataDate: hist.ts,
+  };
 }
 
 // ── (a3) Tampilan kotak saran ────────────────────────────────
-const suggState = { keys: [], chosen: null, via: '' };
+const suggState = { keys: [], chosen: null, via: '', kecName: null, desaName: null };
 
 function onAddrChanged() {
   updatePreview();
   refreshPriceSuggestion();
+  checkOpenInquiryForCustomer(); // v1.0.55: barangkali WA sudah diisi lebih dulu
 }
 
 async function refreshPriceSuggestion() {
   const box = document.getElementById('suggBox');
   if (!box) return;
+
+  if (deliveryMethod === 'ambil') {
+    // v1.0.55: loco tidak butuh alamat — acuannya Harga Ambil Pabrik
+    suggState.keys = ['LOCO'];
+    suggState.chosen = 'LOCO';
+    suggState.via = 'pabrik';
+    suggState.kecName = null;
+    suggState.desaName = null;
+    if (!ilState.loaded) await ilLoadAll();
+    renderPriceSuggestion();
+    return;
+  }
 
   const addr = (document.getElementById('custAddr') || {}).value || '';
   const res = detectRegionCandidates(addr);
@@ -5296,6 +5430,8 @@ async function refreshPriceSuggestion() {
   if (!res.keys.includes(suggState.chosen)) suggState.chosen = null;
   suggState.keys = res.keys;
   suggState.via = res.via;
+  suggState.kecName = res.kec || null;
+  suggState.desaName = res.desa || null;
   if (res.keys.length === 1) suggState.chosen = res.keys[0];
 
   if (!ilState.loaded) await ilLoadAll();
@@ -5308,15 +5444,65 @@ function suggChoose(key) {
   applySuggestedPrice();
 }
 
+// v1.0.55: umur catatan dalam hari, dan tanda peringatan kalau > 14 hari
+function costDataAgeDays(dateVal) {
+  if (!dateVal) return null;
+  const d = new Date(dateVal);
+  if (isNaN(d)) return null;
+  return Math.floor((Date.now() - d.getTime()) / 86400000);
+}
+function costAgeLabel(days) {
+  if (days == null) return '';
+  if (days <= 0) return 'hari ini';
+  if (days === 1) return 'kemarin';
+  if (days < 7) return `${days} hari lalu`;
+  if (days < 30) return `${Math.round(days / 7)} minggu lalu`;
+  return `${Math.round(days / 30)} bulan lalu`;
+}
+
 function renderPriceSuggestion() {
   const box = document.getElementById('suggBox');
   if (!box) return;
 
-  // Saat ambil sendiri, alamat customer tidak dipakai → sembunyikan
-  if (deliveryMethod === 'ambil') { box.className = 'sugg-box'; box.innerHTML = ''; return; }
-  if (!suggState.keys.length) { box.className = 'sugg-box'; box.innerHTML = ''; return; }
-
   const iconInfo = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+
+  // v1.0.55: LOCO — acuannya Harga Ambil Pabrik, bukan alamat
+  if (deliveryMethod === 'ambil') {
+    const q = costQuote(null);
+    const unit = costUnit();
+    const prodName = costProductForMode() === 'bata' ? 'Bata Ringan' : 'Panel Lantai';
+    if (!q || q.noHistory) {
+      box.className = 'sugg-box show warn';
+      box.innerHTML = `
+        <div class="sugg-head">
+          <div class="sugg-ico">${iconInfo}</div>
+          <div style="min-width:0;">
+            <div class="sugg-title">Harga Loco (Ambil Pabrik)</div>
+            <div class="sugg-sub">Belum ada Harga Ambil Pabrik tercatat untuk ${h(BRAND_PRODUCT_NAME[currentBrand] || currentBrand)} ${prodName}. Isi dulu di tab Cost.</div>
+          </div>
+        </div>`;
+      return;
+    }
+    const age = costDataAgeDays(q.dataDate);
+    box.className = 'sugg-box show' + (q.noMargin ? ' warn' : '');
+    box.innerHTML = `
+      <div class="sugg-head">
+        <div class="sugg-ico">${iconInfo}</div>
+        <div style="min-width:0;">
+          <div class="sugg-title">Harga Loco (Ambil Pabrik)</div>
+          <div class="sugg-sub">Modal Rp ${fmtRupiah(q.modal)}${age != null ? ' · ' + h(costAgeLabel(age)) : ''}${q.noMargin ? ' — belum ada margin loco tercatat' : ' · margin +Rp ' + fmtRupiah(q.markup)}</div>
+        </div>
+        <div class="sugg-price">Rp ${fmtRupiah(q.jual)}<small>per ${unit}</small></div>
+      </div>
+      <div class="sugg-actions">
+        <button class="sugg-btn ${q.noMargin ? '' : 'primary'}" onclick="applySuggestedPrice(true)">
+          ${q.noMargin ? 'Isi modal saja (belum ada margin)' : 'Terapkan ke harga satuan'}
+        </button>
+      </div>`;
+    return;
+  }
+
+  if (!suggState.keys.length) { box.className = 'sugg-box'; box.innerHTML = ''; return; }
 
   // Masih ambigu → minta user memilih
   if (!suggState.chosen) {
@@ -5342,6 +5528,10 @@ function renderPriceSuggestion() {
   const info = costRegionInfo(key);
   const q = costQuote(key);
   const unit = costUnit();
+  // v1.0.55: label lokasi paling spesifik yang ketemu (desa > kecamatan > kabupaten)
+  const locLabel = suggState.desaName
+    ? `Ds. ${suggState.desaName}, Kec. ${suggState.kecName}, ${info.name}`
+    : (suggState.kecName ? `Kec. ${suggState.kecName}, ${info.name}` : info.name);
 
   if (!q) {
     box.className = 'sugg-box show warn';
@@ -5349,7 +5539,7 @@ function renderPriceSuggestion() {
       <div class="sugg-head">
         <div class="sugg-ico">${iconInfo}</div>
         <div style="min-width:0;">
-          <div class="sugg-title">${h(info.name)}</div>
+          <div class="sugg-title">${h(locLabel)}</div>
           <div class="sugg-sub">Harga patokan di halaman Tanya Harga belum diisi untuk merek ini.</div>
         </div>
       </div>`;
@@ -5362,20 +5552,30 @@ function renderPriceSuggestion() {
       <div class="sugg-head">
         <div class="sugg-ico">${iconInfo}</div>
         <div style="min-width:0;">
-          <div class="sugg-title">${h(info.name)}</div>
+          <div class="sugg-title">${h(locLabel)}</div>
           <div class="sugg-sub">Belum ada catatan Tanya Harga untuk daerah ini. Modal patokan: Rp ${fmtRupiah(q.modal)}.</div>
         </div>
       </div>`;
     return;
   }
 
-  box.className = 'sugg-box show';
+  // v1.0.55: umur catatan + level kecocokan — bukan masalah kalau harga
+  // berubah dari waktu ke waktu, tapi kamu perlu tahu SEBERAPA LAMA catatan
+  // ini sebelum ikut-ikutan pakai harganya.
+  const age = costDataAgeDays(q.dataDate);
+  const isStale = age != null && age > 14;
+  const matchNote = q.matchLevel === 'desa' ? 'catatan desa ini persis'
+    : q.matchLevel === 'kecamatan' ? 'catatan kecamatan ini'
+    : 'catatan kabupaten (belum ada yang lebih spesifik)';
+
+  box.className = 'sugg-box show' + (isStale ? ' warn' : '');
   box.innerHTML = `
     <div class="sugg-head">
       <div class="sugg-ico">${iconInfo}</div>
       <div style="min-width:0;">
-        <div class="sugg-title">${h(info.name)}</div>
-        <div class="sugg-sub">Dari catatan terakhir — modal Rp ${fmtRupiah(q.modal)}${q.catLabel ? ' · profit ' + q.catLabel : ''}</div>
+        <div class="sugg-title">${h(locLabel)}</div>
+        <div class="sugg-sub">Dari ${matchNote} — modal Rp ${fmtRupiah(q.modal)}${q.catLabel ? ' · profit ' + q.catLabel : ''}${age != null ? ' · ' + h(costAgeLabel(age)) : ''}</div>
+        ${isStale ? `<div class="sugg-sub" style="color:#b45309;">⚠ Catatan ini sudah ${h(costAgeLabel(age))} — cek ulang ke Pak Bima sebelum dipakai.</div>` : ''}
       </div>
       <div class="sugg-price">Rp ${fmtRupiah(q.jual)}<small>per ${unit}</small></div>
     </div>
@@ -5395,7 +5595,7 @@ function renderPriceSuggestion() {
 function applySuggestedPrice(manual) {
   const key = suggState.chosen;
   if (!key) return;
-  const q = costQuote(key);
+  const q = costQuote(deliveryMethod === 'ambil' ? null : key);
   if (!q || q.noHistory) return;
 
   if (mode === 'bata') {
