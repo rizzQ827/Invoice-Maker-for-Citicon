@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Invoice Generator · v1.0.61</title>
-<!-- v1.0.61 -->
+<title>Invoice Generator · v1.0.62</title>
+<!-- v1.0.62 -->
 <meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai multi-brand">
 <meta name="theme-color" content="#0e9e4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -623,10 +623,17 @@
   /* v1.0.56: 3 filter dibuat selalu berjejer 1 baris (rata kiri-tengah-kanan),
      nggak wrap ke bawah lagi biar rapi di layar sempit */
   .stat-filters { display: flex; gap: 6px; flex-wrap: nowrap; justify-content: space-between; margin-bottom: 14px; }
+  /* v1.0.62: panah bawaan browser nempel banget di tepi kanan. Diganti panah
+     sendiri yang posisinya digeser masuk ~10px, jadi tidak mepet pinggir. */
   .stat-filters select {
     flex: 1 1 0; min-width: 0; height: 40px; border-radius: 10px; border: 1px solid #e2e8f0;
-    background: #fff; padding: 0 6px; outline: none;
+    background: #fff; padding: 0 26px 0 10px; outline: none;
     font-family: 'Inter', sans-serif; font-size: 11.5px; color: #0f172a; font-weight: 600;
+    -webkit-appearance: none; -moz-appearance: none; appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 13px 13px;
   }
   .stat-hero {
     background: linear-gradient(135deg, var(--brand-dark), var(--brand-color));
@@ -971,15 +978,20 @@
   .plog-group-name { font-size: 13px; font-weight: 800; color: #0f172a; }
   .plog-group-count { font-size: 11px; color: #94a3b8; font-weight: 600; }
 
+  /* v1.0.62: dua aksi geser — kiri = Hapus (merah), kanan = Order (hijau).
+     Latar .plog-item dibuat netral; warnanya sekarang menempel di masing-masing
+     tombol, supaya sisi kiri & kanan bisa beda warna. */
   .plog-item {
-    position: relative; overflow: hidden; border-radius: 12px; margin-bottom: 7px; background: #dc2626;
+    position: relative; overflow: hidden; border-radius: 12px; margin-bottom: 7px; background: #f1f5f9;
   }
-  .plog-item-del {
-    position: absolute; right: 0; top: 0; bottom: 0; width: 96px;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    color: #fff; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700;
-    border: none; background: none; cursor: pointer;
+  .plog-item-del, .plog-item-order {
+    position: absolute; top: 0; bottom: 0; width: 96px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    color: #fff; font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 700;
+    border: none; cursor: pointer;
   }
+  .plog-item-del   { right: 0; background: #dc2626; }
+  .plog-item-order { left: 0;  background: #0a7a38; }
   .plog-item-face {
     position: relative; z-index: 2;
     background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
@@ -1017,6 +1029,7 @@
     font-family: 'Inter', sans-serif;
   }
   .il-size-btn.active { background: #fff; color: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+  .il-size-hint { font-size: 10.5px; color: #94a3b8; margin-top: 5px; }
   .il-item-price { font-family: 'JetBrains Mono', monospace; font-size: 13.5px; font-weight: 800; color: #0f172a; }
   .il-item-price.empty { font-weight: 600; color: #94a3b8; font-family: inherit; font-size: 11.5px; }
 
@@ -1186,21 +1199,38 @@
     display: flex; align-items: center; justify-content: space-between;
     padding-left: 8px;
   }
+  /* v1.0.62: bentuk splash diganti lingkaran penuh & diperbesar mengisi ruang
+     kosong di kiri baris harga. */
   .history-card-seal {
     position: relative;
-    width: 30px; height: 30px;
+    width: 46px; height: 46px; border-radius: 50%;
     flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
   }
-  .history-card-seal svg.seal-splash {
-    position: absolute; inset: 0;
-    width: 100%; height: 100%;
-  }
+  .history-card[data-brand="citicon"] .history-card-seal { background: linear-gradient(135deg, #075c29, #0a7a38); }
+  .history-card[data-brand="bricon"]  .history-card-seal { background: linear-gradient(135deg, #6b1d13, #922b21); }
+  .history-card[data-brand="grandel"] .history-card-seal { background: linear-gradient(135deg, #654a06, #8d6508); }
   .history-card-seal svg.seal-icon {
     position: relative;
-    width: 13px; height: 13px;
+    width: 22px; height: 22px;
     color: #fff;
     filter: drop-shadow(0 0.5px 0.5px rgba(0,0,0,0.15));
+  }
+  .history-card-amounts {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 4px; min-width: 0;
+  }
+  .history-card-total {
+    font-size: 14px; font-weight: 800; font-family: 'JetBrains Mono', monospace;
+  }
+  .history-profit-chip {
+    background: #dcfce7; color: #0a7a38; font-weight: 800;
+    padding: 2px 8px; border-radius: 999px; font-size: 10.5px;
+    font-family: 'JetBrains Mono', monospace; white-space: nowrap;
+  }
+  .history-profit-chip.neg  { background: #fee2e2; color: #b91c1c; }
+  .history-profit-chip.none {
+    background: #fffbeb; color: #b45309; border: 1px dashed #fcd34d;
+    font-family: 'Inter', sans-serif; font-weight: 700; cursor: pointer;
   }
 
   .empty-state {
@@ -1409,7 +1439,7 @@
     </div>
     <div class="min-w-0">
       <div class="text-[14px] font-bold text-slate-900 truncate leading-tight">Invoice Generator</div>
-      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.61</div>
+      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.62</div>
     </div>
   </div>
 
@@ -2243,16 +2273,28 @@ function userHistoryKey() {
 
 // ── Override Supabase helpers to filter by user_id ───────────
 // These override/wrap the originals defined below this block.
+// v1.0.62: dulu dibatasi 200 baris — invoice ke-201 dst TIDAK ikut terbaca,
+// dan itu bikin nomor urut salah hitung (getHistoryMaxSeq cuma lihat 200 yang
+// kebaca). Sekarang diambil semua, per 1000 baris sekali jalan (batas maksimum
+// satu permintaan Supabase), diulang sampai habis.
 async function sbGetHistoryForUser() {
   if (!currentUser) return null;
-  const { data, error } = await _sb
-    .from('invoices')
-    .select('id, ts, data')
-    .eq('user_id', currentUser.id)
-    .order('ts', { ascending: false })
-    .limit(200);
-  if (error) { console.error('sbGetHistoryForUser:', error); return null; }
-  return data.map(r => r.data);
+  const PAGE = 1000;
+  let all = [], from = 0;
+  for (let guard = 0; guard < 50; guard++) {   // pengaman: maks 50rb invoice
+    const { data, error } = await _sb
+      .from('invoices')
+      .select('id, ts, data')
+      .eq('user_id', currentUser.id)
+      .order('ts', { ascending: false })
+      .range(from, from + PAGE - 1);
+    if (error) { console.error('sbGetHistoryForUser:', error); return all.length ? all : null; }
+    if (!data || !data.length) break;
+    all = all.concat(data.map(r => r.data));
+    if (data.length < PAGE) break;
+    from += PAGE;
+  }
+  return all;
 }
 
 async function sbUpsertInvoiceForUser(entry) {
@@ -2316,7 +2358,7 @@ const USER_PP_MAP = {
 // ════════════════════════════════════════════════════════════════
 //  CONSTANTS
 // ════════════════════════════════════════════════════════════════
-const APP_VERSION = '1.0.61';
+const APP_VERSION = '1.0.62';
 const BULAN_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 
 const PANEL_LENGTHS = [97, 147, 172, 197, 222, 247, 272, 297, 322];
@@ -4664,34 +4706,6 @@ function ilSetPickupMethod(method) {
 function ilRpVal(id) {
   return parseInt((document.getElementById(id) || {}).value?.replace(/\D/g, '') || '0', 10) || 0;
 }
-// v1.0.58 (#9): potongan HTML dua kolom harga bata (10cm & 7,5cm). Dua-duanya
-// opsional — boleh dikosongkan dulu, diisi belakangan setelah Pak Bima jawab.
-function ilModalFieldsHtml(product, id10, id75, val10, val75, oninput) {
-  if (product !== 'bata') {
-    return `
-    <label class="cost-modal-label">Harga dari Pak Bima (Rp, opsional)</label>
-    <div class="cost-price-box">
-      <span class="rp">Rp</span>
-      <input id="${id10}" inputmode="numeric" placeholder="0" value="${val10 ? fmtRupiah(val10) : ''}" oninput="${oninput}">
-      <span class="suffix">/m²</span>
-    </div>`;
-  }
-  return `
-    <label class="cost-modal-label">Harga dari Pak Bima — 60 × 20 × 10 cm (Rp, opsional)</label>
-    <div class="cost-price-box">
-      <span class="rp">Rp</span>
-      <input id="${id10}" inputmode="numeric" placeholder="0" value="${val10 ? fmtRupiah(val10) : ''}" oninput="${oninput}">
-      <span class="suffix">/Kubik</span>
-    </div>
-    <div style="height:8px;"></div>
-    <label class="cost-modal-label">Harga dari Pak Bima — 60 × 20 × 7,5 cm (Rp, opsional)</label>
-    <div class="cost-price-box">
-      <span class="rp">Rp</span>
-      <input id="${id75}" inputmode="numeric" placeholder="0" value="${val75 ? fmtRupiah(val75) : ''}" oninput="${oninput}">
-      <span class="suffix">/Kubik</span>
-    </div>`;
-}
-
 function ilUpdatePreview() {
   ['ilModal', 'ilModal75', 'ilMargin'].forEach(id => {
     const inp = document.getElementById(id);
@@ -4859,6 +4873,8 @@ async function ilSaveNew() {
     ilStore.unshift(data);
     costCloseModal();
     ilRenderAll();
+    checkModalTrackable();          // v1.0.62: kotak peringatan kuning ikut hilang
+    if (_pendingProfitFixId) { await applyPendingProfitFix(data); return; }
     toast('✓ Catatan tersimpan');
   } catch (e) { console.error(e); toast('Gagal menyimpan catatan', 'error'); }
 }
@@ -4953,10 +4969,7 @@ function ilOpenDetail(id, editMode) {
     ${nameBlock}
 
     <div style="height:1px;background:#eef2f9;margin:16px 0 14px;"></div>
-    ${ilModalFieldsHtml(e.product, 'ilDetModal', 'ilDetModal75',
-        isBata ? (Number(e.modal_10) || 0) : (Number(e.modal_price) || 0),
-        isBata ? (Number(e.modal_75) || 0) : 0,
-        'ilDetRecalc()')}
+    ${ilDetModalFieldHtml(e)}
 
     <div style="height:10px;"></div>
     <label class="cost-modal-label">Profitku (Rp) — terisi otomatis dari selisih harga di invoice</label>
@@ -5006,17 +5019,80 @@ function ilOpenDetail(id, editMode) {
       if (opt) sel.value = match;
     }
   }
+  if (isBata) ilDetRecalc(); // v1.0.62: tampilkan keterangan ukuran satunya sejak awal
+}
+
+// v1.0.62: modal detail sekarang ikut pakai toggle 10cm / 7,5cm — sama seperti
+// form tambah baru, jadi tampilannya konsisten. Dua-duanya tetap tersimpan;
+// toggle cuma memilih yang mana yang sedang ditampilkan/diedit. Nilai yang
+// tidak sedang tampil disimpan sementara di ilDetModalVals.
+let ilDetBataSize = '10cm';
+let ilDetModalVals = { '10cm': 0, '7,5cm': 0 };
+
+function ilDetModalFieldHtml(e) {
+  if (e.product !== 'bata') {
+    ilDetBataSize = '10cm';
+    ilDetModalVals = { '10cm': Number(e.modal_price) || 0, '7,5cm': 0 };
+    return `
+    <label class="cost-modal-label">Harga dari Pak Bima (Rp)</label>
+    <div class="cost-price-box">
+      <span class="rp">Rp</span>
+      <input id="ilDetModal" inputmode="numeric" value="${e.modal_price ? fmtRupiah(e.modal_price) : ''}" oninput="ilDetRecalc()">
+      <span class="suffix">/m²</span>
+    </div>`;
+  }
+  const v10 = Number(e.modal_10) || 0;
+  const v75 = Number(e.modal_75) || 0;
+  ilDetModalVals = { '10cm': v10, '7,5cm': v75 };
+  // Mulai dari ukuran yang sudah ada isinya; kalau dua-duanya kosong, 10cm.
+  ilDetBataSize = (!v10 && v75) ? '7,5cm' : '10cm';
+  const cur = ilDetModalVals[ilDetBataSize];
+  return `
+    <label class="cost-modal-label" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+      <span>Harga dari Pak Bima (Rp)</span>
+      <div class="il-size-toggle" id="ilDetSizeToggle">
+        <button type="button" class="il-size-btn${ilDetBataSize === '10cm' ? ' active' : ''}" data-sz="10cm" onclick="ilSetDetBataSize('10cm')">10 cm</button>
+        <button type="button" class="il-size-btn${ilDetBataSize === '7,5cm' ? ' active' : ''}" data-sz="7,5cm" onclick="ilSetDetBataSize('7,5cm')">7,5 cm</button>
+      </div>
+    </label>
+    <div class="cost-price-box">
+      <span class="rp">Rp</span>
+      <input id="ilDetModal" inputmode="numeric" value="${cur ? fmtRupiah(cur) : ''}" placeholder="0" oninput="ilDetRecalc()">
+      <span class="suffix">/Kubik</span>
+    </div>
+    <div class="il-size-hint" id="ilDetSizeHint"></div>`;
+}
+
+// Simpan nilai yang sedang tampil, lalu tampilkan nilai ukuran satunya.
+function ilSetDetBataSize(size) {
+  ilDetModalVals[ilDetBataSize] = ilRpVal('ilDetModal');
+  ilDetBataSize = size;
+  const inp = document.getElementById('ilDetModal');
+  if (inp) { const v = ilDetModalVals[size]; inp.value = v ? fmtRupiah(v) : ''; }
+  document.querySelectorAll('#ilDetSizeToggle .il-size-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.sz === size));
+  ilDetRecalc();
 }
 
 function ilDetRecalc() {
-  const modal = ilRpVal('ilDetModal') || ilRpVal('ilDetModal75');
-  const margin = ilRpVal('ilDetMargin');
-  const el = document.getElementById('ilDetSell');
-  if (el) el.textContent = fmtRupiah(modal + margin);
-  ['ilDetModal', 'ilDetModal75', 'ilDetMargin'].forEach(id => {
+  ['ilDetModal', 'ilDetMargin'].forEach(id => {
     const inp = document.getElementById(id);
     if (inp) { const digits = inp.value.replace(/\D/g, ''); inp.value = digits ? fmtRupiah(parseInt(digits, 10)) : ''; }
   });
+  ilDetModalVals[ilDetBataSize] = ilRpVal('ilDetModal');
+  const modal = ilDetModalVals[ilDetBataSize] || ilDetModalVals['10cm'] || ilDetModalVals['7,5cm'];
+  const margin = ilRpVal('ilDetMargin');
+  const el = document.getElementById('ilDetSell');
+  if (el) el.textContent = fmtRupiah(modal + margin);
+  // Pengingat kecil: ukuran satunya sudah keisi berapa
+  const hint = document.getElementById('ilDetSizeHint');
+  if (hint) {
+    const other = ilDetBataSize === '10cm' ? '7,5cm' : '10cm';
+    const ov = ilDetModalVals[other];
+    hint.textContent = ov
+      ? `${other === '7,5cm' ? '7,5' : '10'} cm sudah terisi: Rp ${fmtRupiah(ov)}`
+      : `${other === '7,5cm' ? '7,5' : '10'} cm belum diisi`;
+  }
 }
 
 async function ilUpdateEntry(id, patch) {
@@ -5109,8 +5185,10 @@ async function ilAutoCloseMatchingInquiry(entry) {
 async function ilSaveDetailAndClose(id, editMode) {
   const _e = ilStore.find(x => x.id === id);
   const _isBata = _e && _e.product === 'bata';
-  const modal10 = ilRpVal('ilDetModal');
-  const modal75 = ilRpVal('ilDetModal75');
+  // v1.0.62: ambil nilai yang sedang tampil dulu, baru baca dua-duanya
+  ilDetModalVals[ilDetBataSize] = ilRpVal('ilDetModal');
+  const modal10 = _isBata ? (ilDetModalVals['10cm'] || 0) : ilRpVal('ilDetModal');
+  const modal75 = _isBata ? (ilDetModalVals['7,5cm'] || 0) : 0;
   const modal = modal10 || modal75;
   const margin = ilRpVal('ilDetMargin');
   const volEl = document.getElementById('ilDetVolume');
@@ -5134,6 +5212,7 @@ async function ilSaveDetailAndClose(id, editMode) {
   await ilUpdateEntry(id, patch);
   costCloseModal();
   ilRenderAll();
+  checkModalTrackable();   // v1.0.62: peringatan kuning menyesuaikan data terbaru
   toast('✓ Tersimpan');
 }
 
@@ -5158,6 +5237,196 @@ function ilOpenWa(phone) {
 // v1.0.47: Nama kontak siap-simpan — beda & tak mirip antar customer (dikasih
 // penanda daerah), tapi tetap pendek. Ini yang disalin, bukan blok teks panjang,
 // karena maksudnya buat dipaste langsung sebagai NAMA kontak WA.
+// ════════════════════════════════════════════════════════════════
+//  v1.0.62: PERBAIKAN SUSULAN — invoice terlanjur dibuat tanpa catatan
+// ════════════════════════════════════════════════════════════════
+// Skenario: kamu langsung bikin invoice tanpa mampir ke Tanya Harga, jadi
+// untungnya kosong. Dari kartu History, chip "untung belum tercatat" bisa
+// diketuk untuk memperbaikinya menyusul — form Tanya Harga terbuka dengan data
+// invoice sudah terisi, dan begitu modal disimpan, untung invoice itu langsung
+// dihitung ulang tanpa kamu perlu membuka invoice-nya lagi.
+let _pendingProfitFixId = null;
+
+function ilFixProfitForInvoice(invoiceId) {
+  const entry = getHistory().find(x => x.id === invoiceId);
+  if (!entry) return;
+
+  // Samakan tab Tanya Harga dengan merek/jenis invoice-nya, supaya catatan
+  // yang dibuat masuk ke laci yang benar.
+  costState.brand = entry.brand || 'citicon';
+  costState.product = entry.mode === 'bata' ? 'bata' : 'panel';
+  document.querySelectorAll('[data-cbrand]').forEach(el =>
+    el.classList.toggle('active', el.dataset.cbrand === costState.brand));
+  document.querySelectorAll('[data-cprod]').forEach(el =>
+    el.classList.toggle('active', el.dataset.cprod === costState.product));
+
+  _pendingProfitFixId = invoiceId;
+  ilOpenAdd();
+
+  setTimeout(() => {
+    const { salute, name } = ilSplitName(`${entry.salute || ''} ${entry.custName || ''}`.trim());
+    const nEl = document.getElementById('ilCustName');   if (nEl) nEl.value = name || '';
+    const sEl = document.getElementById('ilCustSalute'); if (sEl) sEl.value = salute;
+    const pEl = document.getElementById('ilCustPhone');  if (pEl) pEl.value = entry.custPhone || '';
+
+    // Tebak daerah dari alamat yang tertulis di invoice
+    const res = detectRegionCandidates(entry.custAddr || '');
+    if (res.keys.length) {
+      const kab = costRegionInfo(res.keys[0]).name;
+      const kabEl = document.getElementById('ilKab');
+      if (kabEl) { kabEl.value = kab; ilComboSetOptions('ilKec', ilKecOfKab(kab)); }
+      if (res.kec) {
+        const kecEl = document.getElementById('ilKec');
+        if (kecEl) { kecEl.value = res.kec; ilComboSetOptions('ilDesa', ilDesaOfKec(kab, res.kec)); }
+      }
+      if (res.desa) { const dEl = document.getElementById('ilDesa'); if (dEl) dEl.value = res.desa; }
+      ilRenderFormAlerts();
+    }
+    if (entry.mode === 'bata') {
+      const firstM3 = (entry.bataRows || []).find(r => r.unit === 'M3');
+      if (firstM3 && firstM3.size === '7,5cm') ilSetFormBataSize('7,5cm');
+    }
+    toast('Isi harga dari Pak Bima — untung invoice ini langsung dihitung setelah disimpan');
+  }, 30);
+}
+
+// Hitung ulang untung sebuah invoice LANGSUNG dari data tersimpannya, tanpa
+// perlu memuat invoice itu ke form. Dipakai oleh perbaikan susulan di atas.
+function recomputeProfitForEntry(entry, inq) {
+  const product = entry.mode === 'bata' ? 'bata' : 'panel';
+  let volume = 0, revenue = 0, cost = 0, uncountedVolume = 0;
+  const sizes = [];
+
+  if (product === 'bata') {
+    (entry.bataRows || []).forEach(r => {
+      if (r.unit !== 'M3') return;
+      const qty = parseNum(r.qty);
+      if (qty <= 0) return;
+      const price = parseNum(r.price);
+      const size = r.size || '10cm';
+      const m = ilModalOf(inq, size);
+      if (!m) { uncountedVolume += qty; return; }
+      volume += qty; revenue += qty * price; cost += qty * m;
+      sizes.push({ size, qty, modal: m, jual: price });
+    });
+  } else {
+    volume = (entry.panelRows || []).reduce((sum, r) =>
+      sum + (parseNum(r.panjang) * PANEL_WIDTH * parseNum(r.qty)) / 10000, 0);
+    if (volume <= 0) return null;
+    const rate = entry.priceMode === 'nonpasang'
+      ? parseNum(entry.priceNonPasang)
+      : parseNum(entry.pricePerM2);
+    revenue = volume * rate;
+    const m = ilModalOf(inq);
+    if (!m) return null;
+    cost = volume * m;
+  }
+  if (volume <= 0 || cost <= 0) return null;
+
+  return {
+    brand: entry.brand || 'citicon',
+    product,
+    regionKey: (entry.profit && entry.profit.regionKey) || (inq.kecamatan || null),
+    delivery: entry.deliveryMethod === 'ambil' ? 'ambil' : 'kirim',
+    modalPerUnit: cost / volume,
+    jualPerUnit: revenue / volume,
+    volume,
+    untung: revenue - cost,
+    unit: product === 'bata' ? 'm³' : 'm²',
+    inquiryId: inq.id,
+    sizes,
+    uncountedVolume,
+  };
+}
+
+// Dipanggil setelah catatan Tanya Harga baru berhasil disimpan.
+async function applyPendingProfitFix(newInq) {
+  if (!_pendingProfitFixId) return;
+  const invoiceId = _pendingProfitFixId;
+  _pendingProfitFixId = null;
+
+  const hist = getHistory();
+  const entry = hist.find(x => x.id === invoiceId);
+  if (!entry) return;
+
+  const profit = recomputeProfitForEntry(entry, newInq);
+  if (!profit) {
+    toast('Catatan tersimpan, tapi untung belum bisa dihitung — harga modalnya masih kosong', 'error');
+    return;
+  }
+  entry.profit = profit;
+  await sbUpsertInvoice(entry);
+  setHistoryRaw(hist);
+  await syncInquiryFromInvoice(entry);
+  toast(`✓ Untung invoice ${entry.docNo} sekarang tercatat: Rp ${fmtRupiah(Math.round(profit.untung))}`);
+}
+
+// v1.0.62: geser kartu ke KANAN = langsung buatkan invoice dari catatan ini.
+// Pindah ke tab Invoice, lalu semua yang sudah diketahui dari catatan diisikan
+// otomatis: merek, jenis produk, nama, no WA, alamat, cara kirim, harga jual,
+// dan kubik/m² kalau volumenya sudah dicatat. Sisanya tinggal dilengkapi.
+function ilOrderFromInquiry(id) {
+  const e = ilStore.find(x => x.id === id);
+  if (!e) return;
+
+  switchTab('invoice');
+  resetToFreshInvoice();   // mulai dari form bersih, bukan sisa invoice sebelumnya
+
+  // Merek & jenis produk
+  if (e.brand && BRAND_META[e.brand]) setBrand(e.brand);
+  setMode(e.product === 'bata' ? 'bata' : 'panel');
+
+  // Nama & sapaan
+  const { salute, name } = ilSplitName(e.customer_name);
+  const salEl = document.getElementById('custSalute');
+  if (salEl && name) salEl.value = salute;
+  const nameEl = document.getElementById('custName');
+  if (nameEl) nameEl.value = name || '';
+
+  // Nomor WA
+  const phEl = document.getElementById('custPhone');
+  if (phEl) phEl.value = e.customer_phone || '';
+
+  // Cara ambil barang: loco = ambil sendiri di pabrik
+  setDeliveryMethod(e.pickup_method === 'loco' ? 'ambil' : 'kirim');
+
+  // Alamat (hanya untuk pengiriman — loco tidak butuh alamat customer)
+  if (e.pickup_method !== 'loco') {
+    const addrEl = document.getElementById('custAddr');
+    if (addrEl) {
+      const baris1 = [e.desa, e.kecamatan].filter(Boolean).join(', ');
+      const baris2 = e.kabupaten || '';
+      addrEl.value = [baris1, baris2].filter(Boolean).join('\n');
+    }
+  }
+
+  // Harga jual & volume yang sudah tercatat
+  const jual = Number(e.sell_price) || 0;
+  const vol  = Number(e.est_volume) || 0;
+  if (e.product === 'bata') {
+    const size = (Number(e.modal_75) > 0 && !(Number(e.modal_10) > 0)) ? '7,5cm' : '10cm';
+    bataRows = [{ qty: vol > 0 ? fmtQty(vol) : '', unit: 'M3', size, price: jual ? String(jual) : '' }];
+    renderBataRows();
+  } else {
+    const priceEl = document.getElementById('pricePerM2');
+    if (priceEl && jual) priceEl.value = String(jual);
+  }
+
+  updatePhonePreview();
+  updatePreview();
+  if (typeof refreshPriceSuggestion === 'function') refreshPriceSuggestion();
+  window.scrollTo(0, 0);
+
+  const kurang = [];
+  if (!name) kurang.push('nama');
+  if (!e.customer_phone) kurang.push('no WA');
+  if (!jual) kurang.push('harga');
+  if (e.product === 'bata' && !vol) kurang.push('jumlah kubik');
+  toast(kurang.length
+    ? `✓ Form terisi dari catatan — tinggal lengkapi ${kurang.join(', ')}`
+    : '✓ Form terisi lengkap dari catatan Tanya Harga');
+}
+
 function ilSuggestContactName(e) {
   const rawName = (e.customer_name || '').trim();
   const base = rawName || `Cust ${e.customer_phone ? e.customer_phone.slice(-4) : '?'}`;
@@ -5261,6 +5530,10 @@ function ilItemHtml(e) {
   // → alamat (pakai icon lokasi) → harga (paling bawah, penekanan angka)
   return `
     <div class="plog-item">
+      <button class="plog-item-order" onclick="ilOrderFromInquiry(${e.id})" aria-label="Buatkan Invoice">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M17.31 14H9.72L5.95 2.68A1 1 0 0 0 5 2H2v2h2.28l3.54 10.63A2 2 0 0 0 9.72 16h7.59a2 2 0 0 0 1.87-1.3l2.76-7.35-1.87-.7zM10 18a2 2 0 1 0 0 4 2 2 0 1 0 0-4m7 0a2 2 0 1 0 0 4 2 2 0 1 0 0-4"></path><path d="m11.71 7.29-1.42 1.42 2.71 2.7 4.71-4.7-1.42-1.42L13 8.59z"></path></svg>
+        <span>Order</span>
+      </button>
       <button class="plog-item-del" onclick="ilRemove(${e.id})" aria-label="Hapus">
         <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M17 6V4c0-1.1-.9-2-2-2H9c-1.1 0-2 .9-2 2v2H2v2h2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8h2V6zM9 4h6v2H9zM6 20V8h12v12z"></path><path d="M9 10h2v8H9zm4 0h2v8h-2z"></path></svg>
       </button>
@@ -5397,18 +5670,29 @@ function ilBindSwipeIn(containerSelector) {
     if (face.dataset.swipeBound) return;
     face.dataset.swipeBound = '1';
     const id = parseInt(face.dataset.ilId, 10);
-    let startX = 0, startY = 0, startTime = 0, dragging = false, moved = false, anyMoved = false, pid = null;
+    const scroller = face.closest('.il-list-scroll');
+    let startX = 0, startY = 0, dragging = false, moved = false, anyMoved = false,
+        pid = null, startPageY = 0, startScrollTop = 0, dir = null;
 
-    function settle(open) {
+    function settle(pos) {
+      // pos: 'del' (geser kiri), 'order' (geser kanan), atau null (balik ke tengah)
       face.style.transition = 'transform 0.22s cubic-bezier(.22,.61,.36,1)';
-      face.style.transform = open ? 'translateX(-96px)' : 'translateX(0)';
-      face.classList.toggle('swiped', open);
+      face.style.transform =
+        pos === 'del'   ? 'translateX(-96px)' :
+        pos === 'order' ? 'translateX(96px)'  : 'translateX(0)';
+      face.classList.toggle('swiped', pos === 'del');
+      face.classList.toggle('swiped-order', pos === 'order');
+    }
+    function isOpen() {
+      return face.classList.contains('swiped') || face.classList.contains('swiped-order');
     }
 
     face.addEventListener('pointerdown', e => {
       if (e.pointerType === 'mouse' && e.button !== 0) return;
-      startX = e.clientX; startY = e.clientY; startTime = Date.now();
-      dragging = true; moved = false; anyMoved = false; pid = e.pointerId;
+      startX = e.clientX; startY = e.clientY;
+      startPageY = window.scrollY || 0;
+      startScrollTop = scroller ? scroller.scrollTop : 0;
+      dragging = true; moved = false; anyMoved = false; dir = null; pid = e.pointerId;
       face.style.transition = 'none';
     });
 
@@ -5416,38 +5700,52 @@ function ilBindSwipeIn(containerSelector) {
       if (!dragging || e.pointerId !== pid) return;
       const dx = e.clientX - startX;
       const dy = e.clientY - startY;
-      // v1.0.56: threshold dinaikkan (6→12px) — di HP, jari sedikit gemetar
-      // saat "tap" biasa bikin anyMoved true terus, jadi tap pertama
-      // dianggap gerakan & modal nggak kebuka (baru kebuka pas tap kedua).
-      if (Math.abs(dx) > 12 || Math.abs(dy) > 12) anyMoved = true;
-      if (!moved && Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+      // v1.0.62: ambang batas "ini gerakan, bukan tap" diturunkan 12 → 6px.
+      // Makin kecil ambangnya, makin sulit gerakan scroll dianggap tap.
+      if (Math.abs(dx) > 6 || Math.abs(dy) > 6) anyMoved = true;
+      // Arah dikunci sekali saja di awal: begitu jelas ini gerakan vertikal,
+      // geseran horizontal diabaikan sampai jari diangkat (dan sebaliknya).
+      if (!dir && (Math.abs(dx) > 6 || Math.abs(dy) > 6)) {
+        dir = Math.abs(dx) > Math.abs(dy) * 1.3 ? 'h' : 'v';
+      }
+      if (dir === 'v') return;   // lagi scroll — jangan geser kartunya
+      if (!moved && dir === 'h' && Math.abs(dx) > 10) {
         moved = true;
         try { face.setPointerCapture(pid); } catch (err) {}
       }
-      if (moved) face.style.transform = `translateX(${Math.max(-96, Math.min(0, dx))}px)`;
+      if (moved) face.style.transform = `translateX(${Math.max(-96, Math.min(96, dx))}px)`;
     });
 
-    function finish(e) {
+    // v1.0.62: INI BIANG KEROKNYA. Waktu kamu mulai scroll, browser mengambil
+    // alih gerakan jari dan menembakkan `pointercancel` — bukan `pointerup`.
+    // Dulu dua-duanya masuk ke fungsi yang sama, dan karena saat itu `moved`
+    // masih false, kode menyimpulkan "berarti ini tap" lalu MEMBUKA MODAL.
+    // Sekarang pointercancel ditangani terpisah dan tidak pernah membuka apa pun.
+    face.addEventListener('pointercancel', e => {
+      if (!dragging || e.pointerId !== pid) return;
+      dragging = false;
+      if (moved) settle(null); else face.style.transition = '';
+    });
+
+    face.addEventListener('pointerup', e => {
       if (!dragging || e.pointerId !== pid) return;
       dragging = false;
       const dx = e.clientX - startX;
-      // v1.0.60: dulu "gerakan dianggap scroll" cuma berlaku kalau geraknya
-      // JUGA lambat (>220ms) — makanya scroll cepat (flick) di HP tetap
-      // kehitung sebagai tap dan modal ke-buka nggak sengaja. Sekarang cukup
-      // gerakannya lewat ambang batas (anyMoved), nggak peduli cepat atau
-      // pelan — scroll flick cepat pun tidak lagi membuka modal.
+
+      // Pengaman tambahan: kalau halaman (atau kotak daftarnya) ternyata
+      // ikut ter-scroll selama jari menempel, itu jelas scroll — bukan tap.
+      const scrolled =
+        Math.abs((window.scrollY || 0) - startPageY) > 2 ||
+        (scroller && Math.abs(scroller.scrollTop - startScrollTop) > 2);
+
       if (moved) {
-        settle(dx < -40);
-      } else if (anyMoved) {
-        // gerakan (scroll vertikal atau horizontal kecil) — jangan buka apa pun
-      } else if (face.classList.contains('swiped')) {
-        settle(false);
-      } else {
-        ilOpenDetail(id);
+        settle(dx < -40 ? 'del' : (dx > 40 ? 'order' : null));
+        return;
       }
-    }
-    face.addEventListener('pointerup', finish);
-    face.addEventListener('pointercancel', finish);
+      if (anyMoved || dir === 'v' || scrolled) return;  // gerakan → jangan buka
+      if (isOpen()) { settle(null); return; }           // tutup panel dulu
+      ilOpenDetail(id);
+    });
   });
 }
 function ilBindSwipe() { ilBindSwipeIn('#ilList'); }
@@ -6814,7 +7112,19 @@ function getHistory() {
 
 function setHistoryRaw(arr) {
   _histCache = arr;
-  localStorage.setItem(userHistoryKey(), JSON.stringify(arr.slice(0, 200)));
+  // v1.0.62: cache lokal cuma cadangan saat cloud belum kebaca. Disimpan
+  // sebanyak yang muat; kalau penyimpanan HP penuh, dipotong bertahap supaya
+  // tidak bikin aplikasi error.
+  let keep = arr.length;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      localStorage.setItem(userHistoryKey(), JSON.stringify(arr.slice(0, keep)));
+      break;
+    } catch (err) {
+      keep = Math.floor(keep / 2);
+      if (keep < 20) { try { localStorage.removeItem(userHistoryKey()); } catch (e) {} break; }
+    }
+  }
   renderHistory();
 }
 
@@ -7010,46 +7320,19 @@ function renderHistory() {
 
   const BRAND_LABELS = { citicon: 'Citicon', bricon: 'Bricon', grandel: 'Grand Elephant' };
   const BRAND_COLORS = { citicon: '#0a7a38', bricon: '#922b21', grandel: '#8d6508' };
-  // v1.0.44: warna gelap per brand untuk gradasi splash wax-seal (dark -> base)
-  const BRAND_COLORS_DARK = { citicon: '#075c29', bricon: '#6b1d13', grandel: '#654a06' };
 
-  // v1.0.44: bentuk splash irregular (bukan lingkaran sempurna) — dipakai sbg dasar wax-seal badge,
-  // path acak-bergelombang khas cap lilin, viewBox 40x40 supaya scalable di dalam badge 30px
-  const SVG_SEAL_SPLASH = (brand) => `<svg class="seal-splash" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="sealGrad-${brand}" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="${BRAND_COLORS[brand]}"/>
-        <stop offset="100%" stop-color="${BRAND_COLORS_DARK[brand]}"/>
-      </linearGradient>
-    </defs>
-    <path fill="url(#sealGrad-${brand})" d="M20.4,2.1c2.3-0.3,4.4,1.2,6.5,2.1c2.1,0.9,4.5,1.2,6,2.9c1.6,1.8,1.7,4.4,2.3,6.7
-      c0.6,2.3,2,4.4,1.7,6.8c-0.3,2.4-2.2,4.1-3.4,6.2c-1.2,2.1-1.7,4.7-3.7,6.1c-2,1.4-4.6,1.1-6.9,1.6
-      c-2.3,0.5-4.4,1.9-6.7,1.5c-2.3-0.4-3.9-2.4-5.8-3.7c-1.9-1.3-4.3-2-5.5-4c-1.2-2-0.7-4.5-1.1-6.8
-      C3.5,19.2,1.9,17,2.3,14.7c0.4-2.3,2.7-3.7,4.2-5.5c1.5-1.8,2.4-4.2,4.5-5.3C13.1,2.8,15.6,3.6,18,3
-      C18.8,2.8,19.6,2.2,20.4,2.1Z"/>
-  </svg>`;
-
-  // v1.0.54: chip kecil di kartu history — nunjukin untung invoice ini dan
-  // dari catatan Tanya Harga siapa modalnya diambil. Klik chip = buka catatan.
+  // v1.0.62: teks "modal dari ..." dihapus — namanya toh sama dengan nama
+  // customer di kartu ini, jadi cuma mengulang. Chip untung sekarang jadi
+  // baris kedua di kolom kanan, tepat di bawah harga kotor.
   const histProfitChip = (e) => {
     const p = e.profit;
     if (!p || typeof p.untung !== 'number') {
-      return `<div style="margin-top:8px;padding-left:8px;font-size:10.5px;color:#cbd5e1;">
-        Untung belum tercatat · belum ada modal di Tanya Harga
-      </div>`;
+      return `<div class="history-profit-chip none" onclick="event.stopPropagation();ilFixProfitForInvoice(${e.id})"
+                   title="Catat modalnya sekarang">untung belum tercatat</div>`;
     }
-    const inq = p.inquiryId ? ilStore.find(x => x.id === p.inquiryId) : null;
-    const src = inq
-      ? `<span onclick="event.stopPropagation();ilOpenDetail(${inq.id})"
-              style="color:#2563eb;cursor:pointer;text-decoration:underline;">
-           ${h(inq.customer_name || 'catatan Tanya Harga')}
-         </span>`
-      : '<span style="color:#94a3b8;">perkiraan daerah</span>';
-    return `<div style="margin-top:8px;padding-left:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:10.5px;">
-      <span style="background:${p.untung < 0 ? '#fee2e2' : '#dcfce7'};color:${p.untung < 0 ? '#b91c1c' : '#0a7a38'};font-weight:800;padding:2px 7px;border-radius:999px;font-family:'JetBrains Mono',monospace;">
-        ${p.untung < 0 ? '−' : '+'} Rp ${fmtRupiah(Math.abs(Math.round(p.untung)))}
-      </span>
-      <span style="color:#94a3b8;">modal dari ${src}</span>
+    const neg = p.untung < 0;
+    return `<div class="history-profit-chip${neg ? ' neg' : ''}">
+      ${neg ? '−' : '+'} Rp ${fmtRupiah(Math.abs(Math.round(p.untung)))}
     </div>`;
   };
 
@@ -7078,14 +7361,13 @@ function renderHistory() {
       </div>
       <div class="history-card-seal-row">
         <div class="history-card-seal" title="${e.mode === 'bata' ? 'Bata Ringan' : 'Panel Lantai'}">
-          ${SVG_SEAL_SPLASH(entryBrand)}
           ${modeIcon}
         </div>
-        <span style="font-size:14px;color:${accentClr};font-weight:800;font-family:'JetBrains Mono',monospace;">
-          Rp ${fmtRupiah(e.total)}
-        </span>
+        <div class="history-card-amounts">
+          <span class="history-card-total" style="color:${accentClr};">Rp ${fmtRupiah(e.total)}</span>
+          ${histProfitChip(e)}
+        </div>
       </div>
-      ${histProfitChip(e)}
     </div>`;
   }).join('');
 }
@@ -7150,13 +7432,17 @@ async function clearHistory() {
 // ═══ v1.0.44: NAVBAR 4 TAB — Invoice · Cost · History · Profile ═══
 let currentTab = 'invoice';
 
-function setActiveNav(tab) {
+// v1.0.62: `persist` sengaja bisa dimatikan. Dulu mountTopNavEverywhere()
+// memanggil setActiveNav('invoice') saat aplikasi baru dibuka — dan itu MENIMPA
+// catatan tab terakhir di localStorage SEBELUM restoreLastMainTab() sempat
+// membacanya. Makanya refresh selalu mendarat di tab Invoice walau terakhir
+// kali kamu ada di Cost/Profile.
+function setActiveNav(tab, persist = true) {
   currentTab = tab;
   document.querySelectorAll('[data-tab]').forEach(el => {
     el.classList.toggle('active', el.dataset.tab === tab);
   });
-  // v1.0.56: simpan tab utama terakhir biar refresh nggak selalu balik ke Invoice.
-  // Cuma tab utama (invoice/cost/history/profile) — subpage/modal nggak disimpan di sini.
+  if (!persist) return;
   try { localStorage.setItem('citicon_last_main_tab', tab); } catch (e) {}
 }
 
@@ -7171,7 +7457,7 @@ function mountTopNavEverywhere() {
     slot.appendChild(clone);
     slot.dataset.mounted = '1';
   });
-  setActiveNav(currentTab);
+  setActiveNav(currentTab, false); // v1.0.62: jangan timpa catatan tab terakhir
 }
 
 function switchTab(tab) {
