@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Invoice Generator · v1.0.60</title>
-<!-- v1.0.60 -->
+<title>Invoice Generator · v1.0.61</title>
+<!-- v1.0.61 -->
 <meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai multi-brand">
 <meta name="theme-color" content="#0e9e4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -586,6 +586,20 @@
     border: 1px solid #cbd5e1; background: #fff; color: #334155;
   }
   .sugg-btn.primary { background: var(--brand-color); border-color: var(--brand-color); color: #fff; }
+
+  /* ═══ v1.0.61: peringatan untung belum bisa dihitung ═══ */
+  .il-modal-warn {
+    display: none; margin-top: 8px; border-radius: 11px;
+    border: 1px solid #fde68a; background: #fffbeb; padding: 10px 12px;
+    font-size: 11.5px; color: #92400e; line-height: 1.5;
+  }
+  .il-modal-warn.show { display: block; }
+  .il-modal-warn button {
+    display: block; margin-top: 8px; width: 100%; height: 32px; border-radius: 8px;
+    border: 1px solid #f59e0b; background: #fff; color: #92400e; cursor: pointer;
+    font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 700;
+  }
+  .il-modal-warn button:hover { background: #fef3c7; }
 
   /* ═══ v1.0.45: DIAGRAM STATISTIK ═══ */
   .stat-chart-card {
@@ -1395,7 +1409,7 @@
     </div>
     <div class="min-w-0">
       <div class="text-[14px] font-bold text-slate-900 truncate leading-tight">Invoice Generator</div>
-      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.60</div>
+      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.61</div>
     </div>
   </div>
 
@@ -1548,6 +1562,9 @@
           <input class="input" id="custPhone2" oninput="onPhoneInput()" placeholder="0812-3456-7890" inputmode="tel">
           <div class="phone-preview" id="phonePreview2"></div>
         </div>
+        <!-- v1.0.61: peringatan kalau untung order ini belum bisa dihitung sama
+             sekali (belum ada modal tercatat dari customer manapun/daerah manapun) -->
+        <div class="il-modal-warn" id="ilNoModalWarn"></div>
       </div>
     </div>
 
@@ -2299,7 +2316,7 @@ const USER_PP_MAP = {
 // ════════════════════════════════════════════════════════════════
 //  CONSTANTS
 // ════════════════════════════════════════════════════════════════
-const APP_VERSION = '1.0.60';
+const APP_VERSION = '1.0.61';
 const BULAN_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 
 const PANEL_LENGTHS = [97, 147, 172, 197, 222, 247, 272, 297, 322];
@@ -3989,7 +4006,7 @@ function onPhoneInput() {
   // dicatat di Tanya Harga. Kalau ada, kasih tau modalnya berapa — jadi kamu
   // langsung tahu untungnya sebelum invoice disimpan.
   const phones = invoicePhones();
-  if (!phones.some(p => phoneKey(p).length >= 11)) { _lastPhoneHit = null; return; }
+  if (!phones.some(p => phoneKey(p).length >= 11)) { _lastPhoneHit = null; checkModalTrackable(); return; }
   const inq = ilFindByPhone(phones, currentBrand, costProductForMode());
   if (inq && ilModalOf(inq) > 0) {
     if (_lastPhoneHit !== inq.id) {
@@ -4001,6 +4018,7 @@ function onPhoneInput() {
     _lastPhoneHit = null;
     checkOpenInquiryForCustomer();
   }
+  checkModalTrackable();
 }
 
 // v1.0.44: dua kolom nomor telepon (utama + cadangan untuk sopir)
@@ -5986,6 +6004,7 @@ async function refreshPriceSuggestion() {
     suggState.desaName = null;
     if (!ilState.loaded) await ilLoadAll();
     renderPriceSuggestion();
+    checkModalTrackable();
     return;
   }
 
@@ -6002,6 +6021,78 @@ async function refreshPriceSuggestion() {
 
   if (!ilState.loaded) await ilLoadAll();
   renderPriceSuggestion();
+  checkModalTrackable();
+}
+
+// v1.0.61: peringatan proaktif — cek apakah untung order ini SAMA SEKALI
+// tidak bisa dihitung (tidak ada modal dari catatan customer manapun ATAU
+// dari catatan daerah). Ini persis skenario yang bikin kejadian Ibu Asriani:
+// kalau kejadian ini kelewat, invoice tetap tersimpan tapi untungnya kosong
+// tanpa kamu sadari. Sekarang dikasih tahu duluan, sebelum invoice dibuat.
+function checkModalTrackable() {
+  const box = document.getElementById('ilNoModalWarn');
+  if (!box) return;
+  if (isReadOnly) { box.classList.remove('show'); return; }
+
+  const phones = invoicePhones();
+  const hasPhone = phones.some(p => phoneKey(p).length >= 11);
+  if (!hasPhone) { box.classList.remove('show'); return; }
+
+  const product = costProductForMode();
+  const resolved = ilResolveInquiry(phones, currentBrand, product, currentInvoiceAddr());
+  let hasModal = resolved.modalSrc && ilModalOf(resolved.modalSrc) > 0;
+
+  if (!hasModal) {
+    if (deliveryMethod === 'ambil') {
+      const q = costQuote(null);
+      hasModal = !!(q && !q.noHistory && q.modal > 0);
+    } else if (suggState.chosen) {
+      const q = costQuote(suggState.chosen);
+      hasModal = !!(q && !q.noHistory && q.modal > 0);
+    }
+  }
+
+  box.classList.toggle('show', !hasModal);
+  if (!hasModal) {
+    box.innerHTML = `⚠️ Untung order ini belum bisa dihitung — belum ada modal tercatat untuk customer atau daerah ini.
+      <button type="button" onclick="ilQuickAddFromInvoice()">+ Catat di Tanya Harga dulu</button>`;
+  }
+}
+
+// v1.0.61: buka form "Catat Kejadian Tanya Harga", terisi otomatis dari data
+// yang sudah kamu ketik di invoice (nama, no WA, daerah dari deteksi alamat)
+// — supaya nggak perlu ngetik ulang.
+function ilQuickAddFromInvoice() {
+  ilOpenAdd();
+  setTimeout(() => {
+    const name   = (document.getElementById('custName')   || {}).value?.trim() || '';
+    const salute = (document.getElementById('custSalute') || {}).value || 'Bpk.';
+    const phone  = (document.getElementById('custPhone')  || {}).value?.trim() || '';
+    if (name) { const el = document.getElementById('ilCustName');   if (el) el.value = name; }
+    const sEl = document.getElementById('ilCustSalute'); if (sEl) sEl.value = salute;
+    const pEl = document.getElementById('ilCustPhone');  if (pEl) pEl.value = phone;
+
+    if (suggState.chosen && suggState.chosen !== 'LOCO') {
+      const kab = costRegionInfo(suggState.chosen).name;
+      const kabEl = document.getElementById('ilKab');
+      if (kabEl) {
+        kabEl.value = kab;
+        ilComboSetOptions('ilKec', ilKecOfKab(kab));
+      }
+      if (suggState.kecName) {
+        const kecEl = document.getElementById('ilKec');
+        if (kecEl) {
+          kecEl.value = suggState.kecName;
+          ilComboSetOptions('ilDesa', ilDesaOfKec(kab, suggState.kecName));
+        }
+      }
+      if (suggState.desaName) {
+        const desaEl = document.getElementById('ilDesa');
+        if (desaEl) desaEl.value = suggState.desaName;
+      }
+      ilRenderFormAlerts();
+    }
+  }, 30);
 }
 
 function suggChoose(key) {
@@ -7298,6 +7389,8 @@ function setReadOnly(ro) {
   isReadOnly = ro;
   document.body.classList.toggle('readonly-mode', ro);
   document.getElementById('readonlyBanner').classList.toggle('show', ro);
+  // v1.0.61: peringatan modal-belum-tercatat cuma relevan saat form BISA diedit
+  if (ro) { const w = document.getElementById('ilNoModalWarn'); if (w) w.classList.remove('show'); }
   // Disable all inputs directly (covers selects, textareas, native disabled behaviour)
   const scope = document.querySelector('.sidebar');
   if (scope) {
@@ -7322,6 +7415,7 @@ function enableEditMode() {
   setReadOnly(false);
   updateActionButtonMode(true);   // v1.0.40: tombol utama jadi "Simpan Perubahan"
   toast('✎ Mode Edit aktif — silakan ubah invoice');
+  checkModalTrackable(); // v1.0.61: baru relevan dicek setelah tidak read-only lagi
 }
 
 // v1.0.37: Kembalikan form ke kondisi "invoice baru" yang bersih — dipakai saat
