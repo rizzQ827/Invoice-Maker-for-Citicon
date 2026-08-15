@@ -467,6 +467,11 @@
   }
   .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
   .toast.error { background: #dc2626; box-shadow: 0 10px 30px rgba(220,38,38,0.35); }
+  /* v1.0.56: di mobile, bottomnav nutupin toast — naikkan posisinya di atas bottomnav */
+  @media (max-width: 640px) {
+    .toast { bottom: calc(70px + env(safe-area-inset-bottom, 0px)); }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+  }
 
   /* Phone preview */
   .phone-preview {
@@ -594,11 +599,13 @@
   .stat-svg { width: 100%; height: 190px; display: block; overflow: visible; }
 
   /* ═══ v1.0.44: STATISTIK KEUNTUNGAN (Profile) ═══ */
-  .stat-filters { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 14px; }
+  /* v1.0.56: 3 filter dibuat selalu berjejer 1 baris (rata kiri-tengah-kanan),
+     nggak wrap ke bawah lagi biar rapi di layar sempit */
+  .stat-filters { display: flex; gap: 6px; flex-wrap: nowrap; justify-content: space-between; margin-bottom: 14px; }
   .stat-filters select {
-    flex: 1 1 120px; height: 40px; border-radius: 10px; border: 1px solid #e2e8f0;
-    background: #fff; padding: 0 10px; outline: none;
-    font-family: 'Inter', sans-serif; font-size: 12.5px; color: #0f172a; font-weight: 600;
+    flex: 1 1 0; min-width: 0; height: 40px; border-radius: 10px; border: 1px solid #e2e8f0;
+    background: #fff; padding: 0 6px; outline: none;
+    font-family: 'Inter', sans-serif; font-size: 11.5px; color: #0f172a; font-weight: 600;
   }
   .stat-hero {
     background: linear-gradient(135deg, var(--brand-dark), var(--brand-color));
@@ -965,6 +972,49 @@
   .plog-item-date { margin-left: auto; font-size: 11px; color: #94a3b8; font-weight: 600; flex-shrink: 0; }
   .plog-item-meta { display: flex; align-items: center; gap: 7px; margin-top: 5px; flex-wrap: wrap; }
   .plog-item-note { font-size: 11.5px; color: #64748b; line-height: 1.4; }
+
+  /* v1.0.56: hierarki baru card Tanya Harga — nama jadi judul utama, alamat
+     pakai icon lokasi, harga di baris paling bawah biar gampang di-scan */
+  .il-item-name { font-size: 13.5px; font-weight: 800; color: #0f172a; margin-top: 6px; line-height: 1.3; }
+  .il-item-name-empty { color: #94a3b8; font-weight: 600; font-style: italic; }
+  .il-item-addr { display: flex; align-items: flex-start; gap: 4px; font-size: 11.5px; color: #64748b; margin-top: 3px; line-height: 1.4; }
+  .il-item-addr svg { flex-shrink: 0; margin-top: 1px; color: #94a3b8; }
+  .il-item-price-row { margin-top: 7px; }
+  .il-item-price { font-family: 'JetBrains Mono', monospace; font-size: 13.5px; font-weight: 800; color: #0f172a; }
+  .il-item-price.empty { font-weight: 600; color: #94a3b8; font-family: inherit; font-size: 11.5px; }
+
+  /* v1.0.56: label baris info read-only di modal detail Tanya Harga */
+  .il-detail-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 7px 0; border-bottom: 1px dashed #e2e8f0; }
+  .il-detail-row:last-of-type { border-bottom: none; }
+  .il-detail-lbl { font-size: 11.5px; color: #64748b; flex-shrink: 0; }
+  .il-detail-val { font-size: 13px; font-weight: 700; color: #0f172a; text-align: right; }
+  .il-detail-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 4px; }
+  .il-edit-btn {
+    flex-shrink: 0; font-size: 11.5px; font-weight: 700; color: var(--brand-color);
+    background: rgba(var(--brand-rgb),0.08); border: 1px solid rgba(var(--brand-rgb),0.25);
+    border-radius: 8px; padding: 5px 10px; cursor: pointer; display: flex; align-items: center; gap: 4px;
+  }
+  .il-locked-hint { font-size: 10.5px; color: #94a3b8; margin-top: 10px; font-style: italic; }
+
+  /* v1.0.56: icon pilih-cepat-palet di sebelah field Qty (invoice bata) */
+  .il-palet-wrap { position: relative; flex-shrink: 0; }
+  .il-palet-icon-btn {
+    width: 32px; height: 32px; border-radius: 8px; border: 1px solid #e2e8f0;
+    background: #fff; color: var(--brand-color); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0; padding: 0;
+  }
+  .il-palet-icon-btn:hover { border-color: var(--brand-color); background: rgba(var(--brand-rgb),0.06); }
+  .il-palet-popover {
+    display: none; position: absolute; top: 38px; right: 0; z-index: 60;
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(15,23,42,0.16); width: 230px; max-height: 250px; overflow-y: auto;
+    padding: 4px;
+  }
+  .il-palet-item {
+    display: block; width: 100%; text-align: left; padding: 7px 9px; border: none; background: none;
+    font-family: 'Inter', sans-serif; font-size: 10.8px; color: #0f172a; border-radius: 6px; cursor: pointer;
+  }
+  .il-palet-item:hover { background: #f1f5f9; }
 
   .plog-badge {
     display: inline-flex; align-items: center; gap: 4px;
@@ -1737,7 +1787,10 @@
           Catat Kejadian Tanya Harga
         </button>
 
-        <div class="cost-card-title" style="margin-top:16px;">Catatan Tanya Harga</div>
+        <div class="cost-card-title" style="margin-top:16px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <span>Catatan Tanya Harga</span>
+          <button class="il-more-btn" style="margin:0;padding:0;font-size:11.5px;" onclick="ilOpenFullList()">Cari semua →</button>
+        </div>
         <div class="il-status-filter" id="ilStatusFilter">
           <button class="il-status-chip active" data-st="all" onclick="ilSetFilter('all')">Semua</button>
           <button class="il-status-chip" data-st="nanya" onclick="ilSetFilter('nanya')">Nanya</button>
@@ -1747,7 +1800,8 @@
 
         <div id="ilList" class="il-list-scroll"></div>
         <div id="ilEmpty" class="plog-empty" style="display:none;">Belum ada catatan. Mulai catat tiap kali ada yang tanya harga.</div>
-        <button class="il-more-btn" id="ilMoreBtn" onclick="ilOpenFullList()" style="display:none;">Selengkapnya →</button>
+        <!-- v1.0.56: tombol ini sekarang khusus paginasi (nambah 3 card), bukan buka subpage lagi -->
+        <button class="il-more-btn" id="ilMoreBtn" style="display:none;">Selanjutnya →</button>
       </div>
 
       <!-- Peta — visual, dilihat sesekali -->
@@ -2009,6 +2063,7 @@ function hideSplash() {
     // Reset history cache for fresh user session
     _histCache = null;
     initAppUI();
+    restoreLastMainTab();
   }, 420);
 }
 
@@ -2629,11 +2684,22 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('splash-overlay').style.display = 'none';
     applyUserProfile();
     initAppUI();
+    restoreLastMainTab(); // v1.0.56: refresh balik ke tab terakhir, bukan selalu Invoice
   } else {
     // Show splash; app init happens after login
     setTimeout(() => document.getElementById('splashPwInput')?.focus(), 200);
   }
 });
+
+// v1.0.56: dipanggil setelah initAppUI — kalau tab terakhir sebelum refresh
+// bukan Invoice, pindahkan ke situ. Cuma untuk tab utama (bukan subpage/modal).
+function restoreLastMainTab() {
+  let saved = null;
+  try { saved = localStorage.getItem('citicon_last_main_tab'); } catch (e) {}
+  if (saved && ['invoice', 'cost', 'history', 'profile'].includes(saved) && saved !== 'invoice') {
+    switchTab(saved);
+  }
+}
 
 function initAppUI() {
   // Default date: today
@@ -2917,6 +2983,30 @@ function bataQtyPaletOptions() {
   }
   return opts.join('');
 }
+// v1.0.56: versi popover (bukan <option>) dipakai oleh icon pilih-cepat-palet
+// di sebelah field Qty invoice — biar nggak nambah baris baru di bawah field.
+function bataQtyPaletPopoverHtml(i) {
+  let html = '';
+  for (let palet = 1; palet <= 18; palet++) {
+    const m3 = palet * 1.92;
+    const biji = palet * 160;
+    const truk = palet % 6 === 0 ? ` = ${palet / 6} truk/rit` : '';
+    html += `<button type="button" class="il-palet-item" onclick="onBataQtyPaletPick(${i}, '${fmtQty(m3)}')">${palet} palet${truk} — ${fmtQty(m3)} m³ (±${biji} biji)</button>`;
+  }
+  return html;
+}
+function togglePaletPopover(i) {
+  document.querySelectorAll('.il-palet-popover').forEach(el => {
+    if (el.id !== `paletPopover-${i}`) el.style.display = 'none';
+  });
+  const el = document.getElementById(`paletPopover-${i}`);
+  if (el) el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+}
+document.addEventListener('click', (ev) => {
+  if (!ev.target.closest('.il-palet-wrap')) {
+    document.querySelectorAll('.il-palet-popover').forEach(el => el.style.display = 'none');
+  }
+});
 function onBataQtyPaletPick(i, val) {
   if (!val) return;
   bataRows[i].qty = val;
@@ -2946,13 +3036,20 @@ function renderBataRows() {
       <div class="flex gap-2 mb-2">
         <div style="flex:1;">
           <label class="label-field text-[10.5px]">Qty</label>
-          <input class="input text-xs" value="${h(r.qty)}" inputmode="${isM3 ? 'decimal' : 'numeric'}"
-            oninput="${isM3
-              ? `bataRows[${i}].qty=this.value;updateBataRowSubtotal(${i});updatePreview();`
-              : `bataRows[${i}].qty=this.value.replace(/\\D/g,'');this.value=bataRows[${i}].qty;updateBataRowSubtotal(${i});updatePreview();`}"
-            placeholder="${isM3 ? '11,52' : '8'}" style="padding:7px 10px;">
-          ${isM3 ? `<select class="input text-xs" style="padding:6px 22px 6px 8px;margin-top:5px;font-size:10.5px;"
-            onchange="onBataQtyPaletPick(${i}, this.value)">${bataQtyPaletOptions()}</select>` : ''}
+          <div style="display:flex;gap:5px;align-items:flex-start;">
+            <input class="input text-xs" value="${h(r.qty)}" inputmode="${isM3 ? 'decimal' : 'numeric'}"
+              oninput="${isM3
+                ? `bataRows[${i}].qty=this.value;updateBataRowSubtotal(${i});updatePreview();`
+                : `bataRows[${i}].qty=this.value.replace(/\\D/g,'');this.value=bataRows[${i}].qty;updateBataRowSubtotal(${i});updatePreview();`}"
+              placeholder="${isM3 ? '11,52' : '8'}" style="flex:1;min-width:0;padding:7px 10px;">
+            ${isM3 ? `
+            <div class="il-palet-wrap">
+              <button type="button" class="il-palet-icon-btn" onclick="togglePaletPopover(${i})" title="Pilih cepat (palet)">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M4 11h11v2H4zm0-5h16v2H4zm0 10h8v2H4zm15-3h-2v3h-3v2h3v3h2v-3h3v-2h-3z"></path></svg>
+              </button>
+              <div class="il-palet-popover" id="paletPopover-${i}">${bataQtyPaletPopoverHtml(i)}</div>
+            </div>` : ''}
+          </div>
         </div>
         <div style="flex:1;">
           <label class="label-field text-[10.5px]">Satuan</label>
@@ -4145,7 +4242,7 @@ function ilComboReset(id) {
 }
 
 // ── State & penyimpanan (Supabase langsung, bukan JSONB blob) ───────────
-const ilState = { filter: 'all', loaded: false };
+const ilState = { filter: 'all', loaded: false, visibleCount: 3 };
 let ilStore = [];          // semua baris inquiry_log milik user
 let ilRestrictions = [];   // semua baris delivery_restrictions milik user
 let ilFactoryPrices = [];  // v1.0.53: semua baris factory_price_log milik user (semua brand/produk)
@@ -4177,8 +4274,13 @@ function ilEntriesForTab() {
 
 function ilSetFilter(st) {
   ilState.filter = st;
+  ilState.visibleCount = 3; // v1.0.56: reset paginasi tiap ganti filter
   document.querySelectorAll('.il-status-chip').forEach(el =>
     el.classList.toggle('active', el.dataset.st === st));
+  ilRenderList();
+}
+function ilShowMoreCards() {
+  ilState.visibleCount += 3;
   ilRenderList();
 }
 
@@ -4371,8 +4473,14 @@ function ilOpenAdd() {
     <div id="ilFormAlerts"></div>
 
     <div style="height:12px;"></div>
-    <label class="cost-modal-label">Nama Customer (opsional)</label>
-    <input class="input" id="ilCustName" placeholder="Contoh: Pak Joko">
+    <label class="cost-modal-label">Nama Customer (opsional — boleh kosong dulu kalau masih Nanya)</label>
+    <div style="display:flex;gap:8px;">
+      <select class="input" id="ilCustSalute" style="width:80px;flex-shrink:0;">
+        <option value="Bpk.">Bpk.</option>
+        <option value="Ibu">Ibu</option>
+      </select>
+      <input class="input" id="ilCustName" placeholder="Contoh: Joko">
+    </div>
 
     <div style="height:10px;"></div>
     <label class="cost-modal-label">No WA Customer (opsional)</label>
@@ -4473,6 +4581,8 @@ async function ilSaveNew() {
   const kec = (document.getElementById('ilKec') || {}).value || '';
   const desa = (document.getElementById('ilDesa') || {}).value?.trim() || '';
   const custName = (document.getElementById('ilCustName') || {}).value?.trim() || '';
+  const custSalute = (document.getElementById('ilCustSalute') || {}).value || 'Bpk.';
+  const custNameFull = custName ? `${custSalute} ${custName}` : '';
   const custPhone = (document.getElementById('ilCustPhone') || {}).value?.trim() || '';
   const modal = parseInt((document.getElementById('ilModal') || {}).value?.replace(/\D/g, '') || '0', 10) || 0;
   const margin = parseInt((document.getElementById('ilMargin') || {}).value?.replace(/\D/g, '') || '0', 10) || 0;
@@ -4481,9 +4591,10 @@ async function ilSaveNew() {
   const row = {
     user_id: uid, brand: costState.brand, product: costState.product,
     kabupaten: kab, kecamatan: kec, desa,
-    customer_name: custName, customer_phone: custPhone ? normalizePhone(custPhone) : '',
+    customer_name: custNameFull, customer_phone: custPhone ? normalizePhone(custPhone) : '',
     modal_price: modal, margin, sell_price: modal + margin,
     status: 'nanya', note, pickup_method: ilFormPickup,
+    name_locked: !!custNameFull, // v1.0.56: kalau diisi manual dari awal, kunci — jangan ditimpa auto-fill invoice
   };
   try {
     const { data, error } = await _sb.from('inquiry_log').insert(row).select().single();
@@ -4497,6 +4608,8 @@ async function ilSaveNew() {
 
 // ── Detail / edit entri ──────────────────────────────────────
 const IL_STATUS_LABEL = { nanya: 'Nanya', closing: 'Closing', batal: 'Batal' };
+// v1.0.56: icon lokasi (pin) dipakai sebelum teks alamat di card & modal Tanya Harga
+const IL_LOC_ICON = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1112 6.5a2.5 2.5 0 010 5z"/></svg>`;
 // v1.0.53: status lama (nggak_cocok/ghosting) disatukan jadi "batal"
 function ilNormStatus(status) {
   return (status === 'nggak_cocok' || status === 'ghosting') ? 'batal' : (status || 'nanya');
@@ -4507,17 +4620,69 @@ function ilBadgeHtml(status) {
   return `<span class="il-badge ${st}">${IL_STATUS_LABEL[st] || 'Nanya'}</span>`;
 }
 
-function ilOpenDetail(id) {
+// v1.0.56: pisahkan "Bpk. Joko" / "Ibu Siti" jadi {salute, name} buat isi ulang form edit
+function ilSplitName(full) {
+  full = (full || '').trim();
+  if (/^Bpk\.?\s*/i.test(full)) return { salute: 'Bpk.', name: full.replace(/^Bpk\.?\s*/i, '') };
+  if (/^Ibu\s*/i.test(full)) return { salute: 'Ibu', name: full.replace(/^Ibu\s*/i, '') };
+  return { salute: 'Bpk.', name: full };
+}
+
+function ilOpenDetail(id, editMode) {
   const e = ilStore.find(x => x.id === id);
   if (!e) return;
   const lokasi = [e.desa, e.kecamatan, e.kabupaten].filter(Boolean).join(', ') || 'Daerah belum diisi';
   const dateLabel = new Date(e.ts).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const dateOnly = new Date(e.ts).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
   const isBata = e.product === 'bata';
+  const { salute, name } = ilSplitName(e.customer_name);
+
+  // v1.0.56: default read-only (anti typo) — nama/no WA/catatan cuma bisa
+  // diubah kalau pencet tombol Edit. Tanggal SENGAJA nggak dimunculkan di
+  // mode edit sama sekali, biar nggak ada yang kegeser nggak sengaja.
+  const nameBlock = editMode ? `
+    <label class="cost-modal-label">Sapaan & Nama Customer</label>
+    <div style="display:flex;gap:8px;">
+      <select class="input" id="ilDetSalute" style="width:80px;flex-shrink:0;">
+        <option value="Bpk."${salute !== 'Ibu' ? ' selected' : ''}>Bpk.</option>
+        <option value="Ibu"${salute === 'Ibu' ? ' selected' : ''}>Ibu</option>
+      </select>
+      <input class="input" id="ilDetName" value="${h(name)}" placeholder="Nama lengkap">
+    </div>
+    <div style="height:10px;"></div>
+    <label class="cost-modal-label">No WA Customer</label>
+    <input class="input" id="ilDetPhone" value="${h(e.customer_phone || '')}" inputmode="tel" placeholder="08xxxxxxxxxx">
+    <div style="height:10px;"></div>
+    <label class="cost-modal-label">Catatan</label>
+    <textarea class="input" id="ilDetNote" rows="2" placeholder="Contoh: proyek ruko 2 lantai">${h(e.note || '')}</textarea>
+    <div class="il-locked-hint">Tanggal catatan (${h(dateOnly)}) tidak ditampilkan di sini & tidak bisa diubah — biar nggak ada yang kegeser nggak sengaja.</div>
+  ` : `
+    <div class="il-detail-row">
+      <span class="il-detail-lbl">Nama Customer</span>
+      <span class="il-detail-val">${e.customer_name ? h(e.customer_name) : '—'}</span>
+    </div>
+    ${e.customer_phone ? `
+    <div class="il-detail-row">
+      <span class="il-detail-lbl">No WA</span>
+      <span class="il-detail-val">${h(e.customer_phone)}</span>
+    </div>` : ''}
+    ${e.note ? `<div style="font-size:12.5px;color:#64748b;line-height:1.6;margin-top:8px;">${h(e.note)}</div>` : ''}
+  `;
 
   costModal(`
-    <div class="cost-modal-title">${h(lokasi)}</div>
-    <div class="cost-modal-sub">${dateLabel}${e.customer_name ? ' · ' + h(e.customer_name) : ''}</div>
+    <div class="il-detail-header">
+      <div style="min-width:0;">
+        <div class="cost-modal-title" style="display:flex;align-items:flex-start;gap:5px;">${IL_LOC_ICON}<span>${h(lokasi)}</span></div>
+        <div class="cost-modal-sub">${dateLabel}</div>
+      </div>
+      <button class="il-edit-btn" onclick="ilOpenDetail(${e.id}, ${editMode ? 'false' : 'true'})">
+        ${editMode ? 'Selesai Edit' : `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5z"/></svg>Edit`}
+      </button>
+    </div>
 
+    ${nameBlock}
+
+    <div style="height:1px;background:#eef2f9;margin:16px 0 14px;"></div>
     <label class="cost-modal-label">Harga dari Pak Bima (Rp)</label>
     <div class="cost-price-box">
       <span class="rp">Rp</span>
@@ -4538,8 +4703,6 @@ function ilOpenDetail(id) {
     <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:800;color:#0f172a;">
       Harga jual: Rp <span id="ilDetSell">${fmtRupiah(e.sell_price || 0)}</span>
     </div>
-
-    ${e.note ? `<div style="font-size:12.5px;color:#64748b;line-height:1.6;margin-top:8px;">${h(e.note)}</div>` : ''}
 
     <div class="cost-modal-label" style="margin-top:16px;">Status</div>
     <div class="il-status-row">
@@ -4566,7 +4729,7 @@ function ilOpenDetail(id) {
           <button class="cost-btn" style="border-color:#bbf7d0;color:#0a7a38;" onclick="ilOpenWa('${e.customer_phone}')">Chat WA</button>
         </div>` : ''}
     ` : ''}
-  `, `ilSaveDetailAndClose(${e.id})`);
+  `, `ilSaveDetailAndClose(${e.id}, ${editMode ? 'true' : 'false'})`);
 
   if (e.status === 'closing' && isBata) {
     const sel = document.getElementById('ilDetVolume');
@@ -4605,12 +4768,46 @@ async function ilSetStatus(id, status) {
   ilRenderAll();
 }
 
-async function ilSaveDetailAndClose(id) {
+// v1.0.56: dipanggil tiap invoice disimpan — kalau nomor WA-nya cocok dengan
+// catatan Tanya Harga yang masih "Nanya", otomatis jadikan Closing & isi nama+
+// sapaan dari invoice. Kalau catatan itu sudah pernah diedit manual (name_locked),
+// nama yang manual itu yang menang, nggak ditimpa.
+async function ilAutoCloseMatchingInquiry(entry) {
+  if (!entry || !entry.custPhone) return;
+  const cand = ilStore.filter(e => samePhone(e.customer_phone, entry.custPhone) && e.status === 'nanya');
+  if (!cand.length) return;
+  const hit = cand.sort((a, b) => new Date(b.ts) - new Date(a.ts))[0];
+  const name = (entry.custName || '').trim();
+  const patch = { status: 'closing', updated_at: new Date().toISOString() };
+  if (name && !hit.name_locked) {
+    const salute = entry.salute || 'Bpk.';
+    patch.customer_name = `${salute} ${name}`;
+  }
+  const saved = await ilUpdateEntry(hit.id, patch);
+  if (saved) {
+    ilRenderAll();
+    toast(`✓ Tanya Harga "${saved.customer_name || 'catatan ini'}" otomatis jadi Closing`);
+  }
+}
+
+async function ilSaveDetailAndClose(id, editMode) {
   const modal = parseInt((document.getElementById('ilDetModal') || {}).value?.replace(/\D/g, '') || '0', 10) || 0;
   const margin = parseInt((document.getElementById('ilDetMargin') || {}).value?.replace(/\D/g, '') || '0', 10) || 0;
   const volEl = document.getElementById('ilDetVolume');
   const patch = { modal_price: modal, margin, sell_price: modal + margin, updated_at: new Date().toISOString() };
   if (volEl) patch.est_volume = parseNum(volEl.value) || null;
+  // v1.0.56: nama/no WA/catatan cuma ikut kesimpan kalau lagi mode Edit —
+  // dan begitu diedit manual, dikunci (name_locked) biar nggak ketimpa
+  // auto-fill dari invoice lagi.
+  if (editMode) {
+    const salute = (document.getElementById('ilDetSalute') || {}).value || 'Bpk.';
+    const name = (document.getElementById('ilDetName') || {}).value?.trim() || '';
+    const phone = (document.getElementById('ilDetPhone') || {}).value?.trim() || '';
+    patch.customer_name = name ? `${salute} ${name}` : '';
+    patch.customer_phone = phone ? normalizePhone(phone) : '';
+    patch.note = (document.getElementById('ilDetNote') || {}).value?.trim() || '';
+    patch.name_locked = true;
+  }
   await ilUpdateEntry(id, patch);
   costCloseModal();
   ilRenderAll();
@@ -4702,6 +4899,8 @@ function ilRenderContacts() {
 function ilItemHtml(e) {
   const dateLabel = new Date(e.ts).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
   const lokasi = [e.desa, e.kecamatan].filter(Boolean).join(', ');
+  // v1.0.56: hierarki baru — status+tanggal (kecil, atas) → nama (judul utama)
+  // → alamat (pakai icon lokasi) → harga (paling bawah, penekanan angka)
   return `
     <div class="plog-item">
       <button class="plog-item-del" onclick="ilRemove(${e.id})" aria-label="Hapus">
@@ -4709,13 +4908,15 @@ function ilItemHtml(e) {
       </button>
       <div class="plog-item-face" data-il-id="${e.id}">
         <div class="plog-item-top">
-          <span class="il-item-price">${e.sell_price ? 'Rp ' + fmtRupiah(e.sell_price) : (e.customer_name || 'Belum ada harga')}</span>
+          ${ilBadgeHtml(e.status)}
           <span class="plog-item-date">${dateLabel}</span>
         </div>
-        ${lokasi ? `<div class="il-item-addr">${h(lokasi)}</div>` : ''}
-        <div class="plog-item-meta">
-          ${ilBadgeHtml(e.status)}
-          ${e.customer_name ? `<span class="plog-item-note">${h(e.customer_name)}</span>` : ''}
+        <div class="il-item-name">${e.customer_name ? h(e.customer_name) : '<span class="il-item-name-empty">Belum ada nama</span>'}</div>
+        ${lokasi ? `<div class="il-item-addr">${IL_LOC_ICON}<span>${h(lokasi)}</span></div>` : ''}
+        <div class="il-item-price-row">
+          ${e.sell_price
+            ? `<span class="il-item-price">Rp ${fmtRupiah(e.sell_price)}</span>`
+            : `<span class="il-item-price empty">Harga belum diisi</span>`}
         </div>
       </div>
     </div>`;
@@ -4751,13 +4952,23 @@ function ilRenderList() {
   let entries = ilEntriesForTab();
   if (ilState.filter !== 'all') entries = entries.filter(e => ilNormStatus(e.status) === ilState.filter);
 
-  if (moreBtn) moreBtn.style.display = entries.length > 5 ? '' : 'none';
-
-  if (!entries.length) { list.innerHTML = ''; empty.style.display = ''; return; }
+  if (!entries.length) { list.innerHTML = ''; empty.style.display = ''; if (moreBtn) moreBtn.style.display = 'none'; return; }
   empty.style.display = 'none';
 
-  list.innerHTML = ilGroupedHtml(entries);
+  // v1.0.56: paginasi — maks 3 card dulu, tombol "Selanjutnya" nambah 3 lagi
+  const visible = entries.slice(0, ilState.visibleCount);
+  list.innerHTML = ilGroupedHtml(visible);
   ilBindSwipeIn('#ilList');
+
+  if (moreBtn) {
+    if (entries.length > ilState.visibleCount) {
+      moreBtn.style.display = '';
+      moreBtn.textContent = 'Selanjutnya →';
+      moreBtn.onclick = ilShowMoreCards;
+    } else {
+      moreBtn.style.display = 'none';
+    }
+  }
 }
 
 // ── Subpage: semua catatan, dengan pencarian & filter kabupaten/kecamatan ──
@@ -4833,7 +5044,7 @@ function ilBindSwipeIn(containerSelector) {
     if (face.dataset.swipeBound) return;
     face.dataset.swipeBound = '1';
     const id = parseInt(face.dataset.ilId, 10);
-    let startX = 0, startY = 0, dragging = false, moved = false, anyMoved = false, pid = null;
+    let startX = 0, startY = 0, startTime = 0, dragging = false, moved = false, anyMoved = false, pid = null;
 
     function settle(open) {
       face.style.transition = 'transform 0.22s cubic-bezier(.22,.61,.36,1)';
@@ -4843,7 +5054,7 @@ function ilBindSwipeIn(containerSelector) {
 
     face.addEventListener('pointerdown', e => {
       if (e.pointerType === 'mouse' && e.button !== 0) return;
-      startX = e.clientX; startY = e.clientY;
+      startX = e.clientX; startY = e.clientY; startTime = Date.now();
       dragging = true; moved = false; anyMoved = false; pid = e.pointerId;
       face.style.transition = 'none';
     });
@@ -4852,7 +5063,10 @@ function ilBindSwipeIn(containerSelector) {
       if (!dragging || e.pointerId !== pid) return;
       const dx = e.clientX - startX;
       const dy = e.clientY - startY;
-      if (Math.abs(dx) > 6 || Math.abs(dy) > 6) anyMoved = true;
+      // v1.0.56: threshold dinaikkan (6→12px) — di HP, jari sedikit gemetar
+      // saat "tap" biasa bikin anyMoved true terus, jadi tap pertama
+      // dianggap gerakan & modal nggak kebuka (baru kebuka pas tap kedua).
+      if (Math.abs(dx) > 12 || Math.abs(dy) > 12) anyMoved = true;
       if (!moved && Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.2) {
         moved = true;
         try { face.setPointerCapture(pid); } catch (err) {}
@@ -4864,9 +5078,13 @@ function ilBindSwipeIn(containerSelector) {
       if (!dragging || e.pointerId !== pid) return;
       dragging = false;
       const dx = e.clientX - startX;
+      const elapsed = Date.now() - startTime;
+      // v1.0.56: cuma dianggap "scroll, jangan buka" kalau gerakannya lumayan
+      // DAN durasinya juga agak lama — tap cepat dengan jitter kecil tetap
+      // dianggap tap valid supaya modal langsung kebuka sekali tekan.
       if (moved) {
         settle(dx < -40);
-      } else if (anyMoved) {
+      } else if (anyMoved && elapsed > 220) {
         // gerakan cuma scroll vertikal — jangan buka apa pun
       } else if (face.classList.contains('swiped')) {
         settle(false);
@@ -4934,7 +5152,7 @@ function ilMapCounts() {
 // v1.0.53: siluet real hasil ekstraksi dari peta administratif (bagian
 // berwarna merah = Jawa Timur saja), sudah termasuk Madura & pulau-pulau
 // kecilnya jadi satu path (bukan sketsa tangan lagi seperti sebelumnya).
-const JATIM_ISLAND_PATH = 'M34.2,204.3 37.2,204.2 37.9,206.4 39.6,207.1 39.4,209.8 40.7,210.9 39.2,213.2 40.2,216 39.8,216.9 41.6,218.2 41.4,219.7 44.7,220.4 44.6,221.7 43,222.2 43.6,223.4 42.3,224.8 43.2,227.4 37.9,227.6 36.2,226.5 33.1,225.9 29.2,227 28.4,227.9 24.8,227.9 22.8,226.4 21.9,224.1 20.3,224.4 20.5,225.7 17.2,226.4 8.9,223.3 8.2,220.9 8.8,217.3 9.7,216.8 12,213 14.7,214.3 17.8,214.2 19.7,213.3 20.4,210.4 21.6,210.6 21.4,212.8 24,212.8 24.6,210.2 24,207 25.4,206.2 25.2,204.1 27.9,203 28.6,204.4 30,204.1 33,205.1ZM67.4,194.8 69.8,197 69.8,197 69.2,199.2 67.6,202.2 67.2,201 64.5,201.3 62.3,204.5 60.7,204.5 60.8,208.8 58.9,208.9 55.6,210.4 55,211.9 53,212.4 51.2,216.2 48.7,216.2 48,218.6 48.2,220.5 44.7,220.4 41.4,219.7 41.6,218.2 39.8,216.9 40.2,216 39.2,213.2 40.7,210.9 39.4,209.8 39.6,207.1 37.9,206.4 37.2,204.2 34.2,204.3 36,200.2 36.5,196.4 35.3,194.3 37.3,193.8 45.2,193.1 46.4,193.3 47.6,193.2 50.5,194.7 55.2,195 57.2,193.4 60.9,192.4 62.2,193 63.3,195.3 65.4,195.6ZM67.6,202.2 66.4,203.8 66.4,205.8 67.9,207.5 67.6,210.7 69.4,211.4 71.6,214.6 73.8,215.3 73,217.5 71.8,218.2 66.1,218.5 64.6,221 66,223.1 65.7,225.3 67,226.6 67.2,228.2 68.9,228.7 68.6,231.4 65.9,228.6 64.7,228.8 64.7,231 63,232 64.7,233 63.6,234.9 58.7,231.9 58.8,231.2 55,230.8 53.5,229.9 50.9,231.8 48.4,229.9 47.4,231 46.1,229.1 46.4,227.5 44.5,226.6 43.2,227.4 42.3,224.8 43.6,223.4 43,222.2 44.6,221.7 44.7,220.4 48.2,220.5 48,218.6 48.7,216.2 51.2,216.2 53,212.4 55,211.9 55.6,210.4 58.9,208.9 60.8,208.8 60.7,204.5 62.3,204.5 64.5,201.3 67.2,201ZM70.7,197.3 70.9,199.3 72.8,200.1 75.1,202.2 76.5,205 80.7,206.2 81.6,208.4 82.9,211.7 84.2,212.7 84.8,215.2 90.3,216.9 91.2,216.3 93,217.3 92.7,219.6 91.9,219.6 90.1,221.6 86.6,220.4 86.2,225.6 86.6,230.3 83.1,228.3 80.3,228.4 80.3,229.9 78.1,229.7 75.8,228.7 74.1,227 71.8,227.6 70.4,226.4 69.1,226.4 68.9,228.7 67.2,228.2 67,226.6 65.7,225.3 66,223.1 64.6,221 66.1,218.5 71.8,218.2 73,217.5 73.8,215.3 71.6,214.6 69.4,211.4 67.6,210.7 67.9,207.5 66.4,205.8 66.4,203.8 67.6,202.2 69.2,199.2 69.8,197 69.8,197 69.8,197ZM109.5,232.8 107.8,231.7 106.4,232.4 105.2,231.6 102.8,232.9 99.9,232.4 99.8,231.3 95.4,231.4 94.6,230.6 90.8,230.5 89.2,231 86.6,230.3 86.2,225.6 86.6,220.4 90.1,221.6 91.9,219.6 92.7,219.6 93,217.3 91.2,216.3 90.3,216.9 84.8,215.2 84.2,212.7 82.9,211.7 81.6,208.4 85.9,208.6 88.3,208 91.3,207.9 92.5,207 97.1,206.8 105.9,203.7 108.3,204.4 110.3,205.6 115.6,202.4 117.8,206.7 116.8,209.7 116.1,212.9 116,218.6 114.6,219.6 110,220.8 111.4,222 111.9,224.4 111.2,225.1 111.2,229.2ZM99.1,208.9 97.6,210.8 95.6,210.7 95.8,212.6 97.9,214.1 99.7,212 100,209.6ZM113.9,192.4 111.2,193.7 108.8,192 107.8,193 105.4,192.6 104.6,193.3 105.9,194.7 106,197.4 106.8,197.4 107,201.1 105.9,203.7 97.1,206.8 92.5,207 91.3,207.9 88.3,208 85.9,208.6 81.6,208.4 80.7,206.2 76.5,205 75.1,202.2 72.8,200.1 70.9,199.3 70.7,197.3 78.2,190.2 79.6,189.4 81.4,186.4 83.4,186.7 83.3,188.1 85,191.6 86,192.2 86.6,189.6 89,189.2 89.9,186.4 91.6,183.3 92.4,180.2 92.8,181.2 96.1,181.8 97.3,183.7 99.8,186.2 99.5,187 102.5,189.7 105.6,189.6 112.1,193ZM82.9,193.4 81.2,194.9 79.8,195.1 79.9,196.9 81.9,197.4 84.4,200.1 86.7,200.2 87.6,198.5 85.1,196.6ZM133.1,238.4 134,238.8 133.7,240.8 131.8,240ZM112.6,194 114.9,194.9 116.5,194.2 117.6,197.3 117.6,200.1 116.3,203.6 116.4,206 124.6,203.5 122.4,201.7 122.4,197.3 124,195.2 124.1,194 126.1,195.4 128.8,196.7 134,197.7 134.8,199.6 137.5,201.4 137.4,202.7 139.2,205 141.3,206.1 144.7,206.9 145.9,206.5 148.2,207.2 148.7,209 148.2,211.5 145.8,214.4 146.2,215.8 147.4,216.2 147.5,217.9 146,220.9 147,228.1 146,229.7 147,231.5 148.7,232.1 148.1,233.1 149.9,234.7 148.4,236.7 143.8,238.6 143.3,237.6 140.3,236 139.7,238 136.7,238.3 134.8,239.2 132.5,239.2 130.2,240.9 128.5,241.3 127.2,240 121.6,238.1 119.7,238.2 115.9,237.6 114.1,237.8 112.7,236.8 109.2,236.3 108.2,234.4 109.8,230.7 109.8,226.7 110.6,226 110,223.5 108.7,222.4 113.2,221.2 114.7,220.2 114.8,214.5 115.4,211.2 116.5,208.2 114.2,204 109,207.2 107,206 104.6,205.3 105.7,202.7 105.4,199 104.6,199 104.6,196.2 103.3,194.8 104.1,194.2 106.4,194.6 107.5,193.6 109.8,195.3ZM120.9,207.6 122.4,209.2 122,211.9 126.1,214.9 127.4,213.4 128.7,210.2 126.1,209 126.5,206.4 124.2,205.3ZM179.2,210.6 178.2,212.4 180.1,217.7 180.4,219.5 179.6,221.5 175.8,224.5 176.2,227 175.1,230 171.1,228.4 165.2,228.2 162.6,228.8 159.4,228.5 152.6,231.2 151.2,233.1 149.4,231.6 150,230.5 148.4,229.9 147.4,228.1 148.4,226.5 147.3,219.3 148.8,216.4 148.7,214.6 147.5,214.3 147.1,212.8 149.5,209.9 150,207.5 152.4,207.2 153.6,205.9 155.6,206.5 158.1,209.3 158.9,207.3 161.3,207.3 162,208 164.5,207.1 168.3,203.6 168.4,201.6 171.2,202.2 172.6,201.8 173.1,203.8 174.5,203.6 176.3,203.6 178,205.6 179.5,210.1ZM174.9,239.6 177.9,240.4 181.8,240.4 182.3,242.8 178.1,243.6 174.3,243.7 172.2,242.4 173.1,240.8ZM224.6,219 223.2,219.5 221,222.4 218.6,224.1 219.4,225 218.8,226.6 217,227.5 217,229.4 216,231.1 216.6,232 215.6,233.4 216.1,235.4 217.9,237.6 215.2,240.4 214,238.2 211.4,239.8 210.6,244.1 211.6,245.5 210.3,248.2 208.2,246.7 208.5,244.4 207,243.7 204.9,244.6 203.4,246.3 201.1,243.2 200.4,244.2 197,244.1 196.5,241.3 192,239.4 188.8,239.6 185.4,238.2 185,236.4 182.4,236 179.4,237.5 175.6,232.6 173.2,231.1 174.4,228.2 173.9,225.6 177.7,222.6 178.5,220.7 178.3,218.8 176.4,213.6 177.4,211.7 179,210.7 181.7,210.5 182.3,211.2 185,211.3 186.5,210.1 188.8,210.9 191,208.9 194.1,208.4 195.2,208.9 196.8,207.9 198.7,207.6 199.9,210.6 201.4,210.6 203.5,213 205.8,212.4 208.1,213.6 208.6,213 211.5,212.9 213.6,211.8 214,210.8 216,211.5 218.9,213.6 221.6,214.6 223.6,216.4ZM252.8,204.2 253.6,210.8 253.3,213.2 251.1,217.3 251.3,219 250,222.3 250.5,225 248.8,228.1 248.8,230.1 247,238 248.7,242.7 248,245.6 249.5,245.6 251,243 251.8,244 251.3,246.2 252.8,250.6 254.1,252.6 255.2,252.9 256.2,251.5 259,253.7 263,254.5 265.4,258.2 264.8,260.8 262.9,262.2 260.8,262.8 258.5,262.4 256.1,261.4 252.5,260.6 249.1,260.7 247.3,259.5 249.2,258.5 249.3,255.7 247.8,253.5 244.8,251.6 240.6,250.3 239.2,250.6 238.8,253.4 236.2,253.1 232.8,251.7 229.7,251.4 226.8,253 225.6,252.4 225.2,249.9 223.7,249.6 220.8,251.5 220.9,248.3 219.1,247.4 217.6,248.8 216,247.8 212.1,247.1 213.4,244.4 212.5,242.9 213.2,238.6 215.8,237.1 217.1,239.3 219.8,236.5 218,234.2 217.4,232.2 218.5,230.8 217.9,230 218.8,228.3 218.9,226.4 220.6,225.5 221.2,223.9 220.5,223 222.8,221.3 225.1,218.4 226.4,217.9 227.6,217.1 232.8,215.8 235.4,216.1 238.3,215.6 238.7,213.7 240.6,212.4 240.2,209.6 239,207.7 240.8,204.4 244.2,200.7 247.3,202.4ZM239,207.7 240.2,209.6 240.6,212.4 238.7,213.7 238.3,215.6 235.4,216.1 232.8,215.8 227.6,217.1 226.4,217.9 225.4,215.2 223.5,213.4 220.7,212.5 217.8,210.4 215.8,209.6 215.4,210.7 213.4,211.8 210.4,211.8 210,212.5 207.6,211.3 205.4,211.9 203.2,209.4 201.7,209.4 200.6,206.4 198.7,206.8 197.3,206 199.9,204.3 200,203.2 202.5,201.7 204.1,199.7 205,197.2 204.9,195.4 207.4,194.4 209.7,195.9 212.1,195.6 213,194.4 216.3,194.6 220,192.3 222.8,193.2 223.9,192 227.7,191.9 229.6,195.2 230,200.4 231.1,202.3 231.6,205.4 232.3,207 235.6,206.5ZM252.8,204.2 247.3,202.4 244.2,200.7 240.8,204.4 239,207.7 235.6,206.5 232.3,207 231.6,205.4 231.1,202.3 230,200.4 229.6,195.2 227.7,191.9 223.9,192 222.8,193.2 220,192.3 216.3,194.6 213,194.4 212.1,195.6 209.7,195.9 207.4,194.4 204.9,195.4 205,197.2 204.1,199.7 202.5,201.7 200,203.2 199.9,204.3 197.3,206 196.4,205 197.4,203.4 196.9,199.8 195.8,197.9 196.5,196.4 195.6,192.7 194,191.7 194.2,189.6 195.5,188.8 199.2,189.5 200.2,190.4 203.5,188.4 206.5,190.4 208.8,190 210.8,187.8 212.4,186.7 214.2,186.6 216.2,187.6 218.8,187.7 221.6,184.4 223.8,183.3 225,182 226.6,181.4 228.2,183.4 230.8,188.2 237.9,189 239.9,187.7 243.1,190.3 246.2,191.8 249.4,191.2 254.5,194.4 255.7,196.4 255.6,201 252.8,202.8ZM150,207.5 149.5,205.6 150.8,204.6 150.5,202.1 157.3,196.1 157.8,191.2 160.7,188.2 161.6,189.3 163.8,189.6 164.5,190.6 166.4,191.1 165.4,193.3 166.4,193.6 166.4,195.4 168.9,196.1 170.3,193.4 170.5,190.6 171.7,191.3 172.9,193.2 174,193.6 175.2,192.5 178,192.7 179.9,191.3 182.2,190.3 184.5,190.2 187.7,187.7 191,188.5 195.5,188.8 194.2,189.6 194,191.7 195.6,192.7 196.5,196.4 195.8,197.9 196.9,199.8 197.4,203.4 196.4,205 197.3,206 198.7,206.8 197,207.8 196,207.3 192.9,207.7 190.7,209.8 188.3,209 186.8,210.2 184.1,210.1 183.6,209.4 180.9,209.6 179.2,210.6 179.5,210.1 178,205.6 176.3,203.6 174.5,203.6 173.1,203.8 172.6,201.8 171.2,202.2 168.4,201.6 168.3,203.6 164.5,207.1 162,208 161.3,207.3 158.9,207.3 158.1,209.3 155.6,206.5 153.6,205.9 152.4,207.2ZM142.7,178.5 145,179.8 147.3,182.6 146.1,182.5 145.1,184.4 146.7,186.2 148.7,186.1 150.5,183.4 153.5,184.8 156,184.3 158.4,185.6 160.7,188.2 157.8,191.2 157.3,196.1 150.5,202.1 150.8,204.6 149.5,205.6 147.2,205 146,205.3 142.6,204.5 140.5,203.4 138.8,201.1 138.8,199.9 136.1,198 135.4,196.1 130.2,195.1 127.4,193.9 125.4,192.4 124.5,190.2 127.3,186.5 128.2,184.5 127.6,182.5 130.1,180.4 131.2,178.1 133.6,177 134.8,178.7 138.5,178.9 142.4,177.6ZM142.7,178.5 142.4,177.6 138.5,178.9 134.8,178.7 133.6,177 131.2,178.1 128.5,176.2 126.4,174 124.2,172.4 118.4,171.1 117.2,170.1 118.9,167.6 123.9,166.8 125.4,165 128.3,164.8 130.2,164 133.5,162.6 135,163.4 136.9,163 142,163 143.1,162.4 142.4,167.5 142.8,171.9 141,172.4 142.7,174.7 144.6,175.2 145.2,176.4 144.9,178.7ZM118.9,167.6 117.2,170.1 118.4,171.1 124.2,172.4 126.4,174 128.5,176.2 131.2,178.1 130.1,180.4 127.6,182.5 128.2,184.5 127.3,186.5 124.5,190.2 121.7,189.6 119.4,192.1 117.8,192.6 116.2,193.3 114.5,187.8 113.2,186 112.6,182.4 110.7,180.3 109.8,177.6 110.6,175.7 110.6,173 111.6,172.6 112.3,171 108.3,171.1 108.8,166.9 108,165.5 108.6,163.2 110.2,161.8 111.8,162.4 113.6,160.9 117.8,160.4 118.2,162.6 117.7,165.7ZM114.3,168.6 112.2,169 111.7,171.3 115.4,170.8 115.8,168.9ZM108.6,163.2 108,165.5 108.8,166.9 108.3,171.1 112.3,171 111.6,172.6 110.6,173 110.6,175.7 109.8,177.6 110.7,180.3 112.6,182.4 113.2,186 114.5,187.8 116.2,193.3 113.9,192.4 112.1,193 105.6,189.6 102.5,189.7 99.5,187 99.8,186.2 97.3,183.7 96.1,181.8 92.8,181.2 92.4,180.2 92.3,178.6 94.1,176.3 95.1,176 95.2,174.2 96.4,173.2 95.5,171.6 93.5,170.9 91.6,171.3 90.2,170.6 89,168.2 89.4,166.8 90.3,165.8 91.7,165.9 97.6,163.6 99.6,163.4 102,164.4ZM89.4,166.8 89,168.2 90.2,170.6 91.6,171.3 93.5,170.9 95.5,171.6 96.4,173.2 95.2,174.2 95.1,176 94.1,176.3 92.4,178.6 92.4,180.2 91.6,183.3 89.9,186.4 89,189.2 86.6,189.6 86,192.2 85,191.6 83.3,188.1 83.4,186.7 81.4,186.4 79.6,189.4 78.2,190.2 70.7,197.3 69.8,197 69.8,197 67.4,194.8 65.6,192.7 66.1,189.6 67.4,188.2 67.8,186.5 69.2,184.7 69.8,181 71,177.1 72.9,177.3 74,174.2 72.2,173.4 70.8,171.2 72.2,169.7 75.9,169.8 78,169.3 80.5,169.8 82.6,167.3 86,167.5 87.8,166.6ZM70.8,171.2 72.2,173.4 74,174.2 72.9,177.3 71,177.1 69.8,181 69.2,184.7 67.8,186.5 67.4,188.2 66.1,189.6 65.6,192.7 67.4,194.8 65.4,195.6 63.3,195.3 62.2,193 60.9,192.4 57.2,193.4 55.2,195 50.5,194.7 47.6,193.2 46.4,193.3 47.2,189.2 49.8,187.8 50.7,185 52.8,185 54,180.6 51.4,180.7 49.6,183.4 50.7,184.2 48.8,185.2 48.7,183.6 46.8,182.2 48,181.5 48.2,179.8 49.9,178.4 50.6,176.5 52.4,177.1 55.2,175.3 57.6,171.8 59.4,171.3 61.8,167.6 65,170 69,171.8ZM50.6,176.5 49.9,178.4 48.2,179.8 48,181.5 46.8,182.2 48.7,183.6 48.8,185.2 50.7,184.2 50.8,184.3 50.8,184.4 50.7,185 49.8,187.8 47.2,189.2 46.4,193.3 45.2,193.1 37.3,193.8 35.3,194.3 35.6,192 34.3,190.2 31.8,191.3 30,189.4 27.8,188.6 28.6,185.9 28.7,182.3 33.3,180.7 35.4,181.1 37.1,180 41,178.7 41.7,176.7 43.8,176.6 47.2,174.6 50,174.9ZM30,156.4 32.2,159 35.1,159.4 38.3,161.5 41.8,163.3 43.8,163.3 45.7,164.9 47.2,164.4 50.8,164.4 51.9,165 54,164.4 55.1,163.4 57.9,165 59,166.3 61.8,167.6 59.4,171.3 57.6,171.8 55.2,175.3 52.4,177.1 50.6,176.5 50,174.9 47.2,174.6 43.8,176.6 41.7,176.7 41,178.7 37.1,180 35.4,181.1 33.3,180.7 28.7,182.3 25.8,178.3 25.4,175.6 25.8,173.8 23.5,168.6 25.3,164.8 25.2,162 26,161 24.7,160 25.5,157.6 27.5,157.6ZM95.3,146.8 95.8,148.6 94.1,150.6 92.8,154 90.8,155.2 90.8,160.5 89.6,162.4 90.8,164 90.3,165.8 89.4,166.8 87.8,166.6 86,167.5 82.6,167.3 80.5,169.8 78,169.3 75.9,169.8 72.2,169.7 70.8,171.2 69,171.8 65,170 61.8,167.6 59,166.3 57.9,165 55.1,163.4 54,164.4 51.9,165 50.8,164.4 47.2,164.4 46,164.2 47,161.7 44.8,160.9 46.5,158.2 49,156.1 51.5,155.6 54.4,152.4 56,152.1 56,150.7 58.2,146.9 57.8,144.7 58.8,143.4 58.1,142.7 57.8,140 58.5,138.4 60.5,139.2 61,142 63.4,143 64.8,144.9 70,144.7 72.1,145.2 74.6,147.2 75,148.2 81.2,148.4 83.1,149.3 86.7,144.6 90.4,143.8 90.6,145.2 92.6,145.4ZM96.5,132.2 98.7,133.9 98.6,135.4 99.5,139.8 98.7,141.2 99.8,141.7 99.7,144.4 97.8,145.1 97,144.4 95.3,146.8 92.6,145.4 90.6,145.2 90.4,143.8 86.7,144.6 83.1,149.3 81.2,148.4 75,148.2 74.6,147.2 72.1,145.2 70,144.7 64.8,144.9 63.4,143 61,142 60.5,139.2 58.5,138.4 57.2,136.9 55,136 55.1,133.5 57,133.1 57.9,131 57.6,128.6 58.2,126.8 59.3,127.3 61.1,126.5 61.2,123.4 62.7,123.3 63.2,122.1 65.6,123.4 68.4,123.4 71.5,125 75,125.2 79.4,123.8 81,122.8 83.2,123.5 85.3,127.7 87.1,130.2 88.8,131.6 94.7,132.4ZM115.2,130.5 115.2,132.2 114.1,132.8 114,135.8 110.6,136.3 110.1,138.1 111.7,138.2 114.4,139.4 118,139.4 119.7,140 119.2,141.4 121,141.9 122.6,143.8 121.8,145.8 119.4,146.6 119.1,148 117.7,147.9 117.4,150.1 119.2,150.6 119.5,152.6 116,153.7 113.7,155.3 112.2,157.6 113.2,158.2 113,160.4 110.2,161.8 108.6,163.2 102,164.4 99.6,163.4 97.6,163.6 91.7,165.9 90.3,165.8 90.8,164 89.6,162.4 90.8,160.5 90.8,155.2 92.8,154 94.1,150.6 95.8,148.6 95.4,146.8 97.1,144.4 97.8,145.1 99.7,144.4 99.8,141.7 98.7,141.2 99.5,139.8 98.6,135.4 98.7,133.9 96.5,132.2 97.4,131.5 101.6,130.4 103.2,130.9 107.5,129.7 109.4,129.8 111.5,130.6 113.4,129.8ZM130.5,152.6 125.7,154.3 127.4,157.1 128.5,157.3 128.3,160.8 129.7,161 130.2,164 128.3,164.8 125.4,165 123.9,166.8 118.9,167.6 117.7,165.7 118.2,162.6 117.8,160.4 113.6,160.9 111.8,162.4 110.2,161.8 113,160.4 113.2,158.2 112.2,157.6 113.7,155.3 116,153.7 119.5,152.6 119.2,150.6 117.4,150.1 117.6,147.9 119.1,148 119.4,146.6 121.8,145.8 122.6,143.8 121,141.9 119.2,141.4 119.7,140 118,139.4 114.4,139.4 111.7,138.2 110.1,138.1 110.6,136.3 114,135.8 114.1,132.8 115.2,132.2 115.2,130.5 115.8,130.8 116.1,131.1 117.6,132.2 122.3,132.9 123.2,131.4 121.8,130.6 123,129 124.3,131.8 126.1,132.8 125.8,135 127.8,138 129.1,138.7 130,143 128.4,144.5 128.2,148.6 130.3,149.7ZM162.7,131.8 162,134.8 160.6,135.5 161.5,137.5 164.3,138.2 163.3,141.7 162,141.4 161.5,144.8 162.1,146.4 159.3,149.7 158,150.6 156.8,154 154.1,153.8 147.6,151.7 144.6,150.5 138.4,150.3 136.9,149.7 134.9,151.3 132.6,149.8 133.6,145.9 132.2,145.8 131.4,144.3 132,141.4 134.8,141.9 138.9,138.6 143.5,133 143.6,132 148.6,131.8 154,131 158.4,131ZM187.6,132.1 187.2,134 184.3,136.4 183.2,138.5 183.3,140 181.3,141.7 181.3,144.3 179.6,146.8 179.5,148.7 180.4,149.6 180.4,152.5 181.3,154.3 173.1,154.2 172.1,154.8 169.2,154.5 165.8,155 165.3,153.8 161,155.1 156.8,154 158,150.6 159.3,149.7 162.1,146.4 161.5,144.8 162,141.4 163.3,141.7 164.3,138.2 161.5,137.5 160.6,135.5 162,134.8 162.7,131.8 165.8,131.7 167.8,132.1 169.8,131.6 176.5,131.4 184.6,131.5ZM195.8,148.1 193.8,150.6 192.9,154 192.1,155.4 189.8,156.7 188.5,155 181.3,154.3 180.4,152.5 180.4,149.6 179.5,148.7 179.6,146.8 181.3,144.3 181.3,141.7 183.3,140 183.2,138.5 184.3,136.4 187.2,134 187.6,132.1 198.4,131.4 198.2,133.2 199.2,133.4 196.2,137.4 196.2,140.1 194.4,140.5 195.2,143.5 197.2,145.4 196.8,146.4ZM207,153.7 210.4,154.5 209,155.6 206.8,154.4ZM217.9,152 219,153.7 215.3,154.6 215,153.3ZM260.3,150.3 263,151.2 262.6,152.5 260.4,152.7 259.4,150.6ZM351.6,149 350.8,154.9 349.6,155.7 346.9,156 341.1,153.6 340.2,152.3 343,149.2 343.8,151.3 346.7,152 347.2,152.9 349.3,152.2 349.1,150.8ZM242.8,150.8 244.8,155.2 243.5,156 238.6,154.4 237.4,153.3 235.7,150.1 237.3,147.9 239.6,147.3 242.4,149.4ZM213.2,145.9 215.1,146.9 219.8,147.1 220.8,149.6 215.9,149.3 212.5,148 212,147ZM328.8,146 328.4,147.6 327.4,147.4 327.2,145.7ZM320.9,141.8 320.1,144.9 318.2,143.7 319.7,142ZM314.2,141.4 314.2,143.4 311.8,142.8 311.7,141.4ZM222.5,143.2 221,142.9 221.4,141.2 222.8,141.1ZM320.3,136.9 324.8,139.3 323.4,141.4 320.7,140.7 318.7,138.3ZM181,151.1 181.9,149.4 182.3,148.4 180.4,146.5 179.5,143.5 181.4,143.1 181.4,140.4 184.3,136.4 183.3,136.2 183.5,134.4 186.7,134.1 194.7,134.2 202.2,132.8 206.3,133.4 208.7,134.4 215.7,137.9 217.2,140.7 215,140.8 212.6,142.5 207.8,142.8 206.2,145 205,145 203.5,143.5 200.2,147.4 199.6,148.9 200.8,149.4 201.1,151.4 195.8,151.5 190.9,150.3 186.6,149.8 184.6,151.1ZM300.1,130.2 304.1,130.8 309.5,130.8 311.9,131.6 317.8,134.2 320.5,135.8 321.6,137.4 319.7,139.9 317.6,138.4 316.4,138.7 312.8,136.1 311.7,137.1 309.2,137 308.7,135.6 307.2,137 305.3,136.6 304.6,137.4 308.1,139.1 309.6,141.5 304.6,141.9 303.8,140.2 301.8,142.8 300.1,141.8 299.4,139.1 295.3,136.8 296,134.6 298.2,134.3 299.2,132.7 298.6,130.3ZM84.7,192.7 86.9,196 89.4,197.9 88.4,199.6 86.2,199.5 83.7,196.8 81.7,196.3 81.6,194.5 83,194.3ZM97.4,212.5 98.4,213.2 98.1,215.6 96.3,217.8 94.1,216.2 94,214.4 95.9,214.4ZM125,204.8 128.4,202.5 130.6,203.6 130.2,206.2 132.8,207.4 131.5,210.6 130.2,212.1 126,209 126.4,206.4ZM170.5,190.6 170.3,193.4 168.9,196.1 166.4,195.4 166.4,193.6 165.4,193.3 166.4,191.1 168.9,190.3ZM150.5,183.4 148.7,186.1 146.7,186.2 145.1,184.4 146.1,182.5 147.3,182.6ZM115.6,170.6 117,170.8 116.6,172.7 112.9,173.2 113.4,171ZM50.7,185 50.8,184.4 50.8,184.3 50.7,184.2 49.6,183.4 51.4,180.7 54,180.6 52.8,185ZM142,163 136.9,163 135,163.4 133.5,162.6 130.2,164 129.7,161 128.3,160.8 128.5,157.3 127.4,157.1 125.7,154.3 130.5,152.6 131,154.5 132.2,154.8 134.2,154.2 135.4,153 137.7,152.8 138.8,153.7 140.6,157 142,157.4 143.4,159.7ZM124.5,190.2 125.4,192.4 125.3,193.6 123.7,195.7 123.8,200.2 125.9,201.9 117.7,204.4 117.6,202 119,198.5 119,195.7 117.8,192.6 119.4,192.1 121.7,189.6Z';
+const JATIM_ISLAND_PATH = 'M34.2,204.3 37.2,204.2 37.9,206.4 39.6,207.1 39.4,209.8 40.7,210.9 39.2,213.2 40.2,216 39.8,216.9 41.6,218.2 41.4,219.7 44.7,220.4 44.6,221.7 43,222.2 43.6,223.4 42.3,224.8 43.2,227.4 37.9,227.6 36.2,226.5 33.1,225.9 29.2,227 28.4,227.9 24.8,227.9 22.8,226.4 21.9,224.1 20.3,224.4 20.5,225.7 17.2,226.4 8.9,223.3 8.2,220.9 8.8,217.3 9.7,216.8 12,213 14.7,214.3 17.8,214.2 19.7,213.3 20.4,210.4 21.6,210.6 21.4,212.8 24,212.8 24.6,210.2 24,207 25.4,206.2 25.2,204.1 27.9,203 28.6,204.4 30,204.1 33,205.1ZM67.4,194.8 69.8,197 69.8,197 69.2,199.2 67.6,202.2 67.2,201 64.5,201.3 62.3,204.5 60.7,204.5 60.8,208.8 58.9,208.9 55.6,210.4 55,211.9 53,212.4 51.2,216.2 48.7,216.2 48,218.6 48.2,220.5 44.7,220.4 41.4,219.7 41.6,218.2 39.8,216.9 40.2,216 39.2,213.2 40.7,210.9 39.4,209.8 39.6,207.1 37.9,206.4 37.2,204.2 34.2,204.3 36,200.2 36.5,196.4 35.3,194.3 37.3,193.8 45.2,193.1 46.4,193.3 47.6,193.2 50.5,194.7 55.2,195 57.2,193.4 60.9,192.4 62.2,193 63.3,195.3 65.4,195.6ZM67.6,202.2 66.4,203.8 66.4,205.8 67.9,207.5 67.6,210.7 69.4,211.4 71.6,214.6 73.8,215.3 73,217.5 71.8,218.2 66.1,218.5 64.6,221 66,223.1 65.7,225.3 67,226.6 67.2,228.2 68.9,228.7 68.6,231.4 65.9,228.6 64.7,228.8 64.7,231 63,232 64.7,233 63.6,234.9 58.7,231.9 58.8,231.2 55,230.8 53.5,229.9 50.9,231.8 48.4,229.9 47.4,231 46.1,229.1 46.4,227.5 44.5,226.6 43.2,227.4 42.3,224.8 43.6,223.4 43,222.2 44.6,221.7 44.7,220.4 48.2,220.5 48,218.6 48.7,216.2 51.2,216.2 53,212.4 55,211.9 55.6,210.4 58.9,208.9 60.8,208.8 60.7,204.5 62.3,204.5 64.5,201.3 67.2,201ZM70.7,197.3 70.9,199.3 72.8,200.1 75.1,202.2 76.5,205 80.7,206.2 81.6,208.4 82.9,211.7 84.2,212.7 84.8,215.2 90.3,216.9 91.2,216.3 93,217.3 92.7,219.6 91.9,219.6 90.1,221.6 86.6,220.4 86.2,225.6 86.6,230.3 83.1,228.3 80.3,228.4 80.3,229.9 78.1,229.7 75.8,228.7 74.1,227 71.8,227.6 70.4,226.4 69.1,226.4 68.9,228.7 67.2,228.2 67,226.6 65.7,225.3 66,223.1 64.6,221 66.1,218.5 71.8,218.2 73,217.5 73.8,215.3 71.6,214.6 69.4,211.4 67.6,210.7 67.9,207.5 66.4,205.8 66.4,203.8 67.6,202.2 69.2,199.2 69.8,197 69.8,197 69.8,197ZM109.5,232.8 107.8,231.7 106.4,232.4 105.2,231.6 102.8,232.9 99.9,232.4 99.8,231.3 95.4,231.4 94.6,230.6 90.8,230.5 89.2,231 86.6,230.3 86.2,225.6 86.6,220.4 90.1,221.6 91.9,219.6 92.7,219.6 93,217.3 91.2,216.3 90.3,216.9 84.8,215.2 84.2,212.7 82.9,211.7 81.6,208.4 85.9,208.6 88.3,208 91.3,207.9 92.5,207 97.1,206.8 105.9,203.7 108.3,204.4 110.3,205.6 115.6,202.4 117.8,206.7 116.8,209.7 116.1,212.9 116,218.6 114.6,219.6 110,220.8 111.4,222 111.9,224.4 111.2,225.1 111.2,229.2ZM99.1,208.9 97.6,210.8 95.6,210.7 95.8,212.6 97.9,214.1 99.7,212 100,209.6ZM113.9,192.4 111.2,193.7 108.8,192 107.8,193 105.4,192.6 104.6,193.3 105.9,194.7 106,197.4 106.8,197.4 107,201.1 105.9,203.7 97.1,206.8 92.5,207 91.3,207.9 88.3,208 85.9,208.6 81.6,208.4 80.7,206.2 76.5,205 75.1,202.2 72.8,200.1 70.9,199.3 70.7,197.3 78.2,190.2 79.6,189.4 81.4,186.4 83.4,186.7 83.3,188.1 85,191.6 86,192.2 86.6,189.6 89,189.2 89.9,186.4 91.6,183.3 92.4,180.2 92.8,181.2 96.1,181.8 97.3,183.7 99.8,186.2 99.5,187 102.5,189.7 105.6,189.6 112.1,193ZM82.9,193.4 81.2,194.9 79.8,195.1 79.9,196.9 81.9,197.4 84.4,200.1 86.7,200.2 87.6,198.5 85.1,196.6ZM133.1,238.4 134,238.8 133.7,240.8 131.8,240ZM112.6,194 114.9,194.9 116.5,194.2 117.6,197.3 117.6,200.1 116.3,203.6 116.4,206 124.6,203.5 122.4,201.7 122.4,197.3 124,195.2 124.1,194 126.1,195.4 128.8,196.7 134,197.7 134.8,199.6 137.5,201.4 137.4,202.7 139.2,205 141.3,206.1 144.7,206.9 145.9,206.5 148.2,207.2 148.7,209 148.2,211.5 145.8,214.4 146.2,215.8 147.4,216.2 147.5,217.9 146,220.9 147,228.1 146,229.7 147,231.5 148.7,232.1 148.1,233.1 149.9,234.7 148.4,236.7 143.8,238.6 143.3,237.6 140.3,236 139.7,238 136.7,238.3 134.8,239.2 132.5,239.2 130.2,240.9 128.5,241.3 127.2,240 121.6,238.1 119.7,238.2 115.9,237.6 114.1,237.8 112.7,236.8 109.2,236.3 108.2,234.4 109.8,230.7 109.8,226.7 110.6,226 110,223.5 108.7,222.4 113.2,221.2 114.7,220.2 114.8,214.5 115.4,211.2 116.5,208.2 114.2,204 109,207.2 107,206 104.6,205.3 105.7,202.7 105.4,199 104.6,199 104.6,196.2 103.3,194.8 104.1,194.2 106.4,194.6 107.5,193.6 109.8,195.3ZM120.9,207.6 122.4,209.2 122,211.9 126.1,214.9 127.4,213.4 128.7,210.2 126.1,209 126.5,206.4 124.2,205.3ZM179.2,210.6 178.2,212.4 180.1,217.7 180.4,219.5 179.6,221.5 175.8,224.5 176.2,227 175.1,230 171.1,228.4 165.2,228.2 162.6,228.8 159.4,228.5 152.6,231.2 151.2,233.1 149.4,231.6 150,230.5 148.4,229.9 147.4,228.1 148.4,226.5 147.3,219.3 148.8,216.4 148.7,214.6 147.5,214.3 147.1,212.8 149.5,209.9 150,207.5 152.4,207.2 153.6,205.9 155.6,206.5 158.1,209.3 158.9,207.3 161.3,207.3 162,208 164.5,207.1 168.3,203.6 168.4,201.6 171.2,202.2 172.6,201.8 173.1,203.8 174.5,203.6 176.3,203.6 178,205.6 179.5,210.1ZM174.9,239.6 177.9,240.4 181.8,240.4 182.3,242.8 178.1,243.6 174.3,243.7 172.2,242.4 173.1,240.8ZM224.6,219 223.2,219.5 221,222.4 218.6,224.1 219.4,225 218.8,226.6 217,227.5 217,229.4 216,231.1 216.6,232 215.6,233.4 216.1,235.4 217.9,237.6 215.2,240.4 214,238.2 211.4,239.8 210.6,244.1 211.6,245.5 210.3,248.2 208.2,246.7 208.5,244.4 207,243.7 204.9,244.6 203.4,246.3 201.1,243.2 200.4,244.2 197,244.1 196.5,241.3 192,239.4 188.8,239.6 185.4,238.2 185,236.4 182.4,236 179.4,237.5 175.6,232.6 173.2,231.1 174.4,228.2 173.9,225.6 177.7,222.6 178.5,220.7 178.3,218.8 176.4,213.6 177.4,211.7 179,210.7 181.7,210.5 182.3,211.2 185,211.3 186.5,210.1 188.8,210.9 191,208.9 194.1,208.4 195.2,208.9 196.8,207.9 198.7,207.6 199.9,210.6 201.4,210.6 203.5,213 205.8,212.4 208.1,213.6 208.6,213 211.5,212.9 213.6,211.8 214,210.8 216,211.5 218.9,213.6 221.6,214.6 223.6,216.4ZM252.8,204.2 253.6,210.8 253.3,213.2 251.1,217.3 251.3,219 250,222.3 250.5,225 248.8,228.1 248.8,230.1 247,238 248.7,242.7 248,245.6 249.5,245.6 251,243 251.8,244 251.3,246.2 252.8,250.6 254.1,252.6 255.2,252.9 256.2,251.5 259,253.7 263,254.5 265.4,258.2 264.8,260.8 262.9,262.2 260.8,262.8 258.5,262.4 256.1,261.4 252.5,260.6 249.1,260.7 247.3,259.5 249.2,258.5 249.3,255.7 247.8,253.5 244.8,251.6 240.6,250.3 239.2,250.6 238.8,253.4 236.2,253.1 232.8,251.7 229.7,251.4 226.8,253 225.6,252.4 225.2,249.9 223.7,249.6 220.8,251.5 220.9,248.3 219.1,247.4 217.6,248.8 216,247.8 212.1,247.1 213.4,244.4 212.5,242.9 213.2,238.6 215.8,237.1 217.1,239.3 219.8,236.5 218,234.2 217.4,232.2 218.5,230.8 217.9,230 218.8,228.3 218.9,226.4 220.6,225.5 221.2,223.9 220.5,223 222.8,221.3 225.1,218.4 226.4,217.9 227.6,217.1 232.8,215.8 235.4,216.1 238.3,215.6 238.7,213.7 240.6,212.4 240.2,209.6 239,207.7 240.8,204.4 244.2,200.7 247.3,202.4ZM239,207.7 240.2,209.6 240.6,212.4 238.7,213.7 238.3,215.6 235.4,216.1 232.8,215.8 227.6,217.1 226.4,217.9 225.4,215.2 223.5,213.4 220.7,212.5 217.8,210.4 215.8,209.6 215.4,210.7 213.4,211.8 210.4,211.8 210,212.5 207.6,211.3 205.4,211.9 203.2,209.4 201.7,209.4 200.6,206.4 198.7,206.8 197.3,206 199.9,204.3 200,203.2 202.5,201.7 204.1,199.7 205,197.2 204.9,195.4 207.4,194.4 209.7,195.9 212.1,195.6 213,194.4 216.3,194.6 220,192.3 222.8,193.2 223.9,192 227.7,191.9 229.6,195.2 230,200.4 231.1,202.3 231.6,205.4 232.3,207 235.6,206.5ZM252.8,204.2 247.3,202.4 244.2,200.7 240.8,204.4 239,207.7 235.6,206.5 232.3,207 231.6,205.4 231.1,202.3 230,200.4 229.6,195.2 227.7,191.9 223.9,192 222.8,193.2 220,192.3 216.3,194.6 213,194.4 212.1,195.6 209.7,195.9 207.4,194.4 204.9,195.4 205,197.2 204.1,199.7 202.5,201.7 200,203.2 199.9,204.3 197.3,206 196.4,205 197.4,203.4 196.9,199.8 195.8,197.9 196.5,196.4 195.6,192.7 194,191.7 194.2,189.6 195.5,188.8 199.2,189.5 200.2,190.4 203.5,188.4 206.5,190.4 208.8,190 210.8,187.8 212.4,186.7 214.2,186.6 216.2,187.6 218.8,187.7 221.6,184.4 223.8,183.3 225,182 226.6,181.4 228.2,183.4 230.8,188.2 237.9,189 239.9,187.7 243.1,190.3 246.2,191.8 249.4,191.2 254.5,194.4 255.7,196.4 255.6,201 252.8,202.8ZM150,207.5 149.5,205.6 150.8,204.6 150.5,202.1 157.3,196.1 157.8,191.2 160.7,188.2 161.6,189.3 163.8,189.6 164.5,190.6 166.4,191.1 165.4,193.3 166.4,193.6 166.4,195.4 168.9,196.1 170.3,193.4 170.5,190.6 171.7,191.3 172.9,193.2 174,193.6 175.2,192.5 178,192.7 179.9,191.3 182.2,190.3 184.5,190.2 187.7,187.7 191,188.5 195.5,188.8 194.2,189.6 194,191.7 195.6,192.7 196.5,196.4 195.8,197.9 196.9,199.8 197.4,203.4 196.4,205 197.3,206 198.7,206.8 197,207.8 196,207.3 192.9,207.7 190.7,209.8 188.3,209 186.8,210.2 184.1,210.1 183.6,209.4 180.9,209.6 179.2,210.6 179.5,210.1 178,205.6 176.3,203.6 174.5,203.6 173.1,203.8 172.6,201.8 171.2,202.2 168.4,201.6 168.3,203.6 164.5,207.1 162,208 161.3,207.3 158.9,207.3 158.1,209.3 155.6,206.5 153.6,205.9 152.4,207.2ZM142.7,178.5 145,179.8 147.3,182.6 146.1,182.5 145.1,184.4 146.7,186.2 148.7,186.1 150.5,183.4 153.5,184.8 156,184.3 158.4,185.6 160.7,188.2 157.8,191.2 157.3,196.1 150.5,202.1 150.8,204.6 149.5,205.6 147.2,205 146,205.3 142.6,204.5 140.5,203.4 138.8,201.1 138.8,199.9 136.1,198 135.4,196.1 130.2,195.1 127.4,193.9 125.4,192.4 124.5,190.2 127.3,186.5 128.2,184.5 127.6,182.5 130.1,180.4 131.2,178.1 133.6,177 134.8,178.7 138.5,178.9 142.4,177.6ZM142.7,178.5 142.4,177.6 138.5,178.9 134.8,178.7 133.6,177 131.2,178.1 128.5,176.2 126.4,174 124.2,172.4 118.4,171.1 117.2,170.1 118.9,167.6 123.9,166.8 125.4,165 128.3,164.8 130.2,164 133.5,162.6 135,163.4 136.9,163 142,163 143.1,162.4 142.4,167.5 142.8,171.9 141,172.4 142.7,174.7 144.6,175.2 145.2,176.4 144.9,178.7ZM118.9,167.6 117.2,170.1 118.4,171.1 124.2,172.4 126.4,174 128.5,176.2 131.2,178.1 130.1,180.4 127.6,182.5 128.2,184.5 127.3,186.5 124.5,190.2 121.7,189.6 119.4,192.1 117.8,192.6 116.2,193.3 114.5,187.8 113.2,186 112.6,182.4 110.7,180.3 109.8,177.6 110.6,175.7 110.6,173 111.6,172.6 112.3,171 108.3,171.1 108.8,166.9 108,165.5 108.6,163.2 110.2,161.8 111.8,162.4 113.6,160.9 117.8,160.4 118.2,162.6 117.7,165.7ZM114.3,168.6 112.2,169 111.7,171.3 115.4,170.8 115.8,168.9ZM108.6,163.2 108,165.5 108.8,166.9 108.3,171.1 112.3,171 111.6,172.6 110.6,173 110.6,175.7 109.8,177.6 110.7,180.3 112.6,182.4 113.2,186 114.5,187.8 116.2,193.3 113.9,192.4 112.1,193 105.6,189.6 102.5,189.7 99.5,187 99.8,186.2 97.3,183.7 96.1,181.8 92.8,181.2 92.4,180.2 92.3,178.6 94.1,176.3 95.1,176 95.2,174.2 96.4,173.2 95.5,171.6 93.5,170.9 91.6,171.3 90.2,170.6 89,168.2 89.4,166.8 90.3,165.8 91.7,165.9 97.6,163.6 99.6,163.4 102,164.4ZM89.4,166.8 89,168.2 90.2,170.6 91.6,171.3 93.5,170.9 95.5,171.6 96.4,173.2 95.2,174.2 95.1,176 94.1,176.3 92.4,178.6 92.4,180.2 91.6,183.3 89.9,186.4 89,189.2 86.6,189.6 86,192.2 85,191.6 83.3,188.1 83.4,186.7 81.4,186.4 79.6,189.4 78.2,190.2 70.7,197.3 69.8,197 69.8,197 67.4,194.8 65.6,192.7 66.1,189.6 67.4,188.2 67.8,186.5 69.2,184.7 69.8,181 71,177.1 72.9,177.3 74,174.2 72.2,173.4 70.8,171.2 72.2,169.7 75.9,169.8 78,169.3 80.5,169.8 82.6,167.3 86,167.5 87.8,166.6ZM70.8,171.2 72.2,173.4 74,174.2 72.9,177.3 71,177.1 69.8,181 69.2,184.7 67.8,186.5 67.4,188.2 66.1,189.6 65.6,192.7 67.4,194.8 65.4,195.6 63.3,195.3 62.2,193 60.9,192.4 57.2,193.4 55.2,195 50.5,194.7 47.6,193.2 46.4,193.3 47.2,189.2 49.8,187.8 50.7,185 52.8,185 54,180.6 51.4,180.7 49.6,183.4 50.7,184.2 48.8,185.2 48.7,183.6 46.8,182.2 48,181.5 48.2,179.8 49.9,178.4 50.6,176.5 52.4,177.1 55.2,175.3 57.6,171.8 59.4,171.3 61.8,167.6 65,170 69,171.8ZM50.6,176.5 49.9,178.4 48.2,179.8 48,181.5 46.8,182.2 48.7,183.6 48.8,185.2 50.7,184.2 50.8,184.3 50.8,184.4 50.7,185 49.8,187.8 47.2,189.2 46.4,193.3 45.2,193.1 37.3,193.8 35.3,194.3 35.6,192 34.3,190.2 31.8,191.3 30,189.4 27.8,188.6 28.6,185.9 28.7,182.3 33.3,180.7 35.4,181.1 37.1,180 41,178.7 41.7,176.7 43.8,176.6 47.2,174.6 50,174.9ZM30,156.4 32.2,159 35.1,159.4 38.3,161.5 41.8,163.3 43.8,163.3 45.7,164.9 47.2,164.4 50.8,164.4 51.9,165 54,164.4 55.1,163.4 57.9,165 59,166.3 61.8,167.6 59.4,171.3 57.6,171.8 55.2,175.3 52.4,177.1 50.6,176.5 50,174.9 47.2,174.6 43.8,176.6 41.7,176.7 41,178.7 37.1,180 35.4,181.1 33.3,180.7 28.7,182.3 25.8,178.3 25.4,175.6 25.8,173.8 23.5,168.6 25.3,164.8 25.2,162 26,161 24.7,160 25.5,157.6 27.5,157.6ZM95.3,146.8 95.8,148.6 94.1,150.6 92.8,154 90.8,155.2 90.8,160.5 89.6,162.4 90.8,164 90.3,165.8 89.4,166.8 87.8,166.6 86,167.5 82.6,167.3 80.5,169.8 78,169.3 75.9,169.8 72.2,169.7 70.8,171.2 69,171.8 65,170 61.8,167.6 59,166.3 57.9,165 55.1,163.4 54,164.4 51.9,165 50.8,164.4 47.2,164.4 46,164.2 47,161.7 44.8,160.9 46.5,158.2 49,156.1 51.5,155.6 54.4,152.4 56,152.1 56,150.7 58.2,146.9 57.8,144.7 58.8,143.4 58.1,142.7 57.8,140 58.5,138.4 60.5,139.2 61,142 63.4,143 64.8,144.9 70,144.7 72.1,145.2 74.6,147.2 75,148.2 81.2,148.4 83.1,149.3 86.7,144.6 90.4,143.8 90.6,145.2 92.6,145.4ZM96.5,132.2 98.7,133.9 98.6,135.4 99.5,139.8 98.7,141.2 99.8,141.7 99.7,144.4 97.8,145.1 97,144.4 95.3,146.8 92.6,145.4 90.6,145.2 90.4,143.8 86.7,144.6 83.1,149.3 81.2,148.4 75,148.2 74.6,147.2 72.1,145.2 70,144.7 64.8,144.9 63.4,143 61,142 60.5,139.2 58.5,138.4 57.2,136.9 55,136 55.1,133.5 57,133.1 57.9,131 57.6,128.6 58.2,126.8 59.3,127.3 61.1,126.5 61.2,123.4 62.7,123.3 63.2,122.1 65.6,123.4 68.4,123.4 71.5,125 75,125.2 79.4,123.8 81,122.8 83.2,123.5 85.3,127.7 87.1,130.2 88.8,131.6 94.7,132.4ZM115.2,130.5 115.2,132.2 114.1,132.8 114,135.8 110.6,136.3 110.1,138.1 111.7,138.2 114.4,139.4 118,139.4 119.7,140 119.2,141.4 121,141.9 122.6,143.8 121.8,145.8 119.4,146.6 119.1,148 117.7,147.9 117.4,150.1 119.2,150.6 119.5,152.6 116,153.7 113.7,155.3 112.2,157.6 113.2,158.2 113,160.4 110.2,161.8 108.6,163.2 102,164.4 99.6,163.4 97.6,163.6 91.7,165.9 90.3,165.8 90.8,164 89.6,162.4 90.8,160.5 90.8,155.2 92.8,154 94.1,150.6 95.8,148.6 95.4,146.8 97.1,144.4 97.8,145.1 99.7,144.4 99.8,141.7 98.7,141.2 99.5,139.8 98.6,135.4 98.7,133.9 96.5,132.2 97.4,131.5 101.6,130.4 103.2,130.9 107.5,129.7 109.4,129.8 111.5,130.6 113.4,129.8ZM130.5,152.6 125.7,154.3 127.4,157.1 128.5,157.3 128.3,160.8 129.7,161 130.2,164 128.3,164.8 125.4,165 123.9,166.8 118.9,167.6 117.7,165.7 118.2,162.6 117.8,160.4 113.6,160.9 111.8,162.4 110.2,161.8 113,160.4 113.2,158.2 112.2,157.6 113.7,155.3 116,153.7 119.5,152.6 119.2,150.6 117.4,150.1 117.6,147.9 119.1,148 119.4,146.6 121.8,145.8 122.6,143.8 121,141.9 119.2,141.4 119.7,140 118,139.4 114.4,139.4 111.7,138.2 110.1,138.1 110.6,136.3 114,135.8 114.1,132.8 115.2,132.2 115.2,130.5 115.8,130.8 116.1,131.1 117.6,132.2 122.3,132.9 123.2,131.4 121.8,130.6 123,129 124.3,131.8 126.1,132.8 125.8,135 127.8,138 129.1,138.7 130,143 128.4,144.5 128.2,148.6 130.3,149.7ZM162.7,131.8 162,134.8 160.6,135.5 161.5,137.5 164.3,138.2 163.3,141.7 162,141.4 161.5,144.8 162.1,146.4 159.3,149.7 158,150.6 156.8,154 154.1,153.8 147.6,151.7 144.6,150.5 138.4,150.3 136.9,149.7 134.9,151.3 132.6,149.8 133.6,145.9 132.2,145.8 131.4,144.3 132,141.4 134.8,141.9 138.9,138.6 143.5,133 143.6,132 148.6,131.8 154,131 158.4,131ZM187.6,132.1 187.2,134 184.3,136.4 183.2,138.5 183.3,140 181.3,141.7 181.3,144.3 179.6,146.8 179.5,148.7 180.4,149.6 180.4,152.5 181.3,154.3 173.1,154.2 172.1,154.8 169.2,154.5 165.8,155 165.3,153.8 161,155.1 156.8,154 158,150.6 159.3,149.7 162.1,146.4 161.5,144.8 162,141.4 163.3,141.7 164.3,138.2 161.5,137.5 160.6,135.5 162,134.8 162.7,131.8 165.8,131.7 167.8,132.1 169.8,131.6 176.5,131.4 184.6,131.5ZM195.8,148.1 193.8,150.6 192.9,154 192.1,155.4 189.8,156.7 188.5,155 181.3,154.3 180.4,152.5 180.4,149.6 179.5,148.7 179.6,146.8 181.3,144.3 181.3,141.7 183.3,140 183.2,138.5 184.3,136.4 187.2,134 187.6,132.1 198.4,131.4 198.2,133.2 199.2,133.4 196.2,137.4 196.2,140.1 194.4,140.5 195.2,143.5 197.2,145.4 196.8,146.4ZM207,153.7 210.4,154.5 209,155.6 206.8,154.4ZM217.9,152 219,153.7 215.3,154.6 215,153.3ZM260.3,150.3 263,151.2 262.6,152.5 260.4,152.7 259.4,150.6ZM242.8,150.8 244.8,155.2 243.5,156 238.6,154.4 237.4,153.3 235.7,150.1 237.3,147.9 239.6,147.3 242.4,149.4ZM213.2,145.9 215.1,146.9 219.8,147.1 220.8,149.6 215.9,149.3 212.5,148 212,147ZM222.5,143.2 221,142.9 221.4,141.2 222.8,141.1ZM181,151.1 181.9,149.4 182.3,148.4 180.4,146.5 179.5,143.5 181.4,143.1 181.4,140.4 184.3,136.4 183.3,136.2 183.5,134.4 186.7,134.1 194.7,134.2 202.2,132.8 206.3,133.4 208.7,134.4 215.7,137.9 217.2,140.7 215,140.8 212.6,142.5 207.8,142.8 206.2,145 205,145 203.5,143.5 200.2,147.4 199.6,148.9 200.8,149.4 201.1,151.4 195.8,151.5 190.9,150.3 186.6,149.8 184.6,151.1ZM84.7,192.7 86.9,196 89.4,197.9 88.4,199.6 86.2,199.5 83.7,196.8 81.7,196.3 81.6,194.5 83,194.3ZM97.4,212.5 98.4,213.2 98.1,215.6 96.3,217.8 94.1,216.2 94,214.4 95.9,214.4ZM125,204.8 128.4,202.5 130.6,203.6 130.2,206.2 132.8,207.4 131.5,210.6 130.2,212.1 126,209 126.4,206.4ZM170.5,190.6 170.3,193.4 168.9,196.1 166.4,195.4 166.4,193.6 165.4,193.3 166.4,191.1 168.9,190.3ZM150.5,183.4 148.7,186.1 146.7,186.2 145.1,184.4 146.1,182.5 147.3,182.6ZM115.6,170.6 117,170.8 116.6,172.7 112.9,173.2 113.4,171ZM50.7,185 50.8,184.4 50.8,184.3 50.7,184.2 49.6,183.4 51.4,180.7 54,180.6 52.8,185ZM142,163 136.9,163 135,163.4 133.5,162.6 130.2,164 129.7,161 128.3,160.8 128.5,157.3 127.4,157.1 125.7,154.3 130.5,152.6 131,154.5 132.2,154.8 134.2,154.2 135.4,153 137.7,152.8 138.8,153.7 140.6,157 142,157.4 143.4,159.7ZM124.5,190.2 125.4,192.4 125.3,193.6 123.7,195.7 123.8,200.2 125.9,201.9 117.7,204.4 117.6,202 119,198.5 119,195.7 117.8,192.6 119.4,192.1 121.7,189.6Z';
 
 // v1.0.53: pin lokasi (bukan lingkaran polos lagi) — bentuknya nunjuk pas ke
 // satu titik (ujung bawah pin), jadi walau kabupaten/kota-nya deket-deketan
@@ -4962,6 +5180,10 @@ function ilRenderMap() {
     return `<g class="il-map-node" transform="translate(${x},${y}) scale(${s.toFixed(3)}) translate(-12,-22)"
               fill="${fill}" opacity="${opacity}" ${glow}
               onclick="ilMapSelect('${name.replace(/'/g, "\\'")}')">
+              <!-- v1.0.56: rect transparan penuh sebagai hitbox — tanpa ini, klik di
+                   bagian "bolong" (lubang) icon pin nggak kena karena nggak ada
+                   piksel yang dicat di situ, walau posisinya masih di dalam icon. -->
+              <rect x="0" y="0" width="24" height="24" fill="transparent"></rect>
               <path d="${IL_PIN_PATHS[0]}"></path>
               <path d="${IL_PIN_PATHS[1]}"></path>
             </g>`;
@@ -5021,10 +5243,18 @@ function costModal(innerHTML, onCloseJs) {
     ${innerHTML}
   </div>`;
   el.classList.add('show');
+  // v1.0.56: dorong ke history browser — tombol back (device/browser) nutup
+  // modal ini dulu, bukan langsung keluar dari aplikasi.
+  if (history.state?.view !== 'costmodal') {
+    history.pushState({ view: 'costmodal' }, '', '#tanya-harga-modal');
+  }
 }
 function costCloseModal() {
   const el = document.getElementById('costModal');
   if (el) el.classList.remove('show');
+  if (history.state?.view === 'costmodal') {
+    history.back();
+  }
 }
 
 // ── Render gabungan & init ───────────────────────────────────
@@ -6204,6 +6434,10 @@ async function saveToHistory() {
   // Upsert to Supabase
   await sbUpsertInvoice(entry);
 
+  // v1.0.56: kalau nomor WA invoice ini cocok dengan catatan Tanya Harga yang
+  // masih "Nanya", otomatis isi nama+sapaan & ubah status ke Closing.
+  await ilAutoCloseMatchingInquiry(entry);
+
   // Update local cache
   const hist = getHistory();
   const existingIdx = hist.findIndex(e => e.id === entry.id);
@@ -6383,6 +6617,9 @@ function setActiveNav(tab) {
   document.querySelectorAll('[data-tab]').forEach(el => {
     el.classList.toggle('active', el.dataset.tab === tab);
   });
+  // v1.0.56: simpan tab utama terakhir biar refresh nggak selalu balik ke Invoice.
+  // Cuma tab utama (invoice/cost/history/profile) — subpage/modal nggak disimpan di sini.
+  try { localStorage.setItem('citicon_last_main_tab', tab); } catch (e) {}
 }
 
 // v1.0.44: navbar desktop disalin ke semua halaman agar selalu tampil
@@ -6487,6 +6724,15 @@ window.addEventListener('popstate', (ev) => {
   const histVisible = document.getElementById('history-view')?.style.display === 'flex';
   const mainVisible = document.getElementById('main-view')?.style.display === 'flex';
   const ilFullVisible = document.getElementById('il-fulllist-view')?.style.display === 'flex';
+  const costModalVisible = document.getElementById('costModal')?.classList.contains('show');
+
+  // v1.0.56: Back dari modal Tanya Harga (tambah/detail/dll) → tutup modal
+  // itu aja, tetap di halaman/tab yang sama di belakangnya. Dicek paling
+  // awal karena modal ini bisa nangkring di atas subpage "Cari semua" juga.
+  if (costModalVisible && ev.state?.view !== 'costmodal') {
+    document.getElementById('costModal').classList.remove('show');
+    return;
+  }
 
   // v1.0.53: Back dari subpage "Selengkapnya" (Tanya Harga) → tutup subpage,
   // tetap di tab Cost (subpage cuma overlay di atas cost-view, jadi cukup disembunyikan).
