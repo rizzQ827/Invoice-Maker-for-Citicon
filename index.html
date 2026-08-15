@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Invoice Generator · v1.0.55</title>
-<!-- v1.0.55 -->
+<title>Invoice Generator · v1.0.57</title>
+<!-- v1.0.57 -->
 <meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai multi-brand">
 <meta name="theme-color" content="#0e9e4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -422,6 +422,7 @@
   body.readonly-mode .add-btn,
   body.readonly-mode .remove-btn,
   body.readonly-mode .mode-tab,
+  body.readonly-mode .brand-tab,
   body.readonly-mode .price-mode-tab {
     pointer-events: none !important;
     opacity: 0.7;
@@ -2270,6 +2271,7 @@ const USER_PP_MAP = {
 // ════════════════════════════════════════════════════════════════
 //  CONSTANTS
 // ════════════════════════════════════════════════════════════════
+const APP_VERSION = '1.0.57';
 const BULAN_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 
 const PANEL_LENGTHS = [97, 147, 172, 197, 222, 247, 272, 297, 322];
@@ -2330,6 +2332,11 @@ const LS_HISTORY = LS_KEY + '_history';
 
 // Default qty for first bata (BRC) row when adding
 const DEFAULT_BATA_QTY = '11,52';
+
+// v1.0.57: semua kombinasi kode nomor invoice (jenis × merek). Dulu beberapa
+// tempat cuma menyebut BRC/PLC (Citicon), jadi nomor Bricon & Grand Elephant
+// tidak ikut disinkronkan ke cloud / backup.
+const SEQ_TYPES = ['BRC','PLC','BRB','PLB','BRGE','PLGE'];
 
 // ════════════════════════════════════════════════════════════════
 //  SUPABASE CONFIG
@@ -2719,10 +2726,19 @@ function initAppUI() {
   updatePhonePreview();
   updatePreview();
 
+  // v1.0.57: catatan Tanya Harga ikut dimuat sejak awal. Dulu baru dimuat kalau
+  // tab Cost dibuka, jadi kartu History sempat menulis "modal dari perkiraan
+  // daerah" padahal sebenarnya ada catatan Tanya Harga-nya.
+  ilLoadAll().then(() => renderHistory());
+
   // Load history from Supabase cloud (async, updates UI when ready)
   loadHistoryFromCloud().then(() => {
+    // v1.0.57: begitu history asli dari cloud masuk, nomor invoice dihitung
+    // ulang. Dulu nomor dibuat dari cache localStorage yang bisa kosong (HP
+    // baru / cache kebersihan) → nomornya balik ke 001 dan bentrok.
+    if (!isReadOnly && !_viewingHistoryDetail) regenInvoiceNo();
     // Also sync seq from cloud to localStorage
-    ['BRC','PLC'].forEach(async type => {
+    SEQ_TYPES.forEach(async type => {
       const cloudSeq = await sbGetSeq(type);
       const localSeq = parseInt(localStorage.getItem(seqKey(type)) || '0');
       if (cloudSeq > localSeq) {
@@ -3715,7 +3731,7 @@ function buildPanel({ docNo, dateStr, salute, custName, custAddr, custPhone, cus
           ${fmtM2(r.area)} m²
         </td>
         <td style="border:1px solid #444;padding:9px 12px;text-align:right;font-family:Arial,sans-serif;font-size:11.5px;">
-          ${fmtPriceOrFree(r.subtotal)}
+          ${activeRate > 0 ? fmtPriceOrFree(r.subtotal) : ''}
         </td>
       </tr>`).join('');
 
@@ -3805,7 +3821,14 @@ function checkOpenInquiryForCustomer() {
   const phone = (document.getElementById('custPhone') || {}).value || '';
   const key = phoneKey(phone);
   if (key.length < 11) return;
-  const cand = ilStore.filter(e => samePhone(e.customer_phone, phone) && e.status === 'nanya');
+  // v1.0.57: nomor WA yang sama bisa punya beberapa catatan untuk merek/produk
+  // berbeda. Yang dipakai HANYA yang merek + jenis produknya sama dengan
+  // invoice yang sedang dibuat, biar catatan panel nggak kebawa-bawa waktu
+  // yang dibikin invoice bata (atau sebaliknya).
+  const prod = costProductForMode();
+  let cand = ilStore.filter(e => samePhone(e.customer_phone, phone)
+    && ilNormStatus(e.status) === 'nanya'
+    && e.brand === currentBrand && e.product === prod);
   if (!cand.length) return;
   const hit = cand.sort((a, b) => new Date(b.ts) - new Date(a.ts))[0];
   if (_lastNanyaHit === hit.id) return;
@@ -4138,6 +4161,10 @@ const costState = { brand: 'bricon', product: 'bata' };
 
 function costKey() { return `${costState.brand}|${costState.product}`; }
 function costUnit() { return costState.product === 'bata' ? 'Kubik' : 'm²'; }
+// v1.0.57: satuan berdasarkan produk catatan itu sendiri, bukan tab yang lagi
+// kebuka. Dipakai di modal detail — catatan bata bisa dibuka dari kartu History
+// walaupun tab Cost lagi di posisi Panel, dan dulu satuannya jadi salah tulis.
+function ilUnitOf(product) { return product === 'bata' ? 'Kubik' : 'm²'; }
 
 // ── Tab merek & produk ───────────────────────────────────────
 function costSetBrand(b) {
@@ -4375,7 +4402,9 @@ async function ilSaveRestriction() {
 async function ilRemoveRestriction(id) {
   if (!confirm('Hapus daerah larangan ini?')) return;
   try {
-    const { error } = await _sb.from('delivery_restrictions').delete().eq('id', id);
+    const uid = currentUser ? currentUser.id : null;
+    if (!uid) return;
+    const { error } = await _sb.from('delivery_restrictions').delete().eq('id', id).eq('user_id', uid);
     if (error) { console.error(error); toast('Gagal menghapus', 'error'); return; }
     ilRestrictions = ilRestrictions.filter(r => r.id !== id);
     ilRenderRestrictions();
@@ -4688,7 +4717,7 @@ function ilOpenDetail(id, editMode) {
       <span class="rp">Rp</span>
       <input id="ilDetModal" inputmode="numeric" value="${e.modal_price ? fmtRupiah(e.modal_price) : ''}"
              oninput="ilDetRecalc()">
-      <span class="suffix">/${costUnit()}</span>
+      <span class="suffix">/${ilUnitOf(e.product)}</span>
     </div>
 
     <div style="height:10px;"></div>
@@ -4697,7 +4726,7 @@ function ilOpenDetail(id, editMode) {
       <span class="rp">Rp</span>
       <input id="ilDetMargin" inputmode="numeric" value="${e.margin ? fmtRupiah(e.margin) : ''}"
              oninput="ilDetRecalc()">
-      <span class="suffix">/${costUnit()}</span>
+      <span class="suffix">/${ilUnitOf(e.product)}</span>
     </div>
 
     <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:800;color:#0f172a;">
@@ -4706,12 +4735,12 @@ function ilOpenDetail(id, editMode) {
 
     <div class="cost-modal-label" style="margin-top:16px;">Status</div>
     <div class="il-status-row">
-      <button class="il-status-btn${e.status === 'nanya' ? ' sel-nanya' : ''}" onclick="ilSetStatus(${e.id},'nanya')">Nanya</button>
-      <button class="il-status-btn${e.status === 'closing' ? ' sel-closing' : ''}" onclick="ilSetStatus(${e.id},'closing')">Closing</button>
+      <button class="il-status-btn${ilNormStatus(e.status) === 'nanya' ? ' sel-nanya' : ''}" onclick="ilSetStatus(${e.id},'nanya')">Nanya</button>
+      <button class="il-status-btn${ilNormStatus(e.status) === 'closing' ? ' sel-closing' : ''}" onclick="ilSetStatus(${e.id},'closing')">Closing</button>
       <button class="il-status-btn${ilNormStatus(e.status) === 'batal' ? ' sel-batal' : ''}" onclick="ilSetStatus(${e.id},'batal')">Batal</button>
     </div>
 
-    ${e.status === 'closing' ? `
+    ${ilNormStatus(e.status) === 'closing' ? `
       <div style="height:12px;"></div>
       <label class="cost-modal-label">Estimasi volume order (biar untung bersihnya kehitung di Profile)</label>
       ${isBata ? `
@@ -4731,7 +4760,7 @@ function ilOpenDetail(id, editMode) {
     ` : ''}
   `, `ilSaveDetailAndClose(${e.id}, ${editMode ? 'true' : 'false'})`);
 
-  if (e.status === 'closing' && isBata) {
+  if (ilNormStatus(e.status) === 'closing' && isBata) {
     const sel = document.getElementById('ilDetVolume');
     if (sel && e.est_volume) {
       const match = fmtQty(e.est_volume);
@@ -4753,8 +4782,11 @@ function ilDetRecalc() {
 }
 
 async function ilUpdateEntry(id, patch) {
+  const uid = currentUser ? currentUser.id : null;
+  if (!uid) return null;
   try {
-    const { data, error } = await _sb.from('inquiry_log').update(patch).eq('id', id).select().single();
+    const { data, error } = await _sb.from('inquiry_log').update(patch)
+      .eq('id', id).eq('user_id', uid).select().single();
     if (error) { console.error(error); toast('Gagal menyimpan', 'error'); return null; }
     const idx = ilStore.findIndex(x => x.id === id);
     if (idx >= 0) ilStore[idx] = data;
@@ -4774,7 +4806,14 @@ async function ilSetStatus(id, status) {
 // nama yang manual itu yang menang, nggak ditimpa.
 async function ilAutoCloseMatchingInquiry(entry) {
   if (!entry || !entry.custPhone) return;
-  const cand = ilStore.filter(e => samePhone(e.customer_phone, entry.custPhone) && e.status === 'nanya');
+  // v1.0.57: batasi ke merek + jenis produk invoice ini. Tanpa ini, customer
+  // yang nomor WA-nya sama tapi nanya dua produk berbeda (misal bata Bricon
+  // dan panel Citicon) bakal ke-Closing dua-duanya cuma karena satu invoice.
+  const invProduct = entry.mode === 'bata' ? 'bata' : 'panel';
+  const invBrand = entry.brand || currentBrand;
+  const cand = ilStore.filter(e => samePhone(e.customer_phone, entry.custPhone)
+    && ilNormStatus(e.status) === 'nanya'
+    && e.brand === invBrand && e.product === invProduct);
   if (!cand.length) return;
   const hit = cand.sort((a, b) => new Date(b.ts) - new Date(a.ts))[0];
   const name = (entry.custName || '').trim();
@@ -4806,7 +4845,9 @@ async function ilSaveDetailAndClose(id, editMode) {
     patch.customer_name = name ? `${salute} ${name}` : '';
     patch.customer_phone = phone ? normalizePhone(phone) : '';
     patch.note = (document.getElementById('ilDetNote') || {}).value?.trim() || '';
-    patch.name_locked = true;
+    // v1.0.57: kunci nama hanya kalau namanya memang diisi. Kalau dikosongkan,
+    // biarkan tetap bisa terisi otomatis dari invoice nanti.
+    patch.name_locked = !!name;
   }
   await ilUpdateEntry(id, patch);
   costCloseModal();
@@ -4817,7 +4858,9 @@ async function ilSaveDetailAndClose(id, editMode) {
 async function ilRemove(id) {
   if (!confirm('Hapus catatan ini?')) return;
   try {
-    const { error } = await _sb.from('inquiry_log').delete().eq('id', id);
+    const uid = currentUser ? currentUser.id : null;
+    if (!uid) return;
+    const { error } = await _sb.from('inquiry_log').delete().eq('id', id).eq('user_id', uid);
     if (error) { console.error(error); toast('Gagal menghapus', 'error'); return; }
     ilStore = ilStore.filter(x => x.id !== id);
     costCloseModal();
@@ -4853,7 +4896,7 @@ function ilCopyEntry(id) {
 
 // ── Kontak yang pernah closing ───────────────────────────────
 function ilContactGroups() {
-  const closing = ilStore.filter(e => e.status === 'closing' && e.customer_phone);
+  const closing = ilStore.filter(e => ilNormStatus(e.status) === 'closing' && e.customer_phone);
   const byPhone = {};
   closing.forEach(e => {
     if (!byPhone[e.customer_phone]) byPhone[e.customer_phone] = [];
@@ -5837,8 +5880,15 @@ function applySuggestedPrice(manual) {
     });
     if (touched) { renderBataRows(); updatePreview(); }
   } else {
-    const el = document.getElementById('pricePerM2');
-    if (el) { el.value = String(q.jual); updatePreview(); }
+    // v1.0.57: isi field harga yang SEDANG aktif. Sebelumnya selalu nulis ke
+    // "Harga Terpasang", jadi kalau tab-nya lagi di "Tanpa Pemasangan"
+    // tombolnya kelihatan nggak ngefek apa-apa.
+    const el = document.getElementById(priceMode === 'nonpasang' ? 'plcPriceNonPasang' : 'pricePerM2');
+    if (el) {
+      el.value = String(q.jual);
+      if (priceMode === 'nonpasang') priceNonPasang = el.value;
+      updatePreview();
+    }
   }
   if (manual) toast(`✓ Harga satuan diisi Rp ${fmtRupiah(q.jual)}`);
 }
@@ -5865,7 +5915,12 @@ function buildProfitSnapshot(prevEntry) {
   } else {
     volume = panelRows.reduce((s, r) =>
       s + (parseNum(r.panjang) * PANEL_WIDTH * parseNum(r.qty)) / 10000, 0);
-    revenue = volume * getPriceTerpasangRate();
+    // v1.0.57: dulu selalu pakai harga TERPASANG. Kalau invoice-nya pakai mode
+    // "Tanpa Pemasangan", harga terpasang bernilai 0 → omzet 0 → untungnya
+    // kebaca minus. Sekarang ikut harga yang benar-benar aktif.
+    revenue = volume * (priceMode === 'nonpasang'
+      ? getPriceNonPasangRate()
+      : getPriceTerpasangRate());
   }
   if (volume <= 0) return null;
 
@@ -5928,12 +5983,14 @@ async function syncInquiryFromInvoice(entry) {
     }
     // Lengkapi nomor WA di catatan kalau sebelumnya kosong
     if (!inq.customer_phone && entry.custPhone) {
-      patch.customer_phone = phoneKey(entry.custPhone);
+      patch.customer_phone = normalizePhone(entry.custPhone);
     }
     if (!Object.keys(patch).length) return;
 
     patch.updated_at = new Date().toISOString();
-    const { error } = await _sb.from('inquiry_log').update(patch).eq('id', inq.id);
+    const uid = currentUser ? currentUser.id : null;
+    if (!uid) return;
+    const { error } = await _sb.from('inquiry_log').update(patch).eq('id', inq.id).eq('user_id', uid);
     if (error) { console.error('syncInquiryFromInvoice:', error); return; }
 
     Object.assign(inq, patch); // update cache lokal biar UI langsung ikut
@@ -6267,7 +6324,7 @@ async function doExport() {
   btn.innerHTML = '⏳ Memproses...';
   try {
     await downloadInvoicePNG();
-    saveToHistory();
+    await saveToHistory();   // v1.0.57: ditunggu — dulu tidak, jadi error simpan tidak pernah kelihatan
     setCopyGate(true);   // download sukses → tombol salin boleh ditekan
     toast('✓ Invoice berhasil diunduh');
   } catch(e) {
@@ -6349,7 +6406,7 @@ async function loadHistoryFromCloud() {
 }
 
 async function saveToHistory() {
-  const docNo = document.getElementById('docNo').value.trim();
+  let docNo = document.getElementById('docNo').value.trim();
   if (!docNo) return;
 
   let total = 0, subtitle = '';
@@ -6372,8 +6429,37 @@ async function saveToHistory() {
   // id lamanya (_currentEntryId) supaya upsert MENG-UPDATE baris yg sama, bukan
   // bikin baris baru — walaupun docNo di field sudah diubah manual oleh user.
   // Fallback: cocokkan docNo+mode (untuk invoice baru yang kebetulan re-save).
-  const _prevById = _currentEntryId ? getHistory().find(e => e.id === _currentEntryId) : null;
-  const _prev = _prevById || getHistory().find(e => e.docNo === docNo && e.mode === mode);
+  // v1.0.57: pencocokan entry lama diperketat supaya invoice BARU tidak diam-diam
+  // menimpa invoice sebelumnya. Dulu `_currentEntryId` tetap nempel setelah satu
+  // invoice selesai di-download, jadi invoice berikutnya (customer lain, nomor
+  // belum berganti) ditulis ke baris yang sama — invoice lama hilang tanpa pesan.
+  //  • Sedang membuka/mengedit invoice dari History → pakai id-nya, pasti benar.
+  //  • Invoice baru → cocokkan nomor + jenis + merek DAN customer-nya. Kalau
+  //    nomornya sama tapi customer-nya beda, ini invoice baru yang nomornya lupa
+  //    berganti → nomornya otomatis dinaikkan ke urutan berikutnya.
+  const _formName  = (document.getElementById('custName').value || '').trim().toLowerCase();
+  const _formPhone = (document.getElementById('custPhone').value || '').trim();
+  let _prev = (_viewingHistoryDetail && _currentEntryId)
+    ? (getHistory().find(e => e.id === _currentEntryId) || null)
+    : null;
+  if (!_prev) {
+    const cand = getHistory().find(e =>
+      e.docNo === docNo && e.mode === mode && (e.brand || 'citicon') === currentBrand);
+    if (cand) {
+      const sameName  = (cand.custName || '').trim().toLowerCase() === _formName;
+      const samePhoneOk = (!cand.custPhone && !_formPhone) || samePhone(cand.custPhone, _formPhone);
+      if (sameName && samePhoneOk) {
+        _prev = cand;                       // simpan ulang invoice yang sama → update
+      } else {
+        const fresh = genInvoiceNo(mode);   // customer beda → pakai nomor berikutnya
+        docNo = fresh.text;
+        const noEl = document.getElementById('docNo');
+        if (noEl) noEl.value = docNo;
+        updatePreview();
+        toast(`Nomor invoice dinaikkan ke ${docNo} — nomor sebelumnya sudah dipakai customer lain`);
+      }
+    }
+  }
   // v1.0.54: Tanggal history mengikuti TANGGAL INVOICE (docDate), bukan jam
   // pas tombol simpan ditekan. Supaya urutan & statistik bulanan di Profile
   // cocok sama tanggal yang tertulis di invoice. Jam-nya tetap jam asli
@@ -6538,8 +6624,8 @@ function renderHistory() {
          </span>`
       : '<span style="color:#94a3b8;">perkiraan daerah</span>';
     return `<div style="margin-top:8px;padding-left:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:10.5px;">
-      <span style="background:#dcfce7;color:#0a7a38;font-weight:800;padding:2px 7px;border-radius:999px;font-family:'JetBrains Mono',monospace;">
-        + Rp ${fmtRupiah(Math.round(p.untung))}
+      <span style="background:${p.untung < 0 ? '#fee2e2' : '#dcfce7'};color:${p.untung < 0 ? '#b91c1c' : '#0a7a38'};font-weight:800;padding:2px 7px;border-radius:999px;font-family:'JetBrains Mono',monospace;">
+        ${p.untung < 0 ? '−' : '+'} Rp ${fmtRupiah(Math.abs(Math.round(p.untung)))}
       </span>
       <span style="color:#94a3b8;">modal dari ${src}</span>
     </div>`;
@@ -6599,7 +6685,7 @@ async function clearHistory() {
   setHistoryRaw([]);
   // With history now empty, the true seq for every type is 0 — resync so the
   // next invoice starts fresh instead of continuing from a stale counter.
-  for (const type of ['BRC','PLC','BRB','PLB','BRGE','PLGE']) {
+  for (const type of SEQ_TYPES) {
     await resyncSeq(type);
   }
 }
@@ -6638,6 +6724,14 @@ function mountTopNavEverywhere() {
 
 function switchTab(tab) {
   if (tab === 'history') { showHistoryView(); return; }
+
+  // v1.0.57: kalau lagi buka invoice lama dalam mode Read-Only lalu pindah tab,
+  // form dikembalikan ke invoice baru. Dulu sisa invoice lama masih nempel waktu
+  // balik ke tab Invoice. Kalau sedang mode Edit (bukan read-only) TIDAK direset,
+  // supaya perubahan yang belum disimpan tidak hilang.
+  if (tab !== 'invoice' && _viewingHistoryDetail && isReadOnly) {
+    resetToFreshInvoice();
+  }
 
   // Tutup halaman history kalau sedang terbuka
   const histEl = document.getElementById('history-view');
@@ -6862,6 +6956,8 @@ function enableEditMode() {
 function resetToFreshInvoice() {
   _viewingHistoryDetail = false;
   _currentEntryId = null;
+  _lastPhoneHit = null;   // v1.0.57: biar notifikasi modal/Nanya muncul lagi untuk customer berikutnya
+  _lastNanyaHit = null;
   setReadOnly(false);
   updateActionButtonMode(false);  // v1.0.40: invoice baru → tombol kembali "Download Invoice"
 
@@ -6918,12 +7014,12 @@ function exportHistoryData() {
   }
   const payload = {
     app: 'invoice-generator',
-    version: '1.0.19',
+    version: APP_VERSION,
     exportedAt: new Date().toISOString(),
-    seq: {
-      BRC: parseInt(localStorage.getItem(userSeqKey('BRC')) || '0'),
-      PLC: parseInt(localStorage.getItem(userSeqKey('PLC')) || '0'),
-    },
+    seq: SEQ_TYPES.reduce((acc, t) => {
+      acc[t] = parseInt(localStorage.getItem(userSeqKey(t)) || '0');
+      return acc;
+    }, {}),
     history: hist,
   };
   const json = JSON.stringify(payload, null, 2);
@@ -6978,7 +7074,7 @@ function importHistoryData(event) {
 
       // Restore seq counters (use MAX of existing and backup)
       if (data.seq) {
-        for (const type of ['BRC','PLC']) {
+        for (const type of SEQ_TYPES) {
           const cur = parseInt(localStorage.getItem(seqKey(type)) || '0');
           const bak = parseInt(data.seq[type] || 0);
           if (bak > cur) {
