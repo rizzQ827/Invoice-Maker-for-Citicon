@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Invoice Generator · v1.0.59</title>
-<!-- v1.0.59 -->
+<title>Invoice Generator · v1.0.60</title>
+<!-- v1.0.60 -->
 <meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai multi-brand">
 <meta name="theme-color" content="#0e9e4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -765,7 +765,6 @@
   .il-status-btn.sel-closing     { background: #dcfce7; border-color: #bbf7d0; color: #0a7a38; }
   .il-status-btn.sel-batal       { background: #f1f5f9; border-color: #e2e8f0; color: #475569; }
 
-  .il-item-addr { font-size: 11.5px; color: #64748b; margin-top: 2px; line-height: 1.4; }
   .il-item-price { font-family: 'JetBrains Mono', monospace; font-size: 13.5px; font-weight: 800; color: #0f172a; }
   .il-item-margin { font-size: 10.5px; color: #0a7a38; font-weight: 700; }
 
@@ -984,8 +983,8 @@
      pakai icon lokasi, harga di baris paling bawah biar gampang di-scan */
   .il-item-name { font-size: 13.5px; font-weight: 800; color: #0f172a; margin-top: 6px; line-height: 1.3; }
   .il-item-name-empty { color: #94a3b8; font-weight: 600; font-style: italic; }
-  .il-item-addr { display: flex; align-items: flex-start; gap: 4px; font-size: 11.5px; color: #64748b; margin-top: 3px; line-height: 1.4; }
-  .il-item-addr svg { flex-shrink: 0; margin-top: 1px; color: #94a3b8; }
+  .il-item-addr { display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: #64748b; margin-top: 3px; line-height: 1.4; }
+  .il-item-addr svg { flex-shrink: 0; color: #94a3b8; }
   /* v1.0.58: badge status pindah ke pojok kanan bawah, sebaris dengan harga */
   .il-item-price-row { margin-top: 7px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
   .il-contact-phones { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
@@ -1396,7 +1395,7 @@
     </div>
     <div class="min-w-0">
       <div class="text-[14px] font-bold text-slate-900 truncate leading-tight">Invoice Generator</div>
-      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.59</div>
+      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.60</div>
     </div>
   </div>
 
@@ -1815,9 +1814,8 @@
           Catat Kejadian Tanya Harga
         </button>
 
-        <div class="cost-card-title" style="margin-top:16px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+        <div class="cost-card-title" style="margin-top:16px;">
           <span>Catatan Tanya Harga</span>
-          <button class="il-more-btn" style="margin:0;padding:0;font-size:11.5px;" onclick="ilOpenFullList()">Cari semua →</button>
         </div>
         <div class="il-status-filter" id="ilStatusFilter">
           <button class="il-status-chip active" data-st="all" onclick="ilSetFilter('all')">Semua</button>
@@ -1828,8 +1826,11 @@
 
         <div id="ilList" class="il-list-scroll"></div>
         <div id="ilEmpty" class="plog-empty" style="display:none;">Belum ada catatan. Mulai catat tiap kali ada yang tanya harga.</div>
-        <!-- v1.0.56: tombol ini sekarang khusus paginasi (nambah 3 card), bukan buka subpage lagi -->
-        <button class="il-more-btn" id="ilMoreBtn" style="display:none;">Selanjutnya →</button>
+        <!-- v1.0.60: "Cari Semua" dihapus — tombol ini sekarang satu-satunya jalan ke
+             subpage lengkap (pencarian + filter kabupaten/kecamatan/desa). Daftar di
+             atas sendiri sekarang menampilkan SEMUA catatan sekaligus tapi tingginya
+             dibatasi (~3 kartu kelihatan), sisanya di-scroll di dalam kotaknya sendiri. -->
+        <button class="il-more-btn" id="ilMoreBtn" style="display:none;" onclick="ilOpenFullList()">Selanjutnya →</button>
       </div>
 
       <!-- Peta — visual, dilihat sesekali -->
@@ -2298,7 +2299,7 @@ const USER_PP_MAP = {
 // ════════════════════════════════════════════════════════════════
 //  CONSTANTS
 // ════════════════════════════════════════════════════════════════
-const APP_VERSION = '1.0.59';
+const APP_VERSION = '1.0.60';
 const BULAN_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 
 const PANEL_LENGTHS = [97, 147, 172, 197, 222, 247, 272, 297, 322];
@@ -2559,6 +2560,44 @@ function ilFindByPhone(phone, brand, product, addrText) {
   const withModal = cand.filter(e => ilModalOf(e) > 0);
   const pool = withModal.length ? withModal : cand;
   return ilPickByAddr(pool, addrText != null ? addrText : currentInvoiceAddr());
+}
+
+// v1.0.60: SUMBER TUNGGAL — dulu ada dua "otak" yang jalan sendiri-sendiri:
+// buildProfitSnapshot() cari modal dari catatan MANA SAJA yang sudah ada
+// harganya (walau catatan lama), sementara ilAutoCloseMatchingInquiry() cari
+// catatan "Nanya" mana yang harus ditutup, TERPISAH dari yang barusan dipakai
+// buat modal. Akibatnya bisa nyangkut ke DUA catatan berbeda untuk SATU
+// invoice: satu jadi sumber modal (tidak ditutup), satu lagi ditutup tapi
+// datanya kosong (persis kasus Ibu Asriani 15 Agustus — catatan hari itu
+// ditutup kosong, padahal modalnya dipinjam dari catatan 3 Agustus).
+//
+// Sekarang cuma SATU fungsi yang menentukan "catatan mana yang jadi pemilik
+// order ini", dipakai oleh keduanya:
+//   • link     = catatan "Nanya" yang masih terbuka (kalau ada) — ini yang
+//                dianggap PUNYA order ini, dan ini yang akan ditutup.
+//   • modalSrc = sumber angka modal: pakai modal punya `link` sendiri kalau
+//                sudah diisi; kalau belum, baru pinjam dari catatan lain
+//                (termasuk yang sudah closing) yang alamatnya paling mirip.
+//   • attach   = id yang ditulis ke profit.inquiryId invoice (link kalau ada,
+//                kalau tidak ada catatan Nanya sama sekali baru pakai modalSrc).
+function ilResolveInquiry(phones, brand, product, addrText) {
+  const cand = ilStore.filter(e =>
+    samePhoneAny(e.customer_phone, phones) &&
+    (!brand   || e.brand === brand) &&
+    (!product || e.product === product)
+  );
+  if (!cand.length) return { link: null, modalSrc: null, attach: null };
+
+  const open = cand.filter(e => ilNormStatus(e.status) === 'nanya');
+  const link = open.length ? ilPickByAddr(open, addrText) : null;
+
+  let modalSrc = (link && ilModalOf(link) > 0) ? link : null;
+  if (!modalSrc) {
+    const withModal = cand.filter(e => ilModalOf(e) > 0);
+    if (withModal.length) modalSrc = ilPickByAddr(withModal, addrText);
+  }
+  const attach = link || modalSrc;
+  return { link, modalSrc, attach };
 }
 
 function normalizePhone(raw) {
@@ -4374,7 +4413,7 @@ function ilComboReset(id) {
 }
 
 // ── State & penyimpanan (Supabase langsung, bukan JSONB blob) ───────────
-const ilState = { filter: 'all', loaded: false, visibleCount: 3 };
+const ilState = { filter: 'all', loaded: false };
 let ilStore = [];          // semua baris inquiry_log milik user
 let ilRestrictions = [];   // semua baris delivery_restrictions milik user
 let ilFactoryPrices = [];  // v1.0.53: semua baris factory_price_log milik user (semua brand/produk)
@@ -4406,15 +4445,11 @@ function ilEntriesForTab() {
 
 function ilSetFilter(st) {
   ilState.filter = st;
-  ilState.visibleCount = 3; // v1.0.56: reset paginasi tiap ganti filter
   document.querySelectorAll('.il-status-chip').forEach(el =>
     el.classList.toggle('active', el.dataset.st === st));
   ilRenderList();
 }
-function ilShowMoreCards() {
-  ilState.visibleCount += 3;
-  ilRenderList();
-}
+
 
 // ── Cek larangan/limitasi truk — cocokkan sampai ke level paling spesifik ──
 // Prioritas: desa (kalau diisi) → kecamatan (kalau diisi) → seluruh kabupaten.
@@ -4813,7 +4848,9 @@ async function ilSaveNew() {
 // ── Detail / edit entri ──────────────────────────────────────
 const IL_STATUS_LABEL = { nanya: 'Nanya', closing: 'Closing', batal: 'Batal' };
 // v1.0.56: icon lokasi (pin) dipakai sebelum teks alamat di card & modal Tanya Harga
-const IL_LOC_ICON = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1112 6.5a2.5 2.5 0 010 5z"/></svg>`;
+// v1.0.60: ikon lokasi diperbesar (12px → 14px) dan pakai path pin yang lebih
+// tebal/jelas supaya proporsinya nggak kalah sama teks alamat di sebelahnya.
+const IL_LOC_ICON = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c-4.41 0-8 3.59-8 8-.03 6.44 7.12 11.6 7.42 11.82.17.12.38.19.58.19s.41-.06.58-.19c.3-.22 7.45-5.37 7.42-11.82 0-4.41-3.59-8-8-8m0 12c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4"/></svg>`;
 // v1.0.53: status lama (nggak_cocok/ghosting) disatukan jadi "batal"
 function ilNormStatus(status) {
   return (status === 'nggak_cocok' || status === 'ghosting') ? 'batal' : (status || 'nanya');
@@ -4989,25 +5026,61 @@ async function ilSetStatus(id, status) {
 // nama yang manual itu yang menang, nggak ditimpa.
 async function ilAutoCloseMatchingInquiry(entry) {
   if (!entry || !(entry.custPhone || entry.custPhone2)) return;
-  // v1.0.57: batasi ke merek + jenis produk invoice ini. Tanpa ini, customer
-  // yang nomor WA-nya sama tapi nanya dua produk berbeda (misal bata Bricon
-  // dan panel Citicon) bakal ke-Closing dua-duanya cuma karena satu invoice.
   const invProduct = entry.mode === 'bata' ? 'bata' : 'panel';
   const invBrand = entry.brand || currentBrand;
   const phones = [entry.custPhone, entry.custPhone2].filter(Boolean);
-  const cand = ilStore.filter(e => samePhoneAny(e.customer_phone, phones)
-    && ilNormStatus(e.status) === 'nanya'
-    && e.brand === invBrand && e.product === invProduct);
-  if (!cand.length) return;
-  // v1.0.58 (#2): pilih catatan yang alamatnya paling mirip dengan alamat invoice
-  const hit = ilPickByAddr(cand, entry.custAddr || '');
+
+  // v1.0.60: kalau invoice ini sudah punya profit.inquiryId (berarti sudah
+  // dihitung lewat resolver yang sama), catatan yang ditutup HARUS itu juga —
+  // supaya modal yang dipakai untuk hitung untung dan catatan yang ditutup
+  // selalu catatan yang sama, tidak nyasar ke dua tempat berbeda.
+  let hit = null;
+  if (entry.profit && entry.profit.inquiryId) {
+    hit = ilStore.find(e => e.id === entry.profit.inquiryId
+      && ilNormStatus(e.status) === 'nanya');
+  }
+  // Tanpa profit tercatat (mis. belum ada modal sama sekali) — tetap cari
+  // catatan Nanya yang cocok, biar statusnya tidak nyangkut selamanya.
+  if (!hit) {
+    const cand = ilStore.filter(e => samePhoneAny(e.customer_phone, phones)
+      && ilNormStatus(e.status) === 'nanya'
+      && e.brand === invBrand && e.product === invProduct);
+    if (cand.length) hit = ilPickByAddr(cand, entry.custAddr || '');
+  }
   if (!hit) return;
+
   const name = (entry.custName || '').trim();
   const patch = { status: 'closing', updated_at: new Date().toISOString() };
   if (name && !hit.name_locked) {
     const salute = entry.salute || 'Bpk.';
     patch.customer_name = `${salute} ${name}`;
   }
+  // v1.0.60: kalau catatan ini sendiri belum punya modal (baru "Nanya" tanpa
+  // harga), tapi invoice-nya sudah kehitung untungnya (modal dipinjam dari
+  // catatan lain), isikan juga modal & margin ke catatan ini — supaya begitu
+  // ditutup, datanya tidak kosong seperti kasus Ibu Asriani 15 Agustus.
+  const p = entry.profit;
+  if (p && Number(p.modalPerUnit) > 0 && !(ilModalOf(hit) > 0)) {
+    if (invProduct === 'bata' && Array.isArray(p.sizes) && p.sizes.length) {
+      p.sizes.forEach(sz => {
+        if (sz.size === '7,5cm') patch.modal_75 = sz.modal;
+        else patch.modal_10 = sz.modal;
+      });
+    } else if (invProduct !== 'bata') {
+      patch.modal_price = Math.round(p.modalPerUnit);
+    }
+  }
+  if (p && Number(p.jualPerUnit) > 0 && Number(p.modalPerUnit) > 0) {
+    const m = Math.round(p.jualPerUnit - p.modalPerUnit);
+    if (Number(hit.margin || 0) !== m) {
+      patch.margin = m;
+      patch.sell_price = Math.round(p.jualPerUnit);
+    }
+  }
+  if (p && Number(p.volume) > 0) {
+    patch.est_volume = Number(p.volume.toFixed(3));
+  }
+
   const saved = await ilUpdateEntry(hit.id, patch);
   if (saved) {
     ilRenderAll();
@@ -5222,20 +5295,15 @@ function ilRenderList() {
   if (!entries.length) { list.innerHTML = ''; empty.style.display = ''; if (moreBtn) moreBtn.style.display = 'none'; return; }
   empty.style.display = 'none';
 
-  // v1.0.56: paginasi — maks 3 card dulu, tombol "Selanjutnya" nambah 3 lagi
-  const visible = entries.slice(0, ilState.visibleCount);
-  list.innerHTML = ilGroupedHtml(visible);
+  // v1.0.60: "Cari Semua" dihapus. Semua catatan (sesuai filter status)
+  // langsung ditampilkan di sini — kotaknya sendiri yang membatasi tinggi
+  // (~3 kartu kelihatan, .il-list-scroll), sisanya di-scroll di dalamnya.
+  // Tombol "Selanjutnya" sekarang cuma jalan pintas ke subpage lengkap
+  // (pencarian + filter kabupaten/kecamatan/desa) — bukan nambah kartu lagi.
+  list.innerHTML = ilGroupedHtml(entries);
   ilBindSwipeIn('#ilList');
 
-  if (moreBtn) {
-    if (entries.length > ilState.visibleCount) {
-      moreBtn.style.display = '';
-      moreBtn.textContent = 'Selanjutnya →';
-      moreBtn.onclick = ilShowMoreCards;
-    } else {
-      moreBtn.style.display = 'none';
-    }
-  }
+  if (moreBtn) moreBtn.style.display = entries.length ? '' : 'none';
 }
 
 // ── Subpage: semua catatan, dengan pencarian & filter kabupaten/kecamatan ──
@@ -5345,14 +5413,15 @@ function ilBindSwipeIn(containerSelector) {
       if (!dragging || e.pointerId !== pid) return;
       dragging = false;
       const dx = e.clientX - startX;
-      const elapsed = Date.now() - startTime;
-      // v1.0.56: cuma dianggap "scroll, jangan buka" kalau gerakannya lumayan
-      // DAN durasinya juga agak lama — tap cepat dengan jitter kecil tetap
-      // dianggap tap valid supaya modal langsung kebuka sekali tekan.
+      // v1.0.60: dulu "gerakan dianggap scroll" cuma berlaku kalau geraknya
+      // JUGA lambat (>220ms) — makanya scroll cepat (flick) di HP tetap
+      // kehitung sebagai tap dan modal ke-buka nggak sengaja. Sekarang cukup
+      // gerakannya lewat ambang batas (anyMoved), nggak peduli cepat atau
+      // pelan — scroll flick cepat pun tidak lagi membuka modal.
       if (moved) {
         settle(dx < -40);
-      } else if (anyMoved && elapsed > 220) {
-        // gerakan cuma scroll vertikal — jangan buka apa pun
+      } else if (anyMoved) {
+        // gerakan (scroll vertikal atau horizontal kecil) — jangan buka apa pun
       } else if (face.classList.contains('swiped')) {
         settle(false);
       } else {
@@ -6128,7 +6197,12 @@ function buildProfitSnapshot(prevEntry) {
   const pickup = (deliveryMethod === 'ambil');
   const phones = invoicePhones();
   const addr = currentInvoiceAddr();
-  const inq = ilFindByPhone(phones, currentBrand, product, addr);
+  // v1.0.60: satu resolver dipakai sama-sama oleh perhitungan modal (di sini)
+  // dan proses tutup status Nanya (ilAutoCloseMatchingInquiry) — supaya
+  // dua-duanya selalu mengacu ke catatan yang SAMA, tidak nyasar ke dua
+  // catatan berbeda seperti kasus Ibu Asriani.
+  const resolved = ilResolveInquiry(phones, currentBrand, product, addr);
+  const inq = resolved.modalSrc;   // sumber angka modal (boleh catatan lama)
 
   // Modal dibekukan saat invoice pertama disimpan supaya laporan tidak berubah
   // kalau harga Pak Bima naik nanti. Tombol "Hitung Ulang Modal" mengabaikan
@@ -6137,7 +6211,10 @@ function buildProfitSnapshot(prevEntry) {
 
   let regionKey = (frozen && frozen.regionKey) || suggState.chosen || null;
   if (!regionKey && inq && inq.kecamatan) regionKey = inq.kecamatan;
-  let inquiryId = frozen ? (frozen.inquiryId || null) : (inq ? inq.id : null);
+  // inquiryId nempel ke catatan "Nanya" yang masih terbuka kalau ada (itu
+  // yang punya order ini) — bukan otomatis ke catatan mana pun yang
+  // kebetulan punya modal.
+  let inquiryId = frozen ? (frozen.inquiryId || null) : (resolved.attach ? resolved.attach.id : null);
 
   // Perkiraan modal dari catatan daerah — cadangan kalau tidak ketemu catatan
   // milik nomor WA customer ini.
