@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Invoice Generator · v1.0.58</title>
-<!-- v1.0.58 -->
+<title>Invoice Generator · v1.0.59</title>
+<!-- v1.0.59 -->
 <meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai multi-brand">
 <meta name="theme-color" content="#0e9e4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -995,6 +995,15 @@
   }
   .il-contact-phones .tag.nanya   { background: #fef3c7; color: #92400e; }
   .il-contact-phones .tag.closing { background: #dcfce7; color: #0a7a38; }
+
+  /* v1.0.58 (revisi): toggle ukuran bata 10cm/7,5cm di form tambah catatan baru */
+  .il-size-toggle { display: inline-flex; background: #f1f5f9; border-radius: 8px; padding: 2px; gap: 2px; }
+  .il-size-btn {
+    border: none; background: transparent; padding: 4px 9px; border-radius: 6px;
+    font-size: 11px; font-weight: 700; color: #64748b; cursor: pointer;
+    font-family: 'Inter', sans-serif;
+  }
+  .il-size-btn.active { background: #fff; color: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
   .il-item-price { font-family: 'JetBrains Mono', monospace; font-size: 13.5px; font-weight: 800; color: #0f172a; }
   .il-item-price.empty { font-weight: 600; color: #94a3b8; font-family: inherit; font-size: 11.5px; }
 
@@ -1387,7 +1396,7 @@
     </div>
     <div class="min-w-0">
       <div class="text-[14px] font-bold text-slate-900 truncate leading-tight">Invoice Generator</div>
-      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.55</div>
+      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.59</div>
     </div>
   </div>
 
@@ -2289,7 +2298,7 @@ const USER_PP_MAP = {
 // ════════════════════════════════════════════════════════════════
 //  CONSTANTS
 // ════════════════════════════════════════════════════════════════
-const APP_VERSION = '1.0.58';
+const APP_VERSION = '1.0.59';
 const BULAN_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 
 const PANEL_LENGTHS = [97, 147, 172, 197, 222, 247, 272, 297, 322];
@@ -4532,6 +4541,40 @@ function ilDaysAgo(ts) {
 const IL_FACTORY_ADDR = { kab: 'Kabupaten Mojokerto', kec: 'Pungging', desa: 'Landep, Banjartanggul' };
 let ilFormPickup = 'franco';
 
+// v1.0.58 (revisi): form TAMBAH catatan baru pakai satu kolom harga + toggle
+// kecil "10 cm / 7,5 cm" (bukan dua kolom terpisah seperti di modal detail/edit).
+// Default selalu 10 cm karena itu ukuran yang paling sering ditanyakan.
+let ilFormBataSize = '10cm';
+function ilSetFormBataSize(size) {
+  ilFormBataSize = size;
+  document.querySelectorAll('#ilBataSizeToggle .il-size-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.sz === size));
+}
+function ilAddModalFieldHtml(product) {
+  if (product !== 'bata') {
+    return `
+    <label class="cost-modal-label">Harga dari Pak Bima (Rp, opsional)</label>
+    <div class="cost-price-box">
+      <span class="rp">Rp</span>
+      <input id="ilModal" inputmode="numeric" placeholder="0" oninput="ilUpdatePreview()">
+      <span class="suffix">/${costUnit()}</span>
+    </div>`;
+  }
+  return `
+    <label class="cost-modal-label" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+      <span>Harga dari Pak Bima (Rp, opsional)</span>
+      <div class="il-size-toggle" id="ilBataSizeToggle">
+        <button type="button" class="il-size-btn active" data-sz="10cm" onclick="ilSetFormBataSize('10cm')">10 cm</button>
+        <button type="button" class="il-size-btn" data-sz="7,5cm" onclick="ilSetFormBataSize('7,5cm')">7,5 cm</button>
+      </div>
+    </label>
+    <div class="cost-price-box">
+      <span class="rp">Rp</span>
+      <input id="ilModal" inputmode="numeric" placeholder="0" oninput="ilUpdatePreview()">
+      <span class="suffix">/Kubik</span>
+    </div>`;
+}
+
 // v1.0.53: toggle cara ambil barang. Loco = customer ambil sendiri di pabrik
 // (istilah dagang standar buat "harga di lokasi penjual, ongkos angkut
 // tanggungan pembeli" — setara EXW). Franco = harga sudah termasuk kirim
@@ -4612,6 +4655,7 @@ function ilUpdatePreview() {
 // ── Form tambah catatan ──────────────────────────────────────
 function ilOpenAdd() {
   ilFormPickup = 'franco';
+  ilFormBataSize = '10cm'; // v1.0.58: default selalu 10cm tiap buka form baru
   costModal(`
     <div class="cost-modal-title">Catat Kejadian Tanya Harga</div>
     <div class="cost-modal-sub">Isi sebisanya dulu — harga & profit boleh nanti kalau belum dijawab Pak Bima.</div>
@@ -4647,7 +4691,7 @@ function ilOpenAdd() {
     <input class="input" id="ilCustPhone" placeholder="08xxxxxxxxxx" inputmode="tel">
 
     <div style="height:12px;"></div>
-    ${ilModalFieldsHtml(costState.product, 'ilModal', 'ilModal75', 0, 0, 'ilUpdatePreview()')}
+    ${ilAddModalFieldHtml(costState.product)}
 
     <div style="height:10px;"></div>
     <label class="cost-modal-label">Profitku (Rp, opsional — sesuai selera saat itu)</label>
@@ -4737,9 +4781,11 @@ async function ilSaveNew() {
   const custSalute = (document.getElementById('ilCustSalute') || {}).value || 'Bpk.';
   const custNameFull = custName ? `${custSalute} ${custName}` : '';
   const custPhone = (document.getElementById('ilCustPhone') || {}).value?.trim() || '';
-  const modal10 = ilRpVal('ilModal');
-  const modal75 = ilRpVal('ilModal75');
-  const modal = modal10 || modal75;   // modal_price = ringkasan, dipakai saran harga
+  // v1.0.58 (revisi): form ini cuma punya SATU field harga + toggle ukuran
+  // (ilFormBataSize, default '10cm'). modal_price tetap dipakai ringkas oleh
+  // kotak saran harga.
+  const modal = ilRpVal('ilModal');
+  const isBataForm = costState.product === 'bata';
   const margin = ilRpVal('ilMargin');
   const note = (document.getElementById('ilNote') || {}).value?.trim() || '';
 
@@ -4749,8 +4795,8 @@ async function ilSaveNew() {
     customer_name: custNameFull, customer_phone: custPhone ? normalizePhone(custPhone) : '',
     modal_price: modal, margin, sell_price: modal + margin,
     // v1.0.58 (#9): bata dicatat per ukuran; panel tetap satu harga
-    modal_10: costState.product === 'bata' ? (modal10 || null) : null,
-    modal_75: costState.product === 'bata' ? (modal75 || null) : null,
+    modal_10: isBataForm && ilFormBataSize === '10cm'  ? (modal || null) : null,
+    modal_75: isBataForm && ilFormBataSize === '7,5cm' ? (modal || null) : null,
     status: 'nanya', note, pickup_method: ilFormPickup,
     name_locked: !!custNameFull, // v1.0.56: kalau diisi manual dari awal, kunci — jangan ditimpa auto-fill invoice
   };
