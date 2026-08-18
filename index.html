@@ -1055,9 +1055,13 @@
   }
   .il-palet-icon-btn:hover { border-color: var(--brand-color); background: rgba(var(--brand-rgb),0.06); }
   .il-palet-popover {
-    display: none; position: absolute; top: 38px; right: 0; z-index: 60;
+    /* v1.0.63: position:fixed (bukan absolute) + posisi dihitung via JS supaya
+       popover ini nggak pernah kepotong/nabrak keluar layar, baik di desktop
+       maupun mobile, apapun posisi tombolnya atau container yang membungkusnya. */
+    display: none; position: fixed; z-index: 6000;
     background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
-    box-shadow: 0 10px 30px rgba(15,23,42,0.16); width: 230px; max-height: 250px; overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(15,23,42,0.16); width: 230px; max-width: calc(100vw - 20px);
+    max-height: 250px; overflow-y: auto;
     padding: 4px;
   }
   .il-palet-item {
@@ -1660,7 +1664,7 @@
           </label>
           <div class="relative">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-500 font-semibold pointer-events-none">Rp</span>
-            <input class="input" id="pricePerM2" oninput="updatePreview()" placeholder="415000" style="padding-left:32px;" type="number" min="0" step="1" inputmode="numeric">
+            <input class="input" id="pricePerM2" oninput="onRibuanInput(this);updatePreview();" placeholder="415.000" style="padding-left:32px;" type="text" inputmode="numeric">
           </div>
         </div>
 
@@ -1671,7 +1675,7 @@
           </label>
           <div class="relative">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-500 font-semibold pointer-events-none">Rp</span>
-            <input class="input" id="plcPriceNonPasang" oninput="onPriceNonPasangInput()" placeholder="Masukkan nominal harga panel saja..." style="padding-left:32px;" type="number" min="0" step="1" inputmode="numeric">
+            <input class="input" id="plcPriceNonPasang" oninput="onPriceNonPasangInput(this)" placeholder="Masukkan nominal harga panel saja..." style="padding-left:32px;" type="text" inputmode="numeric">
           </div>
         </div>
 
@@ -1682,7 +1686,7 @@
           </label>
           <div class="relative">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-500 font-semibold pointer-events-none">Rp</span>
-            <input class="input" id="ongkirInput" oninput="onOngkirInput()" placeholder="50000" style="padding-left:32px;" type="number" min="0" step="1" inputmode="numeric">
+            <input class="input" id="ongkirInput" oninput="onOngkirInput(this)" placeholder="50.000" style="padding-left:32px;" type="text" inputmode="numeric">
           </div>
         </div>
 
@@ -1693,7 +1697,7 @@
           </label>
           <div class="relative">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-500 font-semibold pointer-events-none">Rp</span>
-            <input class="input" id="biayaLangsirInput" oninput="onBiayaLangsirInput()" placeholder="Masukkan nominal biaya per meter..." style="padding-left:32px;" type="number" min="0" step="1" inputmode="numeric">
+            <input class="input" id="biayaLangsirInput" oninput="onBiayaLangsirInput(this)" placeholder="Masukkan nominal biaya per meter..." style="padding-left:32px;" type="text" inputmode="numeric">
           </div>
         </div>
 
@@ -2358,7 +2362,7 @@ const USER_PP_MAP = {
 // ════════════════════════════════════════════════════════════════
 //  CONSTANTS
 // ════════════════════════════════════════════════════════════════
-const APP_VERSION = '1.0.62';
+const APP_VERSION = '1.0.63';
 const BULAN_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 
 const PANEL_LENGTHS = [97, 147, 172, 197, 222, 247, 272, 297, 322];
@@ -2554,6 +2558,27 @@ function fmtQty(n)  {
   return s.replace('.', ',');
 }
 function fmtRupiah(n) { return Math.round(n).toLocaleString('id-ID'); }
+
+// v1.0.63: format titik ribuan buat SEMUA field Harga Satuan di invoice (bata,
+// mortar, grouting, panel lantai, ongkir, biaya langsir) — tampilannya pakai
+// titik (mis. "20.000"), tapi angka yang disimpan ke state/model TETAP angka
+// bersih tanpa titik (mis. "20000") supaya parseNum() & perhitungan lain di
+// tempat lain tidak berubah/rusak.
+function formatRibuanDisplay(v) {
+  const digits = String(v || '').replace(/\D/g, '');
+  if (!digits) return '';
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+// Dipakai di oninput field harga: reformat tampilan field-nya sambil jaga
+// posisi kursor, lalu balikin angka bersihnya (tanpa titik) buat disimpan.
+function onRibuanInput(el) {
+  const cursorFromEnd = el.value.length - el.selectionStart;
+  const digits = el.value.replace(/\D/g, '');
+  el.value = formatRibuanDisplay(digits);
+  const newPos = Math.max(0, el.value.length - cursorFromEnd);
+  try { el.setSelectionRange(newPos, newPos); } catch (e) {}
+  return digits;
+}
 
 function fmtDateID(ds) {
   if (!ds) return '—';
@@ -3196,18 +3221,53 @@ function bataQtyPaletPopoverHtml(i) {
   }
   return html;
 }
+// v1.0.63: posisi popover dihitung dari lokasi tombolnya di layar (bukan CSS
+// absolute relatif ke wrapper), lalu di-"clamp" (dipepet) supaya nggak keluar
+// dari batas kanan/kiri/bawah layar — ini yang bikin popover nggak lagi out of
+// frame, baik di desktop maupun mobile.
+function positionPaletPopover(btn, popover) {
+  const margin = 10;
+  const btnRect = btn.getBoundingClientRect();
+  const popW = popover.offsetWidth || 230;
+  const popH = popover.offsetHeight || 250;
+
+  let left = btnRect.right - popW; // default: rata kanan ke tombol
+  left = Math.min(left, window.innerWidth - popW - margin);
+  left = Math.max(left, margin);
+
+  let top = btnRect.bottom + 6;
+  if (top + popH > window.innerHeight - margin) {
+    // Nggak cukup ruang di bawah tombol → taruh di atas tombol
+    top = btnRect.top - popH - 6;
+    if (top < margin) top = margin; // fallback kalau tetap kurang, pepet ke atas layar
+  }
+
+  popover.style.left = `${left}px`;
+  popover.style.top = `${top}px`;
+}
+
 function togglePaletPopover(i) {
   document.querySelectorAll('.il-palet-popover').forEach(el => {
     if (el.id !== `paletPopover-${i}`) el.style.display = 'none';
   });
   const el = document.getElementById(`paletPopover-${i}`);
-  if (el) el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+  const btn = el ? el.closest('.il-palet-wrap')?.querySelector('.il-palet-icon-btn') : null;
+  if (!el) return;
+  const willOpen = el.style.display !== 'block';
+  el.style.display = willOpen ? 'block' : 'none';
+  if (willOpen && btn) positionPaletPopover(btn, el);
 }
 document.addEventListener('click', (ev) => {
   if (!ev.target.closest('.il-palet-wrap')) {
     document.querySelectorAll('.il-palet-popover').forEach(el => el.style.display = 'none');
   }
 });
+// v1.0.63: popover sekarang position:fixed (dihitung dari posisi tombol saat
+// dibuka) — kalau halaman di-scroll sementara popover terbuka, tutup aja biar
+// nggak "ngambang" di posisi yang salah (nggak lagi nempel ke tombolnya).
+window.addEventListener('scroll', () => {
+  document.querySelectorAll('.il-palet-popover').forEach(el => el.style.display = 'none');
+}, true);
 function onBataQtyPaletPick(i, val) {
   if (!val) return;
   bataRows[i].qty = val;
@@ -3279,9 +3339,9 @@ function renderBataRows() {
 
       <div>
         <label class="label-field text-[10.5px]">Harga Satuan</label>
-        <input class="input text-xs" value="${h(r.price)}" type="number" min="0" step="1" inputmode="numeric"
-          oninput="bataRows[${i}].price=this.value;updateBataRowSubtotal(${i});updatePreview();"
-          placeholder="605000" style="padding:7px 10px;">
+        <input class="input text-xs" value="${h(formatRibuanDisplay(r.price))}" type="text" inputmode="numeric"
+          oninput="bataRows[${i}].price=onRibuanInput(this);updateBataRowSubtotal(${i});updatePreview();"
+          placeholder="605.000" style="padding:7px 10px;">
       </div>
     </div>`;
   }).join('');
@@ -3370,10 +3430,10 @@ function getOngkir() {
   if (totalArea >= ONGKIR_THRESHOLD_M2 && !ongkirKeepOverThreshold) return 0;
   return parseNum(ongkir) || 0;
 }
-function onOngkirInput() {
+function onOngkirInput(el) {
   if (isReadOnly) return;
-  const el = document.getElementById('ongkirInput');
-  ongkir = el ? el.value : '';
+  if (!el) el = document.getElementById('ongkirInput');
+  ongkir = el ? onRibuanInput(el) : '';
   updatePreview();
 }
 function syncOngkirVisibility() {
@@ -3416,10 +3476,10 @@ function getBiayaLangsirTotal() {
   // Total = Luas Panel Terpasang × nominal per m²
   return getTotalPanelArea() * getBiayaLangsirRate();
 }
-function onBiayaLangsirInput() {
+function onBiayaLangsirInput(el) {
   if (isReadOnly) return;
-  const el = document.getElementById('biayaLangsirInput');
-  biayaLangsir = el ? el.value : '';
+  if (!el) el = document.getElementById('biayaLangsirInput');
+  biayaLangsir = el ? onRibuanInput(el) : '';
   updateBiayaLangsirSummary();
   updatePreview();
 }
@@ -3448,10 +3508,10 @@ function getPriceNonPasangTotal() {
   // Total = Luas Panel Terpasang × nominal per m² (sama logika seperti langsir)
   return getTotalPanelArea() * getPriceNonPasangRate();
 }
-function onPriceNonPasangInput() {
+function onPriceNonPasangInput(el) {
   if (isReadOnly) return;
-  const el = document.getElementById('plcPriceNonPasang');
-  priceNonPasang = el ? el.value : '';
+  if (!el) el = document.getElementById('plcPriceNonPasang');
+  priceNonPasang = el ? onRibuanInput(el) : '';
   updatePreview();
 }
 
@@ -3622,9 +3682,9 @@ function renderGroutingRows() {
         </div>
         <div>
           <label class="label-field text-[10.5px]">Harga Satuan</label>
-          <input class="input text-xs" value="${h(g.price)}" type="number" min="0" step="1" inputmode="numeric"
-            oninput="groutingRows[${i}].price=this.value;updateGroutingRowSubtotal(${i});updatePreview();"
-            placeholder="80000" style="padding:7px 10px;">
+          <input class="input text-xs" value="${h(formatRibuanDisplay(g.price))}" type="text" inputmode="numeric"
+            oninput="groutingRows[${i}].price=onRibuanInput(this);updateGroutingRowSubtotal(${i});updatePreview();"
+            placeholder="80.000" style="padding:7px 10px;">
         </div>
       </div>
     </div>`;
@@ -3796,19 +3856,19 @@ function buildBata({ docNo, dateStr, salute, custName, custAddr, custPhone, cust
     // jumlah tetap apa adanya (misal "8 Sak"), karena itu yang menunjukkan berapa
     // banyak barang yang diberikan gratis. Total tidak dihitung kali-kalian kalau
     // gratis (percuma), cukup ikut tertulis "Free".
-    // v1.0.53: untuk unit Sak, kolom m³/Sak nulis nama satuannya aja ("Sak"),
-    // bukan angkanya — angka jumlah sak-nya ada di kolom JUMLAH. Unit m³ (bata)
-    // tetap ditulis lengkap "qty m³" karena kolomnya gabungan dua satuan.
-    const qtyCell = r.qty ? (r.unit === 'SAK' ? h(unitLabel(r.unit)) : `${fmtQty(r.qty)} ${h(unitLabel(r.unit))}`) : '';
-    // v1.0.53: label jumlah barang (dipakai di kolom JUMLAH saat gratis) — selalu
-    // angka qty-nya, beda dari qtyCell yang buat unit Sak sekarang cuma nulis "Sak".
-    const qtyAmountCell = r.qty ? (r.unit === 'SAK' ? fmtQty(r.qty) : `${fmtQty(r.qty)} ${h(unitLabel(r.unit))}`) : '';
+    // v1.0.63: kolom m³/Sak SELALU nulis angka + satuannya (mis. "10 Sak",
+    // "11,52 m³") — baik unit m³ maupun Sak, baik gratis maupun bayar. Dulu unit
+    // Sak cuma nulis "Sak" tanpa angka sehingga jumlah sak nggak kelihatan sama
+    // sekali di invoice kalau bukan promo gratis (angkanya "ketebak" doang dari
+    // hasil bagi kolom Jumlah).
+    const qtyCell = r.qty ? `${fmtQty(r.qty)} ${h(unitLabel(r.unit))}` : '';
     const isFree = r.priceRaw !== '' && r.price === 0;
     const priceCell = r.priceRaw === '' ? '' : (isFree ? 'Free' : fmtRupiah(r.price));
-    // v1.0.53: kalau gratis, kolom "JUMLAH" (total harga) jangan nulis "Free" lagi
-    // (membingungkan, dikira jumlah barangnya nol) — tulis ulang qty-nya biar jelas
-    // itu jumlah barang yang diberikan gratis, bukan hasil kali harga.
-    const totalCell = r.priceRaw === '' ? '' : (isFree ? qtyAmountCell : fmtRupiah(r.total));
+    // v1.0.63: kolom JUMLAH sekarang konsisten — "Free" kalau gratis (angka sak-nya
+    // sudah kelihatan jelas di kolom m³/Sak, jadi nggak perlu diulang di sini),
+    // atau nominal rupiah kalau bayar. Sebelumnya nulis angka polos (mis. "8") di
+    // kolom yang biasanya isinya duit — kelihatan janggal & nggak konsisten.
+    const totalCell = r.priceRaw === '' ? '' : (isFree ? 'Free' : fmtRupiah(r.total));
     return `
     <tr>
       <td style="border:1px solid #444;padding:9px 12px;text-align:center;font-family:Arial,sans-serif;font-size:11.5px;">
@@ -5409,7 +5469,7 @@ function ilOrderFromInquiry(id) {
     renderBataRows();
   } else {
     const priceEl = document.getElementById('pricePerM2');
-    if (priceEl && jual) priceEl.value = String(jual);
+    if (priceEl && jual) priceEl.value = formatRibuanDisplay(jual);
   }
 
   updatePhonePreview();
@@ -6567,8 +6627,8 @@ function applySuggestedPrice(manual) {
     // tombolnya kelihatan nggak ngefek apa-apa.
     const el = document.getElementById(priceMode === 'nonpasang' ? 'plcPriceNonPasang' : 'pricePerM2');
     if (el) {
-      el.value = String(q.jual);
-      if (priceMode === 'nonpasang') priceNonPasang = el.value;
+      el.value = formatRibuanDisplay(q.jual);
+      if (priceMode === 'nonpasang') priceNonPasang = String(q.jual); // simpan angka bersih, bukan tampilan berformat
       updatePreview();
     }
   }
@@ -7219,7 +7279,10 @@ async function saveToHistory() {
     custPhone2: (document.getElementById('custPhone2')||{}).value || '',
     bankInfo: (document.getElementById('bankInfo')||{}).value || '',
     bankInfoPanel: (document.getElementById('bankInfoPanel')||{}).value || '',
-    pricePerM2: (document.getElementById('pricePerM2')||{}).value || '',
+    // v1.0.63: strip titik ribuan sebelum disimpan — biar entry.pricePerM2 yang
+    // tersimpan di histori tetap angka bersih (aman dibaca parseNum() di tempat
+    // lain, mis. statistik profit), bukan string berformat "415.000".
+    pricePerM2: ((document.getElementById('pricePerM2')||{}).value || '').replace(/\./g, ''),
     ongkir: ongkir || '',
     biayaLangsir: biayaLangsir || '',
     priceNonPasang: priceNonPasang || '', // v8.0
@@ -7493,6 +7556,53 @@ function switchTab(tab) {
   window.scrollTo(0, 0);
 }
 
+// ═══ v1.0.63: SWIPE ANTAR 4 TAB DI MOBILE ═══
+// Urutan tab ngikutin urutan ikon di bottom nav: Invoice → Cost → History → Profile.
+// Geser jari ke KIRI = pindah ke tab berikutnya, geser ke KANAN = tab sebelumnya.
+// Cuma aktif di layar mobile (≤768px, sama kayak breakpoint bottomnav muncul).
+const SWIPE_TAB_ORDER = ['invoice', 'cost', 'history', 'profile'];
+let _swipeStartX = 0, _swipeStartY = 0, _swipeStartTime = 0, _swipeTracking = false;
+
+function _swipeShouldIgnore(target) {
+  // Jangan aktifkan swipe kalau jari mulai dari elemen yang butuh gesture-nya
+  // sendiri (field input, dropdown, tombol, popover palet) atau lagi ada modal
+  // kebuka — biar nggak nyelonong pindah tab pas lagi ngetik/nge-tap sesuatu.
+  if (target.closest('input, select, textarea, button, a, .il-palet-popover, .il-palet-wrap')) return true;
+  if (document.querySelector('.cost-modal.show')) return true;
+  return false;
+}
+
+document.addEventListener('touchstart', (ev) => {
+  if (window.innerWidth > 768) return;
+  if (ev.touches.length !== 1) return;
+  if (_swipeShouldIgnore(ev.target)) { _swipeTracking = false; return; }
+  _swipeStartX = ev.touches[0].clientX;
+  _swipeStartY = ev.touches[0].clientY;
+  _swipeStartTime = Date.now();
+  _swipeTracking = true;
+}, { passive: true });
+
+document.addEventListener('touchend', (ev) => {
+  if (!_swipeTracking) return;
+  _swipeTracking = false;
+  if (window.innerWidth > 768) return;
+  const touch = ev.changedTouches[0];
+  if (!touch) return;
+  const dx = touch.clientX - _swipeStartX;
+  const dy = touch.clientY - _swipeStartY;
+  const elapsed = Date.now() - _swipeStartTime;
+  const MIN_DIST = 60, MAX_OFF_AXIS = 60, MAX_TIME = 600;
+  if (elapsed > MAX_TIME) return;          // kegeseran terlalu lama, bukan swipe cepat
+  if (Math.abs(dx) < MIN_DIST) return;     // geserannya kurang jauh
+  if (Math.abs(dy) > MAX_OFF_AXIS) return; // lebih ke arah scroll vertikal, bukan swipe
+
+  const curIdx = SWIPE_TAB_ORDER.indexOf(currentTab);
+  if (curIdx === -1) return;
+  const nextIdx = curIdx + (dx < 0 ? 1 : -1); // kiri → berikutnya, kanan → sebelumnya
+  if (nextIdx < 0 || nextIdx >= SWIPE_TAB_ORDER.length) return; // udah di tab paling ujung
+  switchTab(SWIPE_TAB_ORDER[nextIdx]);
+}, { passive: true });
+
 // Salin data profil dari sidebar ke halaman Profile
 function syncProfilePage() {
   if (!currentUser) return;
@@ -7629,19 +7739,19 @@ function loadFromHistory(id) {
   if (document.getElementById('custPhone2')) document.getElementById('custPhone2').value = e.custPhone2 || '';
   if (document.getElementById('bankInfo')) document.getElementById('bankInfo').value = e.bankInfo || '';
   if (document.getElementById('bankInfoPanel')) document.getElementById('bankInfoPanel').value = e.bankInfoPanel || e.bankInfo || '';
-  if (document.getElementById('pricePerM2')) document.getElementById('pricePerM2').value = e.pricePerM2 || '';
+  if (document.getElementById('pricePerM2')) document.getElementById('pricePerM2').value = formatRibuanDisplay(e.pricePerM2 || '');
   ongkir = e.ongkir || '';
   // v1.0.58 (#13): invoice lama yang memang sengaja pakai ongkir walau luasnya
   // besar tetap dihormati — tidak ditanyai ulang & tidak dihapus.
   ongkirKeepOverThreshold = parseNum(ongkir) > 0;
   _forceProfitRecalc = false;
-  if (document.getElementById('ongkirInput')) document.getElementById('ongkirInput').value = ongkir;
+  if (document.getElementById('ongkirInput')) document.getElementById('ongkirInput').value = formatRibuanDisplay(ongkir);
   // v7.5: restore biaya langsir
   biayaLangsir = e.biayaLangsir || '';
-  if (document.getElementById('biayaLangsirInput')) document.getElementById('biayaLangsirInput').value = biayaLangsir;
+  if (document.getElementById('biayaLangsirInput')) document.getElementById('biayaLangsirInput').value = formatRibuanDisplay(biayaLangsir);
   // v8.0: restore harga panel tanpa pemasangan
   priceNonPasang = e.priceNonPasang || '';
-  if (document.getElementById('plcPriceNonPasang')) document.getElementById('plcPriceNonPasang').value = priceNonPasang;
+  if (document.getElementById('plcPriceNonPasang')) document.getElementById('plcPriceNonPasang').value = formatRibuanDisplay(priceNonPasang);
   // v9.0: restore priceMode (defaults to 'terpasang' for legacy entries; if entry has nonPasang value but no mode, infer 'nonpasang')
   let restoredPriceMode = e.priceMode;
   if (!restoredPriceMode) {
