@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Invoice Generator · v1.0.62</title>
-<!-- v1.0.62 -->
+<title>Invoice Generator · v1.0.64</title>
+<!-- v1.0.64 -->
 <meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai multi-brand">
 <meta name="theme-color" content="#0e9e4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1046,6 +1046,29 @@
   }
   .il-locked-hint { font-size: 10.5px; color: #94a3b8; margin-top: 10px; font-style: italic; }
 
+  /* ═══ v1.0.64: animasi geser antar tab di mobile ═══
+     Selama jari menggeser, halaman tujuan ditempelkan sebagai lapisan di atas
+     layar (position:fixed) supaya bisa ikut bergerak bareng halaman yang aktif.
+     Kelas ini cuma nempel sementara — dilepas begitu geserannya selesai. */
+  body.tab-swiping { overflow-x: hidden; overscroll-behavior-x: none; }
+  body.tab-swiping #main-view,
+  body.tab-swiping #cost-view,
+  body.tab-swiping #history-view,
+  body.tab-swiping #profile-view {
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+  .tab-swipe-layer {
+    position: fixed !important;
+    inset: 0 !important;
+    /* di bawah bottomnav (900) supaya navbar tetap kelihatan selama geseran */
+    z-index: 800;
+    background: #f8fafc;
+    overflow: hidden !important;
+    height: 100dvh !important;
+    min-height: 0 !important;
+  }
+
   /* v1.0.56: icon pilih-cepat-palet di sebelah field Qty (invoice bata) */
   .il-palet-wrap { position: relative; flex-shrink: 0; }
   .il-palet-icon-btn {
@@ -1443,7 +1466,7 @@
     </div>
     <div class="min-w-0">
       <div class="text-[14px] font-bold text-slate-900 truncate leading-tight">Invoice Generator</div>
-      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.62</div>
+      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.64</div>
     </div>
   </div>
 
@@ -2362,7 +2385,7 @@ const USER_PP_MAP = {
 // ════════════════════════════════════════════════════════════════
 //  CONSTANTS
 // ════════════════════════════════════════════════════════════════
-const APP_VERSION = '1.0.63';
+const APP_VERSION = '1.0.64';
 const BULAN_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 
 const PANEL_LENGTHS = [97, 147, 172, 197, 222, 247, 272, 297, 322];
@@ -3246,31 +3269,59 @@ function positionPaletPopover(btn, popover) {
   popover.style.top = `${top}px`;
 }
 
+// v1.0.64: catatan popover mana yang lagi kebuka + tombol pemiliknya, dipakai
+// supaya popover bisa ikut bergeser waktu halaman discroll (bukan langsung tutup).
+const _paletOpen = { popover: null, btn: null };
+
+function closePaletPopover() {
+  document.querySelectorAll('.il-palet-popover').forEach(el => el.style.display = 'none');
+  _paletOpen.popover = null;
+  _paletOpen.btn = null;
+}
+
 function togglePaletPopover(i) {
-  document.querySelectorAll('.il-palet-popover').forEach(el => {
-    if (el.id !== `paletPopover-${i}`) el.style.display = 'none';
-  });
   const el = document.getElementById(`paletPopover-${i}`);
-  const btn = el ? el.closest('.il-palet-wrap')?.querySelector('.il-palet-icon-btn') : null;
   if (!el) return;
   const willOpen = el.style.display !== 'block';
-  el.style.display = willOpen ? 'block' : 'none';
-  if (willOpen && btn) positionPaletPopover(btn, el);
+  closePaletPopover();                       // tutup semua dulu, termasuk dirinya
+  if (!willOpen) return;                     // memang niatnya nutup → selesai
+  const btn = el.closest('.il-palet-wrap')?.querySelector('.il-palet-icon-btn') || null;
+  el.style.display = 'block';
+  if (btn) {
+    positionPaletPopover(btn, el);
+    _paletOpen.popover = el;
+    _paletOpen.btn = btn;
+  }
 }
 document.addEventListener('click', (ev) => {
   if (!ev.target.closest('.il-palet-wrap')) {
-    document.querySelectorAll('.il-palet-popover').forEach(el => el.style.display = 'none');
+    closePaletPopover();
   }
 });
-// v1.0.63: popover sekarang position:fixed (dihitung dari posisi tombol saat
-// dibuka) — kalau halaman di-scroll sementara popover terbuka, tutup aja biar
-// nggak "ngambang" di posisi yang salah (nggak lagi nempel ke tombolnya).
+
+// v1.0.64: dulu popover langsung ditutup begitu halaman di-scroll sedikit saja —
+// makanya terasa "ilang-ilangan". Sekarang popover-nya IKUT BERGERAK mengikuti
+// tombolnya waktu discroll, dan baru ditutup kalau tombolnya benar-benar sudah
+// keluar dari layar (jadi nggak ada popover ngambang tanpa induk).
 window.addEventListener('scroll', () => {
-  document.querySelectorAll('.il-palet-popover').forEach(el => el.style.display = 'none');
+  if (!_paletOpen.popover || !_paletOpen.btn) return;
+  const r = _paletOpen.btn.getBoundingClientRect();
+  const fullyOffscreen = r.bottom < 0 || r.top > window.innerHeight;
+  if (fullyOffscreen) { closePaletPopover(); return; }
+  positionPaletPopover(_paletOpen.btn, _paletOpen.popover);
 }, true);
+
+window.addEventListener('resize', () => {
+  if (!_paletOpen.popover || !_paletOpen.btn) return;
+  positionPaletPopover(_paletOpen.btn, _paletOpen.popover);
+});
 function onBataQtyPaletPick(i, val) {
   if (!val) return;
   bataRows[i].qty = val;
+  // v1.0.64: renderBataRows() bikin ulang seluruh baris, jadi elemen popover yang
+  // tercatat di _paletOpen sudah tidak ada lagi di halaman. Kalau catatannya nggak
+  // dibersihkan, handler scroll akan terus mencoba memposisikan elemen hantu.
+  closePaletPopover();
   renderBataRows();
   updatePreview();
 }
@@ -7556,51 +7607,180 @@ function switchTab(tab) {
   window.scrollTo(0, 0);
 }
 
-// ═══ v1.0.63: SWIPE ANTAR 4 TAB DI MOBILE ═══
+// ═══ v1.0.64: SWIPE ANTAR 4 TAB DI MOBILE (dengan animasi geser real-time) ═══
 // Urutan tab ngikutin urutan ikon di bottom nav: Invoice → Cost → History → Profile.
 // Geser jari ke KIRI = pindah ke tab berikutnya, geser ke KANAN = tab sebelumnya.
+//
+// Beda dengan v1.0.63 yang langsung "cetek" ganti begitu jari dilepas: sekarang
+// halaman tujuan ikut bergerak mengikuti jari secara real-time (kayak geser foto
+// di galeri HP). Kalau geserannya kurang jauh, halaman balik lagi ke tempatnya
+// dengan animasi — jadi kelihatan jelas ke user bahwa swipe-nya batal.
+//
 // Cuma aktif di layar mobile (≤768px, sama kayak breakpoint bottomnav muncul).
 const SWIPE_TAB_ORDER = ['invoice', 'cost', 'history', 'profile'];
-let _swipeStartX = 0, _swipeStartY = 0, _swipeStartTime = 0, _swipeTracking = false;
+const SWIPE_VIEW_ID = {
+  invoice: 'main-view',
+  cost:    'cost-view',
+  history: 'history-view',
+  profile: 'profile-view',
+};
+
+const _sw = {
+  active: false,      // gesture sedang jalan & sudah dipastikan arahnya horizontal
+  tracking: false,    // jari menyentuh, tapi arah gesture belum ditentukan
+  startX: 0, startY: 0, startTime: 0,
+  dx: 0,
+  curEl: null, nextEl: null, nextTab: null,
+  width: 0,
+};
 
 function _swipeShouldIgnore(target) {
   // Jangan aktifkan swipe kalau jari mulai dari elemen yang butuh gesture-nya
-  // sendiri (field input, dropdown, tombol, popover palet) atau lagi ada modal
-  // kebuka — biar nggak nyelonong pindah tab pas lagi ngetik/nge-tap sesuatu.
+  // sendiri (field input, dropdown, tombol, popover palet, kartu yang bisa digeser)
+  // atau lagi ada modal kebuka — biar nggak nyelonong pindah tab pas lagi
+  // ngetik/nge-tap/geser sesuatu.
   if (target.closest('input, select, textarea, button, a, .il-palet-popover, .il-palet-wrap')) return true;
   if (document.querySelector('.cost-modal.show')) return true;
+  // Halaman/overlay yang menutupi layar penuh — swipe tab nggak boleh jalan di
+  // baliknya, karena user sebenarnya sedang berada di layar lain.
+  const splash = document.getElementById('splash-overlay');
+  if (splash && splash.style.display !== 'none') return true;
+  const fullList = document.getElementById('il-fulllist-view');
+  if (fullList && fullList.style.display === 'flex') return true;
+  // Sedang lihat detail invoice dari histori — geser tab di sini bikin bingung.
+  if (typeof _viewingHistoryDetail !== 'undefined' && _viewingHistoryDetail) return true;
   return false;
+}
+
+// Siapkan halaman tujuan supaya isinya sudah benar SEBELUM ikut digeser —
+// kalau nggak, halaman yang belum pernah dibuka bakal kelihatan kosong melompong
+// selama animasi.
+function _swipePrepareTab(tab) {
+  try {
+    if (tab === 'cost')    costInit();
+    if (tab === 'profile') { syncProfilePage(); renderProfitStats(); }
+    if (tab === 'history') renderHistory();
+  } catch (e) { /* jangan sampai gagal render bikin gesture-nya mati total */ }
+}
+
+function _swipeCleanup() {
+  document.body.classList.remove('tab-swiping');
+  [_sw.curEl, _sw.nextEl].forEach(el => {
+    if (!el) return;
+    el.style.transition = '';
+    el.style.transform = '';
+    el.classList.remove('tab-swipe-layer');
+  });
+  _sw.active = false; _sw.tracking = false;
+  _sw.curEl = null; _sw.nextEl = null; _sw.nextTab = null; _sw.dx = 0;
 }
 
 document.addEventListener('touchstart', (ev) => {
   if (window.innerWidth > 768) return;
   if (ev.touches.length !== 1) return;
-  if (_swipeShouldIgnore(ev.target)) { _swipeTracking = false; return; }
-  _swipeStartX = ev.touches[0].clientX;
-  _swipeStartY = ev.touches[0].clientY;
-  _swipeStartTime = Date.now();
-  _swipeTracking = true;
+  if (_swipeShouldIgnore(ev.target)) { _sw.tracking = false; return; }
+  _sw.startX = ev.touches[0].clientX;
+  _sw.startY = ev.touches[0].clientY;
+  _sw.startTime = Date.now();
+  _sw.tracking = true;
+  _sw.active = false;
+  _sw.dx = 0;
 }, { passive: true });
 
-document.addEventListener('touchend', (ev) => {
-  if (!_swipeTracking) return;
-  _swipeTracking = false;
-  if (window.innerWidth > 768) return;
-  const touch = ev.changedTouches[0];
-  if (!touch) return;
-  const dx = touch.clientX - _swipeStartX;
-  const dy = touch.clientY - _swipeStartY;
-  const elapsed = Date.now() - _swipeStartTime;
-  const MIN_DIST = 60, MAX_OFF_AXIS = 60, MAX_TIME = 600;
-  if (elapsed > MAX_TIME) return;          // kegeseran terlalu lama, bukan swipe cepat
-  if (Math.abs(dx) < MIN_DIST) return;     // geserannya kurang jauh
-  if (Math.abs(dy) > MAX_OFF_AXIS) return; // lebih ke arah scroll vertikal, bukan swipe
+document.addEventListener('touchmove', (ev) => {
+  if (!_sw.tracking || ev.touches.length !== 1) return;
+  const dx = ev.touches[0].clientX - _sw.startX;
+  const dy = ev.touches[0].clientY - _sw.startY;
 
-  const curIdx = SWIPE_TAB_ORDER.indexOf(currentTab);
-  if (curIdx === -1) return;
-  const nextIdx = curIdx + (dx < 0 ? 1 : -1); // kiri → berikutnya, kanan → sebelumnya
-  if (nextIdx < 0 || nextIdx >= SWIPE_TAB_ORDER.length) return; // udah di tab paling ujung
-  switchTab(SWIPE_TAB_ORDER[nextIdx]);
+  // Tahap penentuan arah: kalau ternyata jarinya lebih dominan gerak ke atas/bawah,
+  // berarti user lagi mau scroll biasa — batalkan pelacakan swipe.
+  if (!_sw.active) {
+    if (Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx)) { _sw.tracking = false; return; }
+    if (Math.abs(dx) < 12) return;             // belum jelas arahnya, tunggu dulu
+    if (Math.abs(dx) <= Math.abs(dy)) return;  // masih ambigu
+
+    const curIdx = SWIPE_TAB_ORDER.indexOf(currentTab);
+    if (curIdx === -1) { _sw.tracking = false; return; }
+    const nextIdx = curIdx + (dx < 0 ? 1 : -1);
+    if (nextIdx < 0 || nextIdx >= SWIPE_TAB_ORDER.length) { _sw.tracking = false; return; }
+
+    const curEl  = document.getElementById(SWIPE_VIEW_ID[currentTab]);
+    const nextEl = document.getElementById(SWIPE_VIEW_ID[SWIPE_TAB_ORDER[nextIdx]]);
+    if (!curEl || !nextEl) { _sw.tracking = false; return; }
+
+    _sw.nextTab = SWIPE_TAB_ORDER[nextIdx];
+    _swipePrepareTab(_sw.nextTab);
+
+    _sw.curEl = curEl;
+    _sw.nextEl = nextEl;
+    _sw.width = window.innerWidth;
+    _sw.active = true;
+
+    document.body.classList.add('tab-swiping');
+    nextEl.classList.add('tab-swipe-layer');
+    nextEl.style.display = 'flex';
+    // Halaman tujuan diparkir tepat di luar layar, di sisi arah datangnya geseran.
+    nextEl.style.transform = `translate3d(${dx < 0 ? _sw.width : -_sw.width}px,0,0)`;
+    curEl.style.transition = 'none';
+    nextEl.style.transition = 'none';
+  }
+
+  // Tahan geseran di tepi supaya nggak bisa ditarik melewati batas layar.
+  let move = dx;
+  if (move > _sw.width)  move = _sw.width;
+  if (move < -_sw.width) move = -_sw.width;
+  _sw.dx = move;
+
+  const fromRight = move < 0;
+  _sw.curEl.style.transform  = `translate3d(${move}px,0,0)`;
+  _sw.nextEl.style.transform = `translate3d(${move + (fromRight ? _sw.width : -_sw.width)}px,0,0)`;
+
+  ev.preventDefault(); // kunci arah horizontal, jangan sampai halaman ikut scroll
+}, { passive: false });
+
+document.addEventListener('touchend', () => {
+  if (!_sw.active) { _sw.tracking = false; return; }
+
+  const elapsed  = Date.now() - _sw.startTime;
+  const distance = Math.abs(_sw.dx);
+  // Lolos kalau geserannya sudah lewat sepertiga layar, ATAU geserannya cepat
+  // (flick pendek tapi mantap) — dua-duanya niat pindah tab yang jelas.
+  const commit = distance > _sw.width * 0.33 || (elapsed < 320 && distance > 60);
+
+  const curEl = _sw.curEl, nextEl = _sw.nextEl, nextTab = _sw.nextTab;
+  const fromRight = _sw.dx < 0;
+  const EASE = 'transform 0.24s cubic-bezier(.22,.61,.36,1)';
+  curEl.style.transition = EASE;
+  nextEl.style.transition = EASE;
+
+  if (commit) {
+    curEl.style.transform  = `translate3d(${fromRight ? -_sw.width : _sw.width}px,0,0)`;
+    nextEl.style.transform = 'translate3d(0,0,0)';
+  } else {
+    curEl.style.transform  = 'translate3d(0,0,0)';
+    nextEl.style.transform = `translate3d(${fromRight ? _sw.width : -_sw.width}px,0,0)`;
+  }
+
+  const finish = () => {
+    _swipeCleanup();
+    if (commit) {
+      switchTab(nextTab);
+    } else {
+      // Batal → halaman tujuan disembunyikan lagi seperti semula.
+      nextEl.style.display = (nextTab === currentTab) ? 'flex' : 'none';
+    }
+  };
+  // Tunggu animasi kelar baru DOM-nya dibereskan, biar nggak kedip di tengah jalan.
+  setTimeout(finish, 250);
+}, { passive: true });
+
+document.addEventListener('touchcancel', () => {
+  if (_sw.active) {
+    const nextEl = _sw.nextEl, nextTab = _sw.nextTab;
+    _swipeCleanup();
+    if (nextEl && nextTab !== currentTab) nextEl.style.display = 'none';
+  }
+  _sw.tracking = false;
 }, { passive: true });
 
 // Salin data profil dari sidebar ke halaman Profile
