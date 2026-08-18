@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Invoice Generator · v1.0.64</title>
-<!-- v1.0.64 -->
+<title>Invoice Generator · v1.0.65</title>
+<!-- v1.0.65 -->
 <meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai multi-brand">
 <meta name="theme-color" content="#0e9e4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1046,27 +1046,32 @@
   }
   .il-locked-hint { font-size: 10.5px; color: #94a3b8; margin-top: 10px; font-style: italic; }
 
-  /* ═══ v1.0.64: animasi geser antar tab di mobile ═══
-     Selama jari menggeser, halaman tujuan ditempelkan sebagai lapisan di atas
-     layar (position:fixed) supaya bisa ikut bergerak bareng halaman yang aktif.
-     Kelas ini cuma nempel sementara — dilepas begitu geserannya selesai. */
-  body.tab-swiping { overflow-x: hidden; overscroll-behavior-x: none; }
-  body.tab-swiping #main-view,
-  body.tab-swiping #cost-view,
-  body.tab-swiping #history-view,
-  body.tab-swiping #profile-view {
-    will-change: transform;
-    backface-visibility: hidden;
-  }
+  /* ═══ v1.0.65: animasi geser antar tab di mobile ═══
+     Selama jari menggeser, halaman yang aktif DAN halaman tujuan sama-sama
+     dijadikan lapisan setinggi layar (position:fixed). Ini kuncinya supaya
+     gerakan keduanya sinkron — di v1.0.64 cuma halaman tujuan yang jadi lapisan,
+     sementara halaman aktif digeser dalam keadaan setinggi seluruh dokumen,
+     sehingga terasa berat sebelah & seperti meregang.
+     `--tab-swipe-offset` dipakai untuk mengganjal posisi scroll yang sedang
+     berjalan, biar isinya nggak melompat ke atas begitu jadi lapisan. */
+  body.tab-swiping { overflow: hidden; overscroll-behavior: none; touch-action: pan-y; }
   .tab-swipe-layer {
     position: fixed !important;
-    inset: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: var(--tab-swipe-offset, 0px) !important;
+    bottom: auto !important;
     /* di bawah bottomnav (900) supaya navbar tetap kelihatan selama geseran */
     z-index: 800;
     background: #f8fafc;
-    overflow: hidden !important;
     height: 100dvh !important;
     min-height: 0 !important;
+    max-height: 100dvh !important;
+    overflow: hidden !important;
+    will-change: transform;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    contain: layout paint;
   }
 
   /* v1.0.56: icon pilih-cepat-palet di sebelah field Qty (invoice bata) */
@@ -1466,7 +1471,7 @@
     </div>
     <div class="min-w-0">
       <div class="text-[14px] font-bold text-slate-900 truncate leading-tight">Invoice Generator</div>
-      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.64</div>
+      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.65</div>
     </div>
   </div>
 
@@ -2385,7 +2390,7 @@ const USER_PP_MAP = {
 // ════════════════════════════════════════════════════════════════
 //  CONSTANTS
 // ════════════════════════════════════════════════════════════════
-const APP_VERSION = '1.0.64';
+const APP_VERSION = '1.0.65';
 const BULAN_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 
 const PANEL_LENGTHS = [97, 147, 172, 197, 222, 247, 272, 297, 322];
@@ -7607,16 +7612,22 @@ function switchTab(tab) {
   window.scrollTo(0, 0);
 }
 
-// ═══ v1.0.64: SWIPE ANTAR 4 TAB DI MOBILE (dengan animasi geser real-time) ═══
+// ═══ v1.0.65: SWIPE ANTAR 4 TAB DI MOBILE (animasi geser real-time) ═══
 // Urutan tab ngikutin urutan ikon di bottom nav: Invoice → Cost → History → Profile.
 // Geser jari ke KIRI = pindah ke tab berikutnya, geser ke KANAN = tab sebelumnya.
 //
-// Beda dengan v1.0.63 yang langsung "cetek" ganti begitu jari dilepas: sekarang
-// halaman tujuan ikut bergerak mengikuti jari secara real-time (kayak geser foto
-// di galeri HP). Kalau geserannya kurang jauh, halaman balik lagi ke tempatnya
-// dengan animasi — jadi kelihatan jelas ke user bahwa swipe-nya batal.
-//
-// Cuma aktif di layar mobile (≤768px, sama kayak breakpoint bottomnav muncul).
+// Perbaikan v1.0.65 dibanding v1.0.64:
+//  (1) Gesture kartu Tanya Harga (geser buat Order/Hapus) tidak lagi tabrakan —
+//      begitu jari mulai dari kartu itu, swipe pindah tab langsung mundur.
+//  (2) Animasi nggak lagi "meregang"/patah. Dulu halaman aktif digeser dalam
+//      keadaan tinggi penuh dokumen sementara halaman tujuan setinggi layar,
+//      jadi keduanya bergerak dengan "berat" yang beda. Sekarang dua-duanya
+//      dijadikan lapisan setinggi layar dengan kompensasi posisi scroll, plus
+//      lapisannya disiapkan lebih awal & transform-nya ditulis di rAF supaya
+//      frame pertamanya nggak nyendat.
+//  (3) Area yang memang bisa digeser ke samping (preview invoice yang lebarnya
+//      794px) dibiarkan discroll normal dulu; swipe tab baru mengambil alih
+//      kalau geserannya sudah mentok di ujung.
 const SWIPE_TAB_ORDER = ['invoice', 'cost', 'history', 'profile'];
 const SWIPE_VIEW_ID = {
   invoice: 'main-view',
@@ -7629,17 +7640,37 @@ const _sw = {
   active: false,      // gesture sedang jalan & sudah dipastikan arahnya horizontal
   tracking: false,    // jari menyentuh, tapi arah gesture belum ditentukan
   startX: 0, startY: 0, startTime: 0,
-  dx: 0,
+  dx: 0, lastDx: 0, lastMoveTime: 0, velocity: 0,
   curEl: null, nextEl: null, nextTab: null,
-  width: 0,
+  width: 0, scrollY: 0,
+  hScroller: null,    // area yang bisa digeser ke samping di titik sentuh (kalau ada)
+  rafId: 0,
+  settling: false,
 };
 
+// Cari elemen di jalur sentuhan yang isinya lebih lebar dari kotaknya (jadi
+// memang dimaksudkan untuk digeser ke samping) — contoh nyatanya kotak preview
+// invoice, yang isinya selalu selebar kertas A4 (794px).
+function _swipeFindHScroller(target) {
+  let el = target;
+  while (el && el !== document.body && el.nodeType === 1) {
+    if (el.scrollWidth - el.clientWidth > 4) {
+      const ov = getComputedStyle(el).overflowX;
+      if (ov === 'auto' || ov === 'scroll') return el;
+    }
+    el = el.parentElement;
+  }
+  return null;
+}
+
 function _swipeShouldIgnore(target) {
-  // Jangan aktifkan swipe kalau jari mulai dari elemen yang butuh gesture-nya
-  // sendiri (field input, dropdown, tombol, popover palet, kartu yang bisa digeser)
-  // atau lagi ada modal kebuka — biar nggak nyelonong pindah tab pas lagi
-  // ngetik/nge-tap/geser sesuatu.
+  // Jangan aktifkan swipe kalau jari mulai dari elemen yang punya gesture atau
+  // interaksinya sendiri.
   if (target.closest('input, select, textarea, button, a, .il-palet-popover, .il-palet-wrap')) return true;
+  // v1.0.65: kartu Tanya Harga punya gesture geser sendiri (kiri = Hapus,
+  // kanan = Order). Kalau dua-duanya jalan bareng, kartunya ikut kegeser
+  // sekaligus tabnya ikut pindah — persis bug yang dilaporkan.
+  if (target.closest('.plog-item-face, .plog-item, .plog-actions')) return true;
   if (document.querySelector('.cost-modal.show')) return true;
   // Halaman/overlay yang menutupi layar penuh — swipe tab nggak boleh jalan di
   // baliknya, karena user sebenarnya sedang berada di layar lain.
@@ -7663,25 +7694,49 @@ function _swipePrepareTab(tab) {
   } catch (e) { /* jangan sampai gagal render bikin gesture-nya mati total */ }
 }
 
+// Jadikan sebuah halaman "lapisan geser": ukurannya dipatok setinggi layar biar
+// gerakannya seringan halaman tujuan. Supaya tampilannya tidak melompat ke atas,
+// posisi scroll yang sedang berjalan dikompensasi lewat offset negatif.
+function _swipeToLayer(el, scrollY) {
+  el.classList.add('tab-swipe-layer');
+  el.style.setProperty('--tab-swipe-offset', `${-scrollY}px`);
+}
+
+function _swipeApplyTransform() {
+  _sw.rafId = 0;
+  if (!_sw.active || !_sw.curEl || !_sw.nextEl) return;
+  const move = _sw.dx;
+  const fromRight = move < 0;
+  _sw.curEl.style.transform  = `translate3d(${move}px,0,0)`;
+  _sw.nextEl.style.transform = `translate3d(${move + (fromRight ? _sw.width : -_sw.width)}px,0,0)`;
+}
+
 function _swipeCleanup() {
+  if (_sw.rafId) { cancelAnimationFrame(_sw.rafId); _sw.rafId = 0; }
   document.body.classList.remove('tab-swiping');
   [_sw.curEl, _sw.nextEl].forEach(el => {
     if (!el) return;
     el.style.transition = '';
     el.style.transform = '';
+    el.style.removeProperty('--tab-swipe-offset');
     el.classList.remove('tab-swipe-layer');
   });
-  _sw.active = false; _sw.tracking = false;
-  _sw.curEl = null; _sw.nextEl = null; _sw.nextTab = null; _sw.dx = 0;
+  _sw.active = false; _sw.tracking = false; _sw.settling = false;
+  _sw.curEl = null; _sw.nextEl = null; _sw.nextTab = null;
+  _sw.dx = 0; _sw.velocity = 0; _sw.hScroller = null;
 }
 
 document.addEventListener('touchstart', (ev) => {
+  if (_sw.settling) return;            // animasi penutup masih jalan, jangan diganggu
   if (window.innerWidth > 768) return;
   if (ev.touches.length !== 1) return;
   if (_swipeShouldIgnore(ev.target)) { _sw.tracking = false; return; }
   _sw.startX = ev.touches[0].clientX;
   _sw.startY = ev.touches[0].clientY;
   _sw.startTime = Date.now();
+  _sw.lastMoveTime = _sw.startTime;
+  _sw.lastDx = 0; _sw.velocity = 0;
+  _sw.hScroller = _swipeFindHScroller(ev.target);
   _sw.tracking = true;
   _sw.active = false;
   _sw.dx = 0;
@@ -7699,6 +7754,21 @@ document.addEventListener('touchmove', (ev) => {
     if (Math.abs(dx) < 12) return;             // belum jelas arahnya, tunggu dulu
     if (Math.abs(dx) <= Math.abs(dy)) return;  // masih ambigu
 
+    // v1.0.65: kalau jari ada di atas area yang bisa digeser ke samping (preview
+    // invoice), dahulukan geser isinya. Swipe tab baru boleh ambil alih setelah
+    // geserannya mentok di ujung kiri/kanan area itu.
+    if (_sw.hScroller) {
+      const sc = _sw.hScroller;
+      const maxLeft = sc.scrollWidth - sc.clientWidth;
+      const atStart = sc.scrollLeft <= 1;
+      const atEnd   = sc.scrollLeft >= maxLeft - 1;
+      const wantsRight = dx > 0;  // geser kanan = mau lihat sisi kiri isi
+      if (!((wantsRight && atStart) || (!wantsRight && atEnd))) {
+        _sw.tracking = false;     // masih ada ruang geser di dalam → biarkan native
+        return;
+      }
+    }
+
     const curIdx = SWIPE_TAB_ORDER.indexOf(currentTab);
     if (curIdx === -1) { _sw.tracking = false; return; }
     const nextIdx = curIdx + (dx < 0 ? 1 : -1);
@@ -7714,71 +7784,106 @@ document.addEventListener('touchmove', (ev) => {
     _sw.curEl = curEl;
     _sw.nextEl = nextEl;
     _sw.width = window.innerWidth;
+    _sw.scrollY = window.scrollY || 0;
     _sw.active = true;
 
     document.body.classList.add('tab-swiping');
-    nextEl.classList.add('tab-swipe-layer');
+    // Dua-duanya jadi lapisan setinggi layar → bobot animasinya sama, jadi
+    // geraknya sinkron & nggak ada kesan salah satu "meregang" ketinggalan.
+    _swipeToLayer(curEl, _sw.scrollY);
+    _swipeToLayer(nextEl, 0);
     nextEl.style.display = 'flex';
-    // Halaman tujuan diparkir tepat di luar layar, di sisi arah datangnya geseran.
-    nextEl.style.transform = `translate3d(${dx < 0 ? _sw.width : -_sw.width}px,0,0)`;
     curEl.style.transition = 'none';
     nextEl.style.transition = 'none';
+    // Halaman tujuan diparkir tepat di luar layar, di sisi arah datangnya geseran.
+    nextEl.style.transform = `translate3d(${dx < 0 ? _sw.width : -_sw.width}px,0,0)`;
   }
 
   // Tahan geseran di tepi supaya nggak bisa ditarik melewati batas layar.
   let move = dx;
   if (move > _sw.width)  move = _sw.width;
   if (move < -_sw.width) move = -_sw.width;
+
+  // Catat kecepatan jari (px per milidetik) buat menilai flick di akhir gesture.
+  const now = Date.now();
+  const dt = now - _sw.lastMoveTime;
+  if (dt > 0) {
+    const v = (move - _sw.lastDx) / dt;
+    _sw.velocity = _sw.velocity * 0.7 + v * 0.3;  // dihaluskan biar nggak meloncat
+    _sw.lastDx = move;
+    _sw.lastMoveTime = now;
+  }
   _sw.dx = move;
 
-  const fromRight = move < 0;
-  _sw.curEl.style.transform  = `translate3d(${move}px,0,0)`;
-  _sw.nextEl.style.transform = `translate3d(${move + (fromRight ? _sw.width : -_sw.width)}px,0,0)`;
+  // Transform ditulis di rAF (sekali per frame) — bukan tiap event — supaya
+  // gerakannya rata mengikuti refresh layar, bukan mengikuti banjirnya event.
+  if (!_sw.rafId) _sw.rafId = requestAnimationFrame(_swipeApplyTransform);
 
   ev.preventDefault(); // kunci arah horizontal, jangan sampai halaman ikut scroll
 }, { passive: false });
 
 document.addEventListener('touchend', () => {
   if (!_sw.active) { _sw.tracking = false; return; }
+  if (_sw.rafId) { cancelAnimationFrame(_sw.rafId); _sw.rafId = 0; }
 
-  const elapsed  = Date.now() - _sw.startTime;
   const distance = Math.abs(_sw.dx);
-  // Lolos kalau geserannya sudah lewat sepertiga layar, ATAU geserannya cepat
-  // (flick pendek tapi mantap) — dua-duanya niat pindah tab yang jelas.
-  const commit = distance > _sw.width * 0.33 || (elapsed < 320 && distance > 60);
+  const speed = Math.abs(_sw.velocity);         // px/ms
+  const dirMatch = (_sw.velocity < 0) === (_sw.dx < 0);
+  // Lolos kalau geserannya sudah lewat sepertiga layar, ATAU jarinya masih
+  // melaju kencang ke arah yang sama pas dilepas (flick pendek tapi mantap).
+  const commit = distance > _sw.width * 0.33 || (speed > 0.45 && dirMatch && distance > 45);
 
   const curEl = _sw.curEl, nextEl = _sw.nextEl, nextTab = _sw.nextTab;
   const fromRight = _sw.dx < 0;
-  const EASE = 'transform 0.24s cubic-bezier(.22,.61,.36,1)';
+  const width = _sw.width, scrollY = _sw.scrollY;
+
+  // Durasi menyesuaikan sisa jarak & kecepatan jari, jadi lanjutan animasinya
+  // terasa menyambung dari gerakan tangan — bukan patah lalu mulai ulang.
+  const remaining = commit ? (width - distance) : distance;
+  let dur = speed > 0.05 ? remaining / (speed * 1000) : 0.26;
+  dur = Math.min(0.42, Math.max(0.16, dur));
+  const EASE = `transform ${dur.toFixed(3)}s cubic-bezier(.25,.9,.3,1)`;
+
+  _sw.settling = true;
   curEl.style.transition = EASE;
   nextEl.style.transition = EASE;
 
-  if (commit) {
-    curEl.style.transform  = `translate3d(${fromRight ? -_sw.width : _sw.width}px,0,0)`;
-    nextEl.style.transform = 'translate3d(0,0,0)';
-  } else {
-    curEl.style.transform  = 'translate3d(0,0,0)';
-    nextEl.style.transform = `translate3d(${fromRight ? _sw.width : -_sw.width}px,0,0)`;
-  }
+  requestAnimationFrame(() => {
+    if (commit) {
+      curEl.style.transform  = `translate3d(${fromRight ? -width : width}px,0,0)`;
+      nextEl.style.transform = 'translate3d(0,0,0)';
+    } else {
+      curEl.style.transform  = 'translate3d(0,0,0)';
+      nextEl.style.transform = `translate3d(${fromRight ? width : -width}px,0,0)`;
+    }
+  });
 
+  let done = false;
   const finish = () => {
+    if (done) return;
+    done = true;
+    nextEl.removeEventListener('transitionend', onEnd);
     _swipeCleanup();
     if (commit) {
-      switchTab(nextTab);
+      switchTab(nextTab);           // switchTab sendiri sudah scroll ke atas
     } else {
-      // Batal → halaman tujuan disembunyikan lagi seperti semula.
-      nextEl.style.display = (nextTab === currentTab) ? 'flex' : 'none';
+      nextEl.style.display = 'none';
+      window.scrollTo(0, scrollY);  // balikkan posisi scroll seperti sebelum digeser
     }
   };
-  // Tunggu animasi kelar baru DOM-nya dibereskan, biar nggak kedip di tengah jalan.
-  setTimeout(finish, 250);
+  const onEnd = (e) => { if (e.target === nextEl && e.propertyName === 'transform') finish(); };
+  nextEl.addEventListener('transitionend', onEnd);
+  // Jaring pengaman kalau transitionend nggak pernah nyala (mis. animasi dimatikan
+  // lewat setelan "kurangi gerakan" di HP).
+  setTimeout(finish, Math.round(dur * 1000) + 90);
 }, { passive: true });
 
 document.addEventListener('touchcancel', () => {
-  if (_sw.active) {
-    const nextEl = _sw.nextEl, nextTab = _sw.nextTab;
+  if (_sw.active && !_sw.settling) {
+    const nextEl = _sw.nextEl, nextTab = _sw.nextTab, scrollY = _sw.scrollY;
     _swipeCleanup();
     if (nextEl && nextTab !== currentTab) nextEl.style.display = 'none';
+    window.scrollTo(0, scrollY);
   }
   _sw.tracking = false;
 }, { passive: true });
