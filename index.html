@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Invoice Generator · v1.0.65</title>
-<!-- v1.0.65 -->
+<title>Invoice Generator · v1.0.66</title>
+<!-- v1.0.66 -->
 <meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai multi-brand">
 <meta name="theme-color" content="#0e9e4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1431,6 +1431,137 @@
   }
   #user-badge.visible { display: flex; }
   #user-badge:hover { border-color: var(--brand-color); color: var(--brand-dark); }
+
+  /* ═══════════ v1.0.66: HARGA PUBLIK WEBSITE (city_pricing) ═══════════ */
+  .cp-hint {
+    font-size: 11px; color: #94a3b8; margin-bottom: 12px; line-height: 1.55;
+  }
+  .cp-group { margin-bottom: 10px; }
+  .cp-group-head {
+    display: flex; align-items: center; gap: 8px; padding: 0 2px 6px;
+  }
+  .cp-group-name { font-size: 13px; font-weight: 800; color: #0f172a; }
+  .cp-group-slug {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: #94a3b8;
+    background: #f1f5f9; border-radius: 5px; padding: 2px 6px;
+  }
+  .cp-group-del {
+    margin-left: auto; border: none; background: none; color: #dc2626;
+    font-size: 11px; font-weight: 700; cursor: pointer; flex-shrink: 0; padding: 2px 4px;
+  }
+  .cp-row {
+    display: flex; align-items: center; gap: 10px;
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 11px;
+    padding: 10px 12px; margin-bottom: 6px; cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .cp-row:hover { border-color: var(--brand-color); box-shadow: 0 1px 6px rgba(15,23,42,0.06); }
+  .cp-row-main { min-width: 0; flex: 1; }
+  .cp-row-prod { font-size: 12px; font-weight: 700; color: #475569; }
+  .cp-row-price {
+    font-family: 'JetBrains Mono', monospace; font-size: 13.5px; font-weight: 800;
+    color: #0f172a; margin-top: 3px;
+  }
+  .cp-row-price.empty { color: #cbd5e1; font-weight: 700; }
+  .cp-row-price .unit { font-size: 10.5px; color: #94a3b8; font-family: 'Inter', sans-serif; font-weight: 600; }
+  .cp-pub {
+    flex-shrink: 0; font-size: 10px; font-weight: 800; border-radius: 999px;
+    padding: 3px 9px; letter-spacing: .02em;
+  }
+  .cp-pub.on  { background: #dcfce7; color: #0a7a38; }
+  .cp-pub.off { background: #f1f5f9; color: #94a3b8; }
+
+  .cp-ref { display: flex; gap: 7px; margin: 4px 0 14px; }
+  .cp-ref-box {
+    flex: 1; min-width: 0; border-radius: 10px; padding: 9px 10px;
+    background: #f8fafc; border: 1px solid #e2e8f0;
+  }
+  .cp-ref-box .lbl {
+    font-size: 9.5px; font-weight: 800; color: #94a3b8;
+    text-transform: uppercase; letter-spacing: .04em; line-height: 1.3;
+  }
+  .cp-ref-box .val {
+    font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 800;
+    color: #0f172a; margin-top: 3px; white-space: nowrap;
+  }
+  .cp-ref-box .sub { font-size: 9.5px; color: #94a3b8; margin-top: 2px; line-height: 1.35; }
+  .cp-ref-box.factory { background: #eff6ff; border-color: #bfdbfe; }
+  .cp-ref-box.factory .val { color: #1d4ed8; }
+  .cp-ref-box.modal   { background: #fff7ed; border-color: #fed7aa; }
+  .cp-ref-box.modal .val { color: #c2410c; }
+  .cp-ref-box.sell    { background: #f0fdf4; border-color: #bbf7d0; }
+  .cp-ref-box.sell .val { color: #0a7a38; }
+  .cp-ref-box.muted .val { color: #cbd5e1; }
+  /* Tiga angka ini gunanya buat dibandingkan sekali lihat, jadi di layar sempit
+     pun tetap sejajar — yang dikecilkan ukurannya, bukan susunannya. */
+  @media (max-width: 430px) {
+    .cp-ref { gap: 5px; }
+    .cp-ref-box { padding: 8px 7px; }
+    .cp-ref-box .lbl { font-size: 8.5px; letter-spacing: .02em; }
+    .cp-ref-box .val { font-size: 11.5px; }
+    .cp-ref-box .sub { font-size: 8.5px; }
+  }
+  .cp-warn {
+    display: none; margin-top: 10px; border-radius: 10px; padding: 10px 12px;
+    background: #fffbeb; border: 1px solid #fde68a; color: #92400e;
+    font-size: 11.5px; line-height: 1.55;
+  }
+  .cp-warn.show { display: block; }
+  .cp-checkline {
+    display: flex; align-items: flex-start; gap: 9px; margin-top: 14px;
+    padding: 11px 12px; border-radius: 10px; background: #f8fafc; border: 1px solid #e2e8f0;
+    cursor: pointer;
+  }
+  .cp-checkline input { width: 17px; height: 17px; margin-top: 1px; flex-shrink: 0; accent-color: #0a7a38; cursor: pointer; }
+  .cp-checkline > span { min-width: 0; }
+  .cp-checkline .t { display: block; font-size: 12px; font-weight: 700; color: #0f172a; line-height: 1.4; }
+  .cp-checkline .s { display: block; font-size: 10.5px; color: #94a3b8; margin-top: 3px; line-height: 1.45; }
+
+  /* ═══════════ v1.0.66: TESTIMONI (testimonials) ═══════════ */
+  .tm-item {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+    padding: 11px 13px; margin-bottom: 7px;
+  }
+  .tm-item-top { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+  .tm-item-name { font-size: 13px; font-weight: 800; color: #0f172a; }
+  /* Bintangnya SVG, bukan karakter ★ — di sebagian HP karakter itu jatuh ke
+     font emoji dan warnanya dipaksa oleh font, jadi bintang "kosong" ikut
+     kelihatan penuh. */
+  .tm-stars { display: inline-flex; gap: 1.5px; align-items: center; flex-shrink: 0; }
+  .tm-stars .s { color: #e2e8f0; display: block; }
+  .tm-stars .s.on { color: #f59e0b; }
+  .tm-stars svg { width: 13px; height: 13px; display: block; }
+  .tm-item-sub { font-size: 11px; color: #94a3b8; margin-top: 3px; }
+  .tm-item-quote {
+    font-size: 12.5px; color: #334155; line-height: 1.6; margin-top: 7px;
+    padding-left: 9px; border-left: 2px solid #e2e8f0;
+  }
+  .tm-badge {
+    font-size: 9.5px; font-weight: 800; border-radius: 999px; padding: 3px 8px;
+    letter-spacing: .02em; flex-shrink: 0;
+  }
+  .tm-badge.web-yes  { background: #dcfce7; color: #0a7a38; }
+  .tm-badge.web-no   { background: #f1f5f9; color: #94a3b8; }
+  .tm-badge.noconsent{ background: #fef2f2; color: #b91c1c; }
+  .tm-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .tm-act {
+    height: 32px; padding: 0 12px; border-radius: 8px; cursor: pointer;
+    font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 700;
+    border: 1px solid #e2e8f0; background: #f8fafc; color: #475569;
+  }
+  .tm-act:hover { border-color: var(--brand-color); color: var(--brand-dark); }
+  .tm-act.danger { color: #dc2626; border-color: #fecaca; background: #fef2f2; }
+  .tm-act.go { color: #0a7a38; border-color: #bbf7d0; background: #f0fdf4; }
+
+  .tm-star-pick { display: flex; gap: 5px; }
+  .tm-star-btn {
+    width: 38px; height: 38px; border-radius: 9px; cursor: pointer;
+    border: 1px solid #e2e8f0; background: #f8fafc; color: #cbd5e1;
+    padding: 0; line-height: 1; display: flex; align-items: center; justify-content: center;
+    transition: all 0.12s;
+  }
+  .tm-star-btn svg { width: 19px; height: 19px; display: block; }
+  .tm-star-btn.on { border-color: #fde68a; background: #fffbeb; color: #f59e0b; }
 </style>
 </head>
 <body>
@@ -1926,6 +2057,37 @@
         <div id="ilFactoryPriceWrap"></div>
       </div>
 
+      <!-- v1.0.66: Harga publik per kabupaten — yang tampil di website Bricon.
+           Khusus akun Procon lite, disembunyikan untuk akun lain. -->
+      <div class="cost-card" id="cpCard" style="display:none;">
+        <div class="cost-card-title">Harga Publik Website</div>
+        <div class="cp-hint">
+          Harga yang boleh dilihat orang di <b>bata-ringan-bricon.com</b>. Beda dari harga pabrik
+          (itu modal) dan beda dari harga per transaksi. Ketuk barisnya untuk mengisi.
+        </div>
+        <div id="cpList"></div>
+        <button class="plog-add-btn" onclick="cpOpenAddKab()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Tambah Kabupaten
+        </button>
+      </div>
+
+      <!-- v1.0.66: Testimoni pelanggan. Dikumpulkan di sini, dipasang ke HTML
+           website secara manual. Khusus akun Procon lite. -->
+      <div class="cost-card" id="tmCard" style="display:none;">
+        <div class="cost-card-title">Testimoni Pelanggan</div>
+        <div class="cp-hint">
+          Salin balasan WhatsApp pelanggan ke sini. Testimoni <b>tidak</b> dibaca website
+          langsung dari database — nanti ditanam ke file HTML supaya Google bisa membacanya.
+          Tombol "Tandai sudah di web" cuma penanda, bukan tombol publish.
+        </div>
+        <div id="tmList"></div>
+        <button class="plog-add-btn" onclick="tmOpenAdd()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Tambah Testimoni
+        </button>
+      </div>
+
       <!-- Kontak yang pernah closing — referensi sesekali -->
       <div class="cost-card" id="ilContactsCard" style="display:none;">
         <div class="cost-card-title">Kontak Pernah Closing</div>
@@ -2278,11 +2440,16 @@ function applyUserProfile() {
   applyDefaultBank();
   applySalesButtonVisibility();
   applyMortarPromoButtonVisibility();
+  applyBriconWebVisibility();   // v1.0.66: kartu harga publik & testimoni khusus Procon lite
   mountTopNavEverywhere();
   costState.brand = DEFAULT_BRAND_BY_USER[id] || 'bricon';
   ilState.loaded = false;
   ilStore = [];
   ilRestrictions = [];
+  // v1.0.66: data website Bricon ikut direset supaya tidak kebawa antar akun
+  cpStore = [];
+  tmStore = [];
+  cpLoaded = false;
 }
 
 // v1.0.44: pastikan rekening yang terpilih selalu opsi pertama (rekening default)
@@ -2390,7 +2557,7 @@ const USER_PP_MAP = {
 // ════════════════════════════════════════════════════════════════
 //  CONSTANTS
 // ════════════════════════════════════════════════════════════════
-const APP_VERSION = '1.0.65';
+const APP_VERSION = '1.0.66';
 const BULAN_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 
 const PANEL_LENGTHS = [97, 147, 172, 197, 222, 247, 272, 297, 322];
@@ -4835,6 +5002,28 @@ function ilUpdatePreview() {
   if (profitEl) profitEl.textContent = 'Rp ' + fmtRupiah(margin);
 }
 
+// ── v1.0.66: Asal Lead ───────────────────────────────────────
+// Dipakai buat menghitung ROI iklan — tanpa ini evaluasi bulanan cuma
+// mengandalkan ingatan. Pesan WhatsApp dari website sudah membawa penanda
+// halaman di isinya ("... - Surabaya - Produk Bata"), jadi biasanya sumbernya
+// bisa ditebak dari situ.
+const IL_SOURCE_OPTIONS = {
+  google_ads:        'Google Ads',
+  organic_search:    'Pencarian Google (organik)',
+  whatsapp_langsung: 'WhatsApp langsung',
+  referral_ayah:     'Referral ayah',
+  instagram:         'Instagram',
+  lainnya:           'Lainnya',
+};
+function ilSourceLabel(v) { return IL_SOURCE_OPTIONS[v] || ''; }
+function ilSourceSelectHtml(id, current) {
+  return `<select class="input" id="${id}">
+    <option value="">— belum tahu —</option>
+    ${Object.entries(IL_SOURCE_OPTIONS).map(([v, l]) =>
+      `<option value="${v}"${current === v ? ' selected' : ''}>${h(l)}</option>`).join('')}
+  </select>`;
+}
+
 // ── Form tambah catatan ──────────────────────────────────────
 function ilOpenAdd() {
   ilFormPickup = 'franco';
@@ -4872,6 +5061,10 @@ function ilOpenAdd() {
     <div style="height:10px;"></div>
     <label class="cost-modal-label">No WA Customer (opsional)</label>
     <input class="input" id="ilCustPhone" placeholder="08xxxxxxxxxx" inputmode="tel">
+
+    <div style="height:10px;"></div>
+    <label class="cost-modal-label">Asal Lead (opsional — buat menghitung ROI iklan)</label>
+    ${ilSourceSelectHtml('ilSource', '')}
 
     <div style="height:12px;"></div>
     ${ilAddModalFieldHtml(costState.product)}
@@ -4981,6 +5174,7 @@ async function ilSaveNew() {
     modal_10: isBataForm && ilFormBataSize === '10cm'  ? (modal || null) : null,
     modal_75: isBataForm && ilFormBataSize === '7,5cm' ? (modal || null) : null,
     status: 'nanya', note, pickup_method: ilFormPickup,
+    source: (document.getElementById('ilSource') || {}).value || null,  // v1.0.66
     name_locked: !!custNameFull, // v1.0.56: kalau diisi manual dari awal, kunci — jangan ditimpa auto-fill invoice
   };
   try {
@@ -5055,6 +5249,9 @@ function ilOpenDetail(id, editMode) {
     <label class="cost-modal-label">No WA Customer</label>
     <input class="input" id="ilDetPhone" value="${h(e.customer_phone || '')}" inputmode="tel" placeholder="08xxxxxxxxxx">
     <div style="height:10px;"></div>
+    <label class="cost-modal-label">Asal Lead</label>
+    ${ilSourceSelectHtml('ilDetSource', e.source || '')}
+    <div style="height:10px;"></div>
     <label class="cost-modal-label">Catatan</label>
     <textarea class="input" id="ilDetNote" rows="2" placeholder="Contoh: proyek ruko 2 lantai">${h(e.note || '')}</textarea>
     <div class="il-locked-hint">Tanggal catatan (${h(dateOnly)}) tidak ditampilkan di sini & tidak bisa diubah — biar nggak ada yang kegeser nggak sengaja.</div>
@@ -5067,6 +5264,11 @@ function ilOpenDetail(id, editMode) {
     <div class="il-detail-row">
       <span class="il-detail-lbl">No WA</span>
       <span class="il-detail-val">${h(e.customer_phone)}</span>
+    </div>` : ''}
+    ${e.source ? `
+    <div class="il-detail-row">
+      <span class="il-detail-lbl">Asal Lead</span>
+      <span class="il-detail-val">${h(ilSourceLabel(e.source) || e.source)}</span>
     </div>` : ''}
     ${e.note ? `<div style="font-size:12.5px;color:#64748b;line-height:1.6;margin-top:8px;">${h(e.note)}</div>` : ''}
   `;
@@ -5321,6 +5523,7 @@ async function ilSaveDetailAndClose(id, editMode) {
     patch.customer_name = name ? `${salute} ${name}` : '';
     patch.customer_phone = phone ? normalizePhone(phone) : '';
     patch.note = (document.getElementById('ilDetNote') || {}).value?.trim() || '';
+    patch.source = (document.getElementById('ilDetSource') || {}).value || null;  // v1.0.66
     // v1.0.57: kunci nama hanya kalau namanya memang diisi. Kalau dikosongkan,
     // biarkan tetap bisa terisi otomatis dari invoice nanti.
     patch.name_locked = !!name;
@@ -6140,9 +6343,556 @@ async function ilSaveFactoryPrice() {
   } catch (e) { console.error(e); toast('Gagal menyimpan', 'error'); }
 }
 
+// ════════════════════════════════════════════════════════════════
+//  v1.0.66 — HARGA PUBLIK PER KABUPATEN & TESTIMONI (khusus Procon lite)
+//
+//  Dua fitur ini menyuplai website bata-ringan-bricon.com:
+//   (A) city_pricing  — harga yang boleh dilihat publik di halaman /kota/<slug>.
+//       BEDA dari factory_price_log (harga modal dari pabrik, belum ongkir) dan
+//       beda dari harga per transaksi di inquiry_log.
+//   (B) testimonials  — testimoni pelanggan yang nantinya DITANAM MANUAL ke file
+//       HTML website (bukan dibaca live dari database), supaya Google bisa
+//       membacanya dan halaman tetap cepat. Jadi is_published di sini artinya
+//       "sudah terpasang di web", bukan tombol publish.
+// ════════════════════════════════════════════════════════════════
+
+const CP_OWNER = 'proconlite';
+const CP_BRAND = 'bricon';   // dua fitur ini cuma menyuplai website Bricon
+
+let cpStore = [];    // semua baris city_pricing
+let tmStore = [];    // semua baris testimonials milik proconlite
+let cpLoaded = false;
+
+function cpEnabled() { return !!(currentUser && currentUser.id === CP_OWNER); }
+
+// Kartu di halaman Cost cuma muncul untuk Procon lite — mengikuti pola
+// applySalesButtonVisibility() / applyMortarPromoButtonVisibility().
+function applyBriconWebVisibility() {
+  const on = cpEnabled();
+  ['cpCard', 'tmCard'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = on ? '' : 'none';
+  });
+}
+
+async function cpLoadAll() {
+  if (!cpEnabled()) { cpStore = []; tmStore = []; cpLoaded = false; return; }
+  try {
+    const [{ data: cp, error: e1 }, { data: tm, error: e2 }] = await Promise.all([
+      _sb.from('city_pricing').select('*').order('kabupaten', { ascending: true }),
+      _sb.from('testimonials').select('*').eq('user_id', CP_OWNER).order('created_at', { ascending: false }),
+    ]);
+    if (e1) console.error('cpLoadAll city_pricing:', e1);
+    if (e2) console.error('cpLoadAll testimonials:', e2);
+    cpStore = cp || [];
+    tmStore = tm || [];
+    cpLoaded = true;
+    cpRenderList();
+    tmRenderList();
+  } catch (e) { console.error('cpLoadAll:', e); }
+}
+
+// ── Bantuan nama & format ────────────────────────────────────
+// Di inquiry_log daerah ditulis lengkap ("Kabupaten Jombang"), di city_pricing
+// ditulis singkat ("Jombang"). Dua-duanya harus dianggap sama.
+function cpNormKab(s) {
+  return (s || '').toString().trim()
+    .replace(/^(kabupaten|kab\.?|kota)\s+/i, '')
+    .toLowerCase();
+}
+function cpBareName(s) {
+  return (s || '').toString().trim().replace(/^(Kabupaten|Kab\.?|Kota)\s+/i, '').trim();
+}
+function cpSlugify(s) {
+  return (s || '').toString().trim().toLowerCase()
+    .replace(/^(kabupaten|kab\.?|kota)\s+/, '')
+    .replace(/[^a-z0-9]+/g, '-');
+}
+function cpSlugClean(s) { return cpSlugify(s).replace(/^-+|-+$/g, ''); }
+function cpUnitLabel(u) { return u === 'm3' ? 'm³' : (u === 'm2' ? 'm²' : (u || '')); }
+function cpProdLabel(p) { return p === 'panel' ? 'Panel Lantai' : 'Bata Ringan'; }
+function cpDateLabel(d) {
+  if (!d) return '';
+  try { return new Date(d + 'T00:00:00').toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }); }
+  catch (e) { return String(d); }
+}
+
+// ── Tiga angka pembanding ────────────────────────────────────
+// 1. Harga pabrik  — baris factory_price_log terbaru (BELUM termasuk ongkir)
+// 2. Modal riil    — rata-rata modal_price dari closing di kabupaten itu
+//                    (SUDAH termasuk ongkir, jadi ini patokan yang sebenarnya)
+// 3. Jual riil     — rata-rata sell_price dari transaksi yang sama
+function cpRefStats(kabupaten, product) {
+  const fp = ilFactoryPrices
+    .filter(r => r.brand === CP_BRAND && r.product === product)
+    .slice()
+    .sort((a, b) => (a.effective_date < b.effective_date ? 1 : (a.effective_date > b.effective_date ? -1 : b.id - a.id)))[0] || null;
+
+  const key = cpNormKab(kabupaten);
+  const rows = ilStore.filter(e =>
+    e.brand === CP_BRAND &&
+    e.product === product &&
+    ilNormStatus(e.status) === 'closing' &&
+    cpNormKab(e.kabupaten) === key
+  );
+  const avgOf = (field) => {
+    const vals = rows.map(r => Number(r[field]) || 0).filter(v => v > 0);
+    if (!vals.length) return null;
+    return Math.round(vals.reduce((s, v) => s + v, 0) / vals.length);
+  };
+  return {
+    factory: fp ? Number(fp.price) : null,
+    factoryDate: fp ? fp.effective_date : null,
+    modalAvg: avgOf('modal_price'),
+    sellAvg: avgOf('sell_price'),
+    count: rows.length,
+  };
+}
+
+// ── Daftar harga publik ──────────────────────────────────────
+function cpRenderList() {
+  const box = document.getElementById('cpList');
+  if (!box) return;
+  if (!cpStore.length) {
+    box.innerHTML = `<div class="plog-empty">Belum ada kabupaten. Tambah lewat tombol di bawah.</div>`;
+    return;
+  }
+  const groups = {};
+  cpStore.forEach(r => {
+    if (!groups[r.slug]) groups[r.slug] = { kab: r.kabupaten, slug: r.slug, rows: [] };
+    groups[r.slug].rows.push(r);
+  });
+  const prodOrder = { bata: 0, panel: 1 };
+  box.innerHTML = Object.values(groups)
+    .sort((a, b) => String(a.kab).localeCompare(String(b.kab), 'id'))
+    .map(g => {
+      const rows = g.rows.slice().sort((a, b) => (prodOrder[a.product] ?? 9) - (prodOrder[b.product] ?? 9));
+      return `<div class="cp-group">
+        <div class="cp-group-head">
+          <span class="cp-group-name">${h(g.kab)}</span>
+          <span class="cp-group-slug">/kota/${h(g.slug)}</span>
+          <button class="cp-group-del" onclick="cpDeleteKab(${rows[0].id})">Hapus</button>
+        </div>
+        ${rows.map(r => {
+          const min = r.price_min == null ? null : Number(r.price_min);
+          const max = r.price_max == null ? null : Number(r.price_max);
+          const has = min != null || max != null;
+          let priceTxt = 'Belum diisi';
+          if (has) {
+            priceTxt = (min != null && max != null && max !== min)
+              ? `Rp ${fmtRupiah(min)} – ${fmtRupiah(max)}`
+              : `Rp ${fmtRupiah(min != null ? min : max)}`;
+          }
+          return `<div class="cp-row" onclick="cpOpenEdit(${r.id})">
+            <div class="cp-row-main">
+              <div class="cp-row-prod">${cpProdLabel(r.product)}</div>
+              <div class="cp-row-price${has ? '' : ' empty'}">${priceTxt}${has ? ` <span class="unit">/${cpUnitLabel(r.unit)}</span>` : ''}</div>
+            </div>
+            <span class="cp-pub ${r.is_published ? 'on' : 'off'}">${r.is_published ? 'Tampil' : 'Disembunyikan'}</span>
+          </div>`;
+        }).join('')}
+      </div>`;
+    }).join('');
+}
+
+// ── Form isi harga publik ────────────────────────────────────
+let cpWarnFloor = null;
+let cpWarnLabel = 'modal riil';
+
+function cpFmtInput(el) {
+  const d = el.value.replace(/\D/g, '');
+  el.value = d ? fmtRupiah(parseInt(d, 10)) : '';
+}
+
+function cpCheckWarn() {
+  const box = document.getElementById('cpWarn');
+  if (!box) return;
+  const min = ilRpVal('cpMin');
+  const max = ilRpVal('cpMax');
+  const msgs = [];
+  if (min && max && max < min) {
+    msgs.push(`Harga maks (Rp ${fmtRupiah(max)}) lebih kecil dari harga min (Rp ${fmtRupiah(min)}).`);
+  }
+  if (min && cpWarnFloor && min < cpWarnFloor) {
+    msgs.push(`Harga min (Rp ${fmtRupiah(min)}) di bawah ${cpWarnLabel} (Rp ${fmtRupiah(cpWarnFloor)}). Cek lagi — bisa jadi rugi.`);
+  }
+  box.innerHTML = msgs.map(m => '⚠️ ' + m).join('<br>');
+  box.classList.toggle('show', msgs.length > 0);
+}
+
+function cpOpenEdit(id) {
+  const r = cpStore.find(x => x.id === id);
+  if (!r) return;
+  const st = cpRefStats(r.kabupaten, r.product);
+  const u = cpUnitLabel(r.unit);
+  // Patokan peringatan: modal riil kalau ada (sudah termasuk ongkir),
+  // kalau belum ada transaksi jatuh ke harga pabrik.
+  cpWarnFloor = st.modalAvg || st.factory || null;
+  cpWarnLabel = st.modalAvg ? 'modal riil' : 'harga pabrik';
+
+  costModal(`
+    <div class="cost-modal-title">${h(r.kabupaten)} · ${cpProdLabel(r.product)}</div>
+    <div class="cost-modal-sub">Harga yang ditampilkan ke publik di halaman /kota/${h(r.slug)}</div>
+
+    <label class="cost-modal-label">Angka Pembanding</label>
+    <div class="cp-ref">
+      <div class="cp-ref-box factory${st.factory ? '' : ' muted'}">
+        <div class="lbl">Harga Pabrik</div>
+        <div class="val">${st.factory ? 'Rp ' + fmtRupiah(st.factory) : '—'}</div>
+        <div class="sub">${st.factory ? `<b>BELUM</b> termasuk ongkir${st.factoryDate ? '<br>berlaku ' + h(cpDateLabel(st.factoryDate)) : ''}` : 'belum tercatat'}</div>
+      </div>
+      <div class="cp-ref-box modal${st.modalAvg ? '' : ' muted'}">
+        <div class="lbl">Modal Riil</div>
+        <div class="val">${st.modalAvg ? 'Rp ' + fmtRupiah(st.modalAvg) : '—'}</div>
+        <div class="sub">${st.modalAvg ? `<b>SUDAH</b> termasuk ongkir<br>rata-rata ${st.count} closing` : 'belum ada closing di sini'}</div>
+      </div>
+      <div class="cp-ref-box sell${st.sellAvg ? '' : ' muted'}">
+        <div class="lbl">Jual Riil</div>
+        <div class="val">${st.sellAvg ? 'Rp ' + fmtRupiah(st.sellAvg) : '—'}</div>
+        <div class="sub">${st.sellAvg ? `rata-rata ${st.count} transaksi` : 'belum ada data'}</div>
+      </div>
+    </div>
+
+    <label class="cost-modal-label">Harga Minimum (Rp)</label>
+    <div class="cost-price-box">
+      <span class="rp">Rp</span>
+      <input id="cpMin" inputmode="numeric" placeholder="0"
+             value="${r.price_min != null ? fmtRupiah(Number(r.price_min)) : ''}"
+             oninput="cpFmtInput(this); cpCheckWarn()">
+      <span class="suffix">/${u}</span>
+    </div>
+
+    <div style="height:10px;"></div>
+    <label class="cost-modal-label">Harga Maksimum (Rp)</label>
+    <div class="cost-price-box">
+      <span class="rp">Rp</span>
+      <input id="cpMax" inputmode="numeric" placeholder="0"
+             value="${r.price_max != null ? fmtRupiah(Number(r.price_max)) : ''}"
+             oninput="cpFmtInput(this); cpCheckWarn()">
+      <span class="suffix">/${u}</span>
+    </div>
+
+    <div class="cp-warn" id="cpWarn"></div>
+
+    <div style="height:12px;"></div>
+    <label class="cost-modal-label">Catatan (opsional)</label>
+    <input class="input" id="cpNote" value="${h(r.note || '')}" placeholder="Contoh: belum termasuk langsir">
+
+    <label class="cp-checkline">
+      <input type="checkbox" id="cpPub" ${r.is_published ? 'checked' : ''}>
+      <span>
+        <span class="t">Tampilkan harga ini di website</span>
+        <span class="s">Kalau dicentang, harga min &amp; maks wajib terisi.</span>
+      </span>
+    </label>
+
+    <div class="cost-modal-actions">
+      <button class="cost-btn" onclick="costCloseModal()">Batal</button>
+      <button class="cost-btn primary" onclick="cpSave(${r.id})">Simpan</button>
+    </div>
+  `);
+  cpCheckWarn();
+}
+
+async function cpSave(id) {
+  const r = cpStore.find(x => x.id === id);
+  if (!r) return;
+  const min = ilRpVal('cpMin');
+  const max = ilRpVal('cpMax');
+  const note = (document.getElementById('cpNote') || {}).value?.trim() || '';
+  const pub = !!(document.getElementById('cpPub') || {}).checked;
+
+  if (min && max && max < min) { toast('Harga maks tidak boleh lebih kecil dari harga min', 'error'); return; }
+  if (pub && (!min || !max)) { toast('Kalau mau tampil di web, harga min & maks wajib diisi', 'error'); return; }
+
+  const patch = {
+    price_min: min || null,
+    price_max: max || null,
+    note,
+    is_published: pub,
+    updated_at: new Date().toISOString(),
+    updated_by: currentUser ? currentUser.id : null,
+  };
+  try {
+    const { data, error } = await _sb.from('city_pricing').update(patch).eq('id', id).select().single();
+    if (error) { console.error(error); toast('Gagal menyimpan', 'error'); return; }
+    Object.assign(r, data);
+    costCloseModal();
+    cpRenderList();
+    toast('✓ Harga publik tersimpan');
+  } catch (e) { console.error(e); toast('Gagal menyimpan', 'error'); }
+}
+
+// ── Tambah / hapus kabupaten ─────────────────────────────────
+function cpEchoSlug() {
+  const s = (document.getElementById('cpNewSlug') || {}).value || '…';
+  const echo = document.getElementById('cpSlugEcho');
+  if (echo) echo.textContent = s;
+}
+
+function cpOpenAddKab() {
+  costModal(`
+    <div class="cost-modal-title">Tambah Kabupaten</div>
+    <div class="cost-modal-sub">Otomatis dibuatkan dua baris sekaligus: Bata Ringan (m³) &amp; Panel Lantai (m²).</div>
+
+    <label class="cost-modal-label">Nama Kabupaten / Kota</label>
+    ${ilComboHtml('cpNewKab', 'Contoh: Gresik')}
+
+    <div style="height:12px;"></div>
+    <label class="cost-modal-label">Slug URL</label>
+    <input class="input" id="cpNewSlug" placeholder="gresik" oninput="this.value=cpSlugify(this.value); cpEchoSlug()">
+    <div style="font-size:10.5px;color:#94a3b8;margin-top:5px;line-height:1.5;">
+      Dipakai jadi alamat halaman: <b>bata-ringan-bricon.com/kota/<span id="cpSlugEcho">…</span></b>
+    </div>
+
+    <div class="cost-modal-actions">
+      <button class="cost-btn" onclick="costCloseModal()">Batal</button>
+      <button class="cost-btn primary" onclick="cpSaveNewKab()">Simpan</button>
+    </div>
+  `);
+  ilComboRegister('cpNewKab', ilKabList(), (v) => {
+    const s = document.getElementById('cpNewSlug');
+    if (s) { s.value = cpSlugClean(v); cpEchoSlug(); }
+  });
+}
+
+async function cpSaveNewKab() {
+  const kab = cpBareName((document.getElementById('cpNewKab') || {}).value || '');
+  const slug = cpSlugClean((document.getElementById('cpNewSlug') || {}).value || kab);
+  if (!kab)  { toast('Nama kabupaten belum diisi', 'error'); return; }
+  if (!slug) { toast('Slug belum diisi', 'error'); return; }
+  if (cpStore.some(r => r.slug === slug)) { toast('Slug itu sudah dipakai', 'error'); return; }
+  const uid = currentUser ? currentUser.id : null;
+  const rows = [
+    { kabupaten: kab, slug, product: 'bata',  unit: 'm3', is_published: false, updated_by: uid },
+    { kabupaten: kab, slug, product: 'panel', unit: 'm2', is_published: false, updated_by: uid },
+  ];
+  try {
+    const { data, error } = await _sb.from('city_pricing').insert(rows).select();
+    if (error) { console.error(error); toast('Gagal menambah kabupaten', 'error'); return; }
+    cpStore = cpStore.concat(data || []);
+    costCloseModal();
+    cpRenderList();
+    toast('✓ ' + kab + ' ditambahkan');
+  } catch (e) { console.error(e); toast('Gagal menambah kabupaten', 'error'); }
+}
+
+// Dipanggil dengan id salah satu baris dalam grup — bukan slug — supaya tidak
+// ada teks bebas yang ikut masuk ke atribut onclick.
+async function cpDeleteKab(rowId) {
+  const ref = cpStore.find(r => r.id === rowId);
+  if (!ref) return;
+  const slug = ref.slug;
+  const g = cpStore.filter(r => r.slug === slug);
+  if (!g.length) return;
+  if (!confirm(`Hapus ${g[0].kabupaten} dari daftar harga publik?\nHalaman /kota/${slug} jadi tidak punya harga.`)) return;
+  try {
+    const { error } = await _sb.from('city_pricing').delete().eq('slug', slug);
+    if (error) { console.error(error); toast('Gagal menghapus', 'error'); return; }
+    cpStore = cpStore.filter(r => r.slug !== slug);
+    cpRenderList();
+    toast('✓ Dihapus');
+  } catch (e) { console.error(e); toast('Gagal menghapus', 'error'); }
+}
+
+// ════════════════════════════════════════════════════════════════
+//  TESTIMONI
+// ════════════════════════════════════════════════════════════════
+
+let tmRating = 5;
+let tmPickedInquiry = null;
+
+const TM_STAR_SVG = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.4l2.94 5.96 6.58.96-4.76 4.64 1.12 6.55L12 17.42l-5.88 3.09 1.12-6.55L2.48 9.32l6.58-.96z"/></svg>`;
+
+function tmStars(n) {
+  const k = Math.max(0, Math.min(5, parseInt(n, 10) || 0));
+  return [1, 2, 3, 4, 5].map(i => `<span class="s${i <= k ? ' on' : ''}">${TM_STAR_SVG}</span>`).join('');
+}
+
+function tmRenderList() {
+  const box = document.getElementById('tmList');
+  if (!box) return;
+  if (!tmStore.length) {
+    box.innerHTML = `<div class="plog-empty">Belum ada testimoni.<br>Minta ke pelanggan yang sudah closing lewat WhatsApp, lalu salin balasannya ke sini.</div>`;
+    return;
+  }
+  box.innerHTML = tmStore.map(t => `
+    <div class="tm-item">
+      <div class="tm-item-top">
+        <span class="tm-item-name">${h(t.display_name || '—')}</span>
+        <span class="tm-stars">${tmStars(t.rating || 5)}</span>
+        <span class="tm-badge ${t.is_published ? 'web-yes' : 'web-no'}">${t.is_published ? 'Sudah di web' : 'Belum di web'}</span>
+        ${t.consent_name ? '' : '<span class="tm-badge noconsent">Belum ada izin nama</span>'}
+      </div>
+      <div class="tm-item-sub">${cpProdLabel(t.product || 'bata')}${t.kabupaten ? ' · ' + h(t.kabupaten) : ''}</div>
+      <div class="tm-item-quote">${h(t.quote || '').replace(/\n/g, '<br>')}</div>
+      <div class="tm-actions">
+        <button class="tm-act${t.is_published ? '' : ' go'}" onclick="tmTogglePublished(${t.id})">${t.is_published ? 'Tandai belum di web' : 'Tandai sudah di web'}</button>
+        <button class="tm-act danger" onclick="tmRemove(${t.id})">Hapus</button>
+      </div>
+    </div>`).join('');
+}
+
+function tmOpenAdd() {
+  tmRating = 5;
+  tmPickedInquiry = null;
+  // Dropdown pelanggan diambil dari catatan Tanya Harga yang sudah Closing —
+  // supaya tidak salah orang. Tetap boleh diisi manual tanpa memilih.
+  const closings = ilStore
+    .filter(e => ilNormStatus(e.status) === 'closing')
+    .slice()
+    .sort((a, b) => new Date(b.ts) - new Date(a.ts));
+  const opts = closings.map(e => {
+    const nm = e.customer_name || '(tanpa nama)';
+    const kb = cpBareName(e.kabupaten || '') || '—';
+    const dt = new Date(e.ts).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+    return `<option value="${e.id}">${h(nm)} · ${h(kb)} · ${h(dt)}</option>`;
+  }).join('');
+
+  costModal(`
+    <div class="cost-modal-title">Tambah Testimoni</div>
+    <div class="cost-modal-sub">Salin balasan WhatsApp pelanggan. Tanda bacanya boleh dirapikan — jangan diubah maksudnya.</div>
+
+    <label class="cost-modal-label">Pilih Pelanggan yang Sudah Closing</label>
+    <select class="input" id="tmInquiry" onchange="tmPickInquiry(this.value)">
+      <option value="">— isi manual saja —</option>
+      ${opts}
+    </select>
+    ${closings.length ? '' : '<div style="font-size:10.5px;color:#94a3b8;margin-top:5px;">Belum ada catatan berstatus Closing — isi manual dulu.</div>'}
+
+    <div style="height:12px;"></div>
+    <label class="cost-modal-label">Nama yang Tampil di Website</label>
+    <input class="input" id="tmName" placeholder="Contoh: Pak R. — Sidoarjo">
+    <div style="font-size:10.5px;color:#94a3b8;margin-top:5px;line-height:1.5;">
+      Boleh disamarkan kalau pelanggan tidak mau nama penuhnya muncul.
+    </div>
+
+    <div style="height:12px;"></div>
+    <div class="il-region-row">
+      <div class="il-region-col">
+        <label class="cost-modal-label">Kabupaten</label>
+        <input class="input" id="tmKab" placeholder="Sidoarjo">
+      </div>
+      <div class="il-region-col">
+        <label class="cost-modal-label">Produk</label>
+        <select class="input" id="tmProduct">
+          <option value="bata">Bata Ringan</option>
+          <option value="panel">Panel Lantai</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="height:12px;"></div>
+    <label class="cost-modal-label">Rating</label>
+    <div class="tm-star-pick" id="tmStarPick">
+      ${[1,2,3,4,5].map(n => `<button type="button" class="tm-star-btn on" data-n="${n}" onclick="tmSetRating(${n})" aria-label="${n} bintang">${TM_STAR_SVG}</button>`).join('')}
+    </div>
+
+    <div style="height:12px;"></div>
+    <label class="cost-modal-label">Isi Testimoni</label>
+    <textarea class="input" id="tmQuote" rows="4" placeholder="Contoh: Barang sampai tepat waktu, kualitasnya bagus, respon cepat."></textarea>
+
+    <label class="cp-checkline">
+      <input type="checkbox" id="tmConsent">
+      <span>
+        <span class="t">Pelanggan sudah mengizinkan namanya ditampilkan di website</span>
+        <span class="s">Kalau belum, testimoninya tetap tersimpan tapi diberi tanda supaya tidak sengaja terpasang.</span>
+      </span>
+    </label>
+
+    <div class="cost-modal-actions">
+      <button class="cost-btn" onclick="costCloseModal()">Batal</button>
+      <button class="cost-btn primary" onclick="tmSave()">Simpan</button>
+    </div>
+  `);
+}
+
+function tmPickInquiry(idStr) {
+  const id = parseInt(idStr, 10);
+  if (!id) { tmPickedInquiry = null; return; }
+  const e = ilStore.find(x => x.id === id);
+  if (!e) { tmPickedInquiry = null; return; }
+  tmPickedInquiry = id;
+  const nm = document.getElementById('tmName');
+  const kb = document.getElementById('tmKab');
+  const pr = document.getElementById('tmProduct');
+  if (nm) nm.value = e.customer_name || '';
+  if (kb) kb.value = cpBareName(e.kabupaten || '');
+  if (pr && (e.product === 'bata' || e.product === 'panel')) pr.value = e.product;
+}
+
+function tmSetRating(n) {
+  tmRating = n;
+  document.querySelectorAll('#tmStarPick .tm-star-btn').forEach(b =>
+    b.classList.toggle('on', parseInt(b.dataset.n, 10) <= n));
+}
+
+async function tmSave() {
+  const name    = (document.getElementById('tmName')    || {}).value?.trim() || '';
+  const quote   = (document.getElementById('tmQuote')   || {}).value?.trim() || '';
+  const kab     = cpBareName((document.getElementById('tmKab') || {}).value || '');
+  const product = (document.getElementById('tmProduct') || {}).value || 'bata';
+  const consent = !!(document.getElementById('tmConsent') || {}).checked;
+  if (!name)  { toast('Nama yang tampil belum diisi', 'error'); return; }
+  if (!quote) { toast('Isi testimoni belum diisi', 'error'); return; }
+  const row = {
+    user_id: CP_OWNER,
+    inquiry_id: tmPickedInquiry,
+    display_name: name,
+    kabupaten: kab,
+    rating: tmRating,
+    quote,
+    product,
+    consent_name: consent,
+    is_published: false,
+  };
+  try {
+    const { data, error } = await _sb.from('testimonials').insert(row).select().single();
+    if (error) { console.error(error); toast('Gagal menyimpan testimoni', 'error'); return; }
+    tmStore.unshift(data);
+    costCloseModal();
+    tmRenderList();
+    toast('✓ Testimoni tersimpan');
+  } catch (e) { console.error(e); toast('Gagal menyimpan testimoni', 'error'); }
+}
+
+// is_published = "sudah terpasang di file HTML website", bukan tombol publish.
+async function tmTogglePublished(id) {
+  const t = tmStore.find(x => x.id === id);
+  if (!t) return;
+  if (!t.is_published && !t.consent_name) {
+    if (!confirm('Pelanggan ini belum tercatat mengizinkan namanya ditampilkan.\nTetap tandai sudah terpasang di web?')) return;
+  }
+  const next = !t.is_published;
+  try {
+    const { data, error } = await _sb.from('testimonials')
+      .update({ is_published: next, updated_at: new Date().toISOString() })
+      .eq('id', id).select().single();
+    if (error) { console.error(error); toast('Gagal memperbarui', 'error'); return; }
+    Object.assign(t, data);
+    tmRenderList();
+    toast(next ? '✓ Ditandai sudah di web' : '✓ Ditandai belum di web');
+  } catch (e) { console.error(e); toast('Gagal memperbarui', 'error'); }
+}
+
+async function tmRemove(id) {
+  const t = tmStore.find(x => x.id === id);
+  if (!t) return;
+  if (!confirm(`Hapus testimoni dari ${t.display_name || 'pelanggan ini'}?`)) return;
+  try {
+    const { error } = await _sb.from('testimonials').delete().eq('id', id);
+    if (error) { console.error(error); toast('Gagal menghapus', 'error'); return; }
+    tmStore = tmStore.filter(x => x.id !== id);
+    tmRenderList();
+    toast('✓ Testimoni dihapus');
+  } catch (e) { console.error(e); toast('Gagal menghapus', 'error'); }
+}
+
 // ── Inisialisasi saat tab Cost dibuka ────────────────────────
 function costInit() {
   if (!ilState.loaded) ilLoadAll();
+  applyBriconWebVisibility();
+  if (cpEnabled() && !cpLoaded) cpLoadAll();
   costRenderAll();
 }
 
