@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Invoice Generator · v1.0.66</title>
-<!-- v1.0.66 -->
+<title>Invoice Generator · v1.0.67</title>
+<!-- v1.0.67 -->
 <meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai multi-brand">
 <meta name="theme-color" content="#0e9e4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -675,6 +675,77 @@
     color: #64748b; transition: all 0.15s; white-space: nowrap;
   }
   .cost-tab.active { background: #fff; color: var(--brand-dark); box-shadow: 0 1px 4px rgba(15,23,42,0.10); }
+
+  /* ═══ v1.0.67: dua kotak berputar — merek & produk ═══
+     Menggantikan dua baris tab. Sekali ketuk = maju ke pilihan berikutnya,
+     memutar balik ke awal setelah pilihan terakhir. */
+  .cost-cycle-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .cost-cycle {
+    flex: 1 1 0; min-width: 0; text-align: left; cursor: pointer;
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+    padding: 10px 12px; font-family: 'Inter', sans-serif;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.08s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .cost-cycle:hover { border-color: var(--brand-color); }
+  .cost-cycle:active { transform: scale(0.985); }
+  .cost-cycle .lbl {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 9.5px; font-weight: 800; color: #94a3b8;
+    text-transform: uppercase; letter-spacing: .05em;
+  }
+  .cost-cycle .lbl svg { width: 11px; height: 11px; flex-shrink: 0; }
+  .cost-cycle .val {
+    display: block; font-size: 14px; font-weight: 800; color: var(--brand-dark);
+    margin-top: 3px; line-height: 1.25;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .cost-cycle .dots { display: flex; gap: 3px; margin-top: 6px; }
+  .cost-cycle .dots i {
+    width: 12px; height: 3px; border-radius: 2px; background: #e2e8f0; display: block;
+    transition: background 0.15s;
+  }
+  .cost-cycle .dots i.on { background: var(--brand-color); }
+  /* Animasi kecil tiap kali nilainya berganti — supaya jelas ketukannya kena. */
+  @keyframes costCyclePop { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+  .cost-cycle .val.pop { animation: costCyclePop 0.18s ease-out; }
+
+  /* ═══ v1.0.67: tab section — bisa digeser ke samping ═══ */
+  .csec-strip {
+    display: flex; gap: 6px; overflow-x: auto; overflow-y: hidden;
+    padding: 2px 0 8px; margin-bottom: 12px;
+    scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+  }
+  .csec-strip::-webkit-scrollbar { display: none; }
+  .csec-chip {
+    flex: 0 0 auto; scroll-snap-align: start; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 36px; padding: 0 13px; border-radius: 999px;
+    border: 1px solid #e2e8f0; background: #fff; color: #64748b;
+    font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700;
+    white-space: nowrap; transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .csec-chip svg { width: 15px; height: 15px; flex-shrink: 0; }
+  .csec-chip:hover { border-color: #cbd5e1; color: #334155; }
+  .csec-chip.active {
+    background: var(--brand-color); border-color: var(--brand-color); color: #fff;
+    box-shadow: 0 2px 8px rgba(var(--brand-rgb), 0.28);
+  }
+  .csec-chip .badge {
+    font-size: 10px; font-weight: 800; border-radius: 999px; padding: 1px 6px;
+    background: #f1f5f9; color: #94a3b8; line-height: 1.5;
+  }
+  .csec-chip.active .badge { background: rgba(255,255,255,0.22); color: #fff; }
+  /* Petunjuk bahwa deretan tab ini masih bisa digeser ke kanan */
+  .csec-strip-wrap { position: relative; }
+  .csec-strip-wrap::after {
+    content: ''; position: absolute; top: 0; right: 0; bottom: 8px; width: 26px;
+    background: linear-gradient(to right, rgba(248,250,252,0), #f8fafc);
+    pointer-events: none; opacity: 1; transition: opacity 0.2s;
+  }
+  .csec-strip-wrap.at-end::after { opacity: 0; }
 
   .cost-card {
     background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
@@ -1528,9 +1599,19 @@
      font emoji dan warnanya dipaksa oleh font, jadi bintang "kosong" ikut
      kelihatan penuh. */
   .tm-stars { display: inline-flex; gap: 1.5px; align-items: center; flex-shrink: 0; }
-  .tm-stars .s { color: #e2e8f0; display: block; }
-  .tm-stars .s.on { color: #f59e0b; }
+  .tm-stars .s { position: relative; display: block; color: #e2e8f0; line-height: 0; }
+  /* Lapisan emas ditumpuk di atas bintang abu-abu lalu dipotong lebarnya —
+     0% = kosong, 50% = setengah, 100% = penuh. */
+  .tm-stars .s .fill {
+    position: absolute; inset: 0; overflow: hidden; color: #f59e0b; line-height: 0;
+  }
   .tm-stars svg { width: 13px; height: 13px; display: block; }
+  .tm-stars .s .fill svg { width: 13px; height: 13px; }
+  .tm-score {
+    font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 800;
+    color: #b45309; flex-shrink: 0;
+  }
+  .tm-score .word { font-family: 'Inter', sans-serif; font-weight: 700; color: #94a3b8; margin-left: 3px; }
   .tm-item-sub { font-size: 11px; color: #94a3b8; margin-top: 3px; }
   .tm-item-quote {
     font-size: 12.5px; color: #334155; line-height: 1.6; margin-top: 7px;
@@ -1554,14 +1635,37 @@
   .tm-act.go { color: #0a7a38; border-color: #bbf7d0; background: #f0fdf4; }
 
   .tm-star-pick { display: flex; gap: 5px; }
+  /* Pemilih rating: tiap kotak = 1 bintang, tapi separuh kirinya adalah
+     "setengah bintang" dan separuh kanannya "bintang penuh". */
   .tm-star-btn {
-    width: 38px; height: 38px; border-radius: 9px; cursor: pointer;
+    position: relative; width: 38px; height: 38px; border-radius: 9px;
     border: 1px solid #e2e8f0; background: #f8fafc; color: #cbd5e1;
-    padding: 0; line-height: 1; display: flex; align-items: center; justify-content: center;
-    transition: all 0.12s;
+    padding: 0; line-height: 0; display: flex; align-items: center; justify-content: center;
+    transition: border-color 0.12s, background 0.12s;
   }
   .tm-star-btn svg { width: 19px; height: 19px; display: block; }
-  .tm-star-btn.on { border-color: #fde68a; background: #fffbeb; color: #f59e0b; }
+  .tm-star-btn .fill {
+    position: absolute; top: 50%; left: 50%; transform: translate(-9.5px, -9.5px);
+    width: 0; height: 19px; overflow: hidden; color: #f59e0b; line-height: 0;
+    transition: width 0.12s;
+  }
+  .tm-star-btn .fill svg { width: 19px; height: 19px; }
+  .tm-star-btn.half, .tm-star-btn.full { border-color: #fde68a; background: #fffbeb; }
+  .tm-star-btn.half .fill { width: 9.5px; }
+  .tm-star-btn.full .fill { width: 19px; }
+  .tm-star-hit {
+    position: absolute; top: 0; bottom: 0; width: 50%; cursor: pointer;
+    border: none; background: none; padding: 0; -webkit-tap-highlight-color: transparent;
+  }
+  .tm-star-hit.lo { left: 0; }
+  .tm-star-hit.hi { right: 0; }
+  .tm-rating-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .tm-rating-label {
+    font-size: 12.5px; font-weight: 800; color: #b45309;
+    background: #fffbeb; border: 1px solid #fde68a; border-radius: 999px;
+    padding: 5px 11px; white-space: nowrap;
+  }
+  .tm-rating-label .num { font-family: 'JetBrains Mono', monospace; margin-right: 4px; }
 </style>
 </head>
 <body>
@@ -1602,7 +1706,7 @@
     </div>
     <div class="min-w-0">
       <div class="text-[14px] font-bold text-slate-900 truncate leading-tight">Invoice Generator</div>
-      <div class="text-[10px] text-slate-400 truncate leading-tight">v1.0.65</div>
+      <div class="text-[10px] text-slate-400 truncate leading-tight" id="appVersionLabel">v1.0.67</div>
     </div>
   </div>
 
@@ -2004,109 +2108,127 @@
   <main class="flex-1 overflow-auto" style="background:#f8fafc;">
     <div class="page-wrap" style="max-width:760px;">
 
-      <!-- Tab merek -->
-      <div class="cost-tabbar" id="costBrandTabs">
-        <button class="cost-tab" data-cbrand="citicon" onclick="costSetBrand('citicon')">Citicon</button>
-        <button class="cost-tab" data-cbrand="grandel" onclick="costSetBrand('grandel')">Grand Elephant</button>
-        <button class="cost-tab" data-cbrand="bricon" onclick="costSetBrand('bricon')">Bricon</button>
-      </div>
-
-      <!-- Tab produk -->
-      <div class="cost-tabbar" id="costProductTabs" style="margin-bottom:16px;">
-        <button class="cost-tab" data-cprod="bata" onclick="costSetProduct('bata')">Bata Ringan</button>
-        <button class="cost-tab" data-cprod="panel" onclick="costSetProduct('panel')">Panel Lantai</button>
-      </div>
-
-      <!-- Catatan Tanya Harga — paling sering dipakai, jadi paling atas -->
-      <div class="cost-card">
-        <button class="il-primary-add" onclick="ilOpenAdd()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Catat Kejadian Tanya Harga
+      <!-- v1.0.67: dua kotak berputar menggantikan dua baris tab.
+           Sekali ketuk = maju ke pilihan berikutnya, memutar balik di ujung. -->
+      <div class="cost-cycle-row">
+        <button type="button" class="cost-cycle" onclick="costCycleBrand()" aria-label="Ganti merek">
+          <span class="lbl">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Merek
+          </span>
+          <span class="val" id="costBrandVal">Bricon</span>
+          <span class="dots" id="costBrandDots"></span>
         </button>
-
-        <div class="cost-card-title" style="margin-top:16px;">
-          <span>Catatan Tanya Harga</span>
-        </div>
-        <div class="il-status-filter" id="ilStatusFilter">
-          <button class="il-status-chip active" data-st="all" onclick="ilSetFilter('all')">Semua</button>
-          <button class="il-status-chip" data-st="nanya" onclick="ilSetFilter('nanya')">Nanya</button>
-          <button class="il-status-chip" data-st="closing" onclick="ilSetFilter('closing')">Closing</button>
-          <button class="il-status-chip" data-st="batal" onclick="ilSetFilter('batal')">Batal</button>
-        </div>
-
-        <div id="ilList" class="il-list-scroll"></div>
-        <div id="ilEmpty" class="plog-empty" style="display:none;">Belum ada catatan. Mulai catat tiap kali ada yang tanya harga.</div>
-        <!-- v1.0.60: "Cari Semua" dihapus — tombol ini sekarang satu-satunya jalan ke
-             subpage lengkap (pencarian + filter kabupaten/kecamatan/desa). Daftar di
-             atas sendiri sekarang menampilkan SEMUA catatan sekaligus tapi tingginya
-             dibatasi (~3 kartu kelihatan), sisanya di-scroll di dalam kotaknya sendiri. -->
-        <button class="il-more-btn" id="ilMoreBtn" style="display:none;" onclick="ilOpenFullList()">Selanjutnya →</button>
-      </div>
-
-      <!-- Peta — visual, dilihat sesekali -->
-      <div class="cost-card">
-        <div class="cost-card-title">Peta Sebaran Tanya Harga</div>
-        <div id="ilMapWrap"></div>
-        <div id="ilMapDetail"></div>
-      </div>
-
-      <!-- v1.0.53: Harga ambil pabrik — modal terbaru dari Pak Bima buat brand/produk
-           yang lagi aktif, beserta histori perubahannya. -->
-      <div class="cost-card">
-        <div class="cost-card-title">Harga Ambil Pabrik</div>
-        <div id="ilFactoryPriceWrap"></div>
-      </div>
-
-      <!-- v1.0.66: Harga publik per kabupaten — yang tampil di website Bricon.
-           Khusus akun Procon lite, disembunyikan untuk akun lain. -->
-      <div class="cost-card" id="cpCard" style="display:none;">
-        <div class="cost-card-title">Harga Publik Website</div>
-        <div class="cp-hint">
-          Harga yang boleh dilihat orang di <b>bata-ringan-bricon.com</b>. Beda dari harga pabrik
-          (itu modal) dan beda dari harga per transaksi. Ketuk barisnya untuk mengisi.
-        </div>
-        <div id="cpList"></div>
-        <button class="plog-add-btn" onclick="cpOpenAddKab()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Tambah Kabupaten
+        <button type="button" class="cost-cycle" onclick="costCycleProduct()" aria-label="Ganti produk">
+          <span class="lbl">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Produk
+          </span>
+          <span class="val" id="costProductVal">Bata Ringan</span>
+          <span class="dots" id="costProductDots"></span>
         </button>
       </div>
 
-      <!-- v1.0.66: Testimoni pelanggan. Dikumpulkan di sini, dipasang ke HTML
-           website secara manual. Khusus akun Procon lite. -->
-      <div class="cost-card" id="tmCard" style="display:none;">
-        <div class="cost-card-title">Testimoni Pelanggan</div>
-        <div class="cp-hint">
-          Salin balasan WhatsApp pelanggan ke sini. Testimoni <b>tidak</b> dibaca website
-          langsung dari database — nanti ditanam ke file HTML supaya Google bisa membacanya.
-          Tombol "Tandai sudah di web" cuma penanda, bukan tombol publish.
-        </div>
-        <div id="tmList"></div>
-        <button class="plog-add-btn" onclick="tmOpenAdd()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Tambah Testimoni
-        </button>
+      <!-- v1.0.67: tiap section jadi satu tab. Deretannya bisa digeser ke samping. -->
+      <div class="csec-strip-wrap" id="csecStripWrap">
+        <div class="csec-strip" id="csecStrip"></div>
       </div>
 
-      <!-- Kontak yang pernah closing — referensi sesekali -->
-      <div class="cost-card" id="ilContactsCard" style="display:none;">
-        <div class="cost-card-title">Kontak Pernah Closing</div>
-        <div id="ilContactsList"></div>
+      <!-- ── Section: Catatan Tanya Harga ── -->
+      <div data-csec="catatan">
+        <div class="cost-card">
+          <button class="il-primary-add" onclick="ilOpenAdd()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Catat Kejadian Tanya Harga
+          </button>
+
+          <div class="cost-card-title" style="margin-top:16px;">
+            <span>Catatan Tanya Harga</span>
+          </div>
+          <div class="il-status-filter" id="ilStatusFilter">
+            <button class="il-status-chip active" data-st="all" onclick="ilSetFilter('all')">Semua</button>
+            <button class="il-status-chip" data-st="nanya" onclick="ilSetFilter('nanya')">Nanya</button>
+            <button class="il-status-chip" data-st="closing" onclick="ilSetFilter('closing')">Closing</button>
+            <button class="il-status-chip" data-st="batal" onclick="ilSetFilter('batal')">Batal</button>
+          </div>
+
+          <div id="ilList" class="il-list-scroll"></div>
+          <div id="ilEmpty" class="plog-empty" style="display:none;">Belum ada catatan. Mulai catat tiap kali ada yang tanya harga.</div>
+          <button class="il-more-btn" id="ilMoreBtn" style="display:none;" onclick="ilOpenFullList()">Selanjutnya →</button>
+        </div>
       </div>
 
-      <!-- Larangan/limitasi truk — setup, jarang diubah setelah awal.
-           Pengecekannya sendiri OTOMATIS jalan di dalam form "Catat" di atas,
-           jadi di sini cuma untuk kelola daftarnya. -->
-      <div class="cost-card">
-        <div class="cost-card-title">Daftar Larangan / Limitasi Truk</div>
-        <div style="font-size:11px;color:#94a3b8;margin-bottom:10px;line-height:1.5;">
-          Daerah di sini otomatis muncul sebagai peringatan begitu kamu pilih kecamatan yang cocok saat mencatat di atas.
+      <!-- ── Section: Harga Ambil Pabrik ── -->
+      <div data-csec="pabrik">
+        <div class="cost-card">
+          <div class="cost-card-title">Harga Ambil Pabrik</div>
+          <div id="ilFactoryPriceWrap"></div>
         </div>
-        <div id="ilRestrictionList"></div>
-        <button class="plog-add-btn" onclick="ilOpenAddRestriction()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Tambah Daerah Larangan/Limitasi
-        </button>
+      </div>
+
+      <!-- ── Section: Harga Publik Website (khusus Procon lite) ── -->
+      <div data-csec="hargapublik">
+        <div class="cost-card" id="cpCard">
+          <div class="cost-card-title">Harga Publik Website</div>
+          <div class="cp-hint">
+            Harga yang boleh dilihat orang di <b>bata-ringan-bricon.com</b>. Beda dari harga pabrik
+            (itu modal) dan beda dari harga per transaksi. Ketuk barisnya untuk mengisi.
+          </div>
+          <div id="cpList"></div>
+          <button class="plog-add-btn" onclick="cpOpenAddKab()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Tambah Kabupaten
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Section: Testimoni (khusus Procon lite) ── -->
+      <div data-csec="testimoni">
+        <div class="cost-card" id="tmCard">
+          <div class="cost-card-title">Testimoni Pelanggan</div>
+          <div class="cp-hint">
+            Salin balasan WhatsApp pelanggan ke sini. Testimoni <b>tidak</b> dibaca website
+            langsung dari database — nanti ditanam ke file HTML supaya Google bisa membacanya.
+            Tombol "Tandai sudah di web" cuma penanda, bukan tombol publish.
+          </div>
+          <div id="tmList"></div>
+          <button class="plog-add-btn" onclick="tmOpenAdd()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Tambah Testimoni
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Section: Peta Sebaran ── -->
+      <div data-csec="peta">
+        <div class="cost-card">
+          <div class="cost-card-title">Peta Sebaran Tanya Harga</div>
+          <div id="ilMapWrap"></div>
+          <div id="ilMapDetail"></div>
+        </div>
+      </div>
+
+      <!-- ── Section: Kontak Pernah Closing ── -->
+      <div data-csec="kontak">
+        <div class="cost-card" id="ilContactsCard">
+          <div class="cost-card-title">Kontak Pernah Closing</div>
+          <div id="ilContactsList"></div>
+        </div>
+      </div>
+
+      <!-- ── Section: Larangan / Limitasi Truk ── -->
+      <div data-csec="larangan">
+        <div class="cost-card">
+          <div class="cost-card-title">Daftar Larangan / Limitasi Truk</div>
+          <div style="font-size:11px;color:#94a3b8;margin-bottom:10px;line-height:1.5;">
+            Daerah di sini otomatis muncul sebagai peringatan begitu kamu pilih kecamatan yang cocok saat mencatat kejadian Tanya Harga.
+          </div>
+          <div id="ilRestrictionList"></div>
+          <button class="plog-add-btn" onclick="ilOpenAddRestriction()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Tambah Daerah Larangan/Limitasi
+          </button>
+        </div>
       </div>
 
       <div style="height:26px;"></div>
@@ -2194,8 +2316,11 @@
       </div>
 
       <div style="height:18px;"></div>
-      <div class="stat-section-title">Statistik Keuntungan</div>
-      <div id="statWrap"></div>
+      <!-- v1.0.67: statistik keuntungan ikut fitur Cost — disembunyikan untuk akun yang tidak memakainya -->
+      <div id="statSection">
+        <div class="stat-section-title">Statistik Keuntungan</div>
+        <div id="statWrap"></div>
+      </div>
 
       <button onclick="doLogout()"
               style="margin-top:18px;width:100%;height:44px;border-radius:10px;border:1px solid #fecaca;background:#fef2f2;color:#b91c1c;font-size:13.5px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;">
@@ -2442,6 +2567,7 @@ function applyUserProfile() {
   applyMortarPromoButtonVisibility();
   applyBriconWebVisibility();   // v1.0.66: kartu harga publik & testimoni khusus Procon lite
   mountTopNavEverywhere();
+  applyCostTabVisibility();     // v1.0.67: dipanggil SETELAH navbar disalin ke semua halaman
   costState.brand = DEFAULT_BRAND_BY_USER[id] || 'bricon';
   ilState.loaded = false;
   ilStore = [];
@@ -2557,7 +2683,7 @@ const USER_PP_MAP = {
 // ════════════════════════════════════════════════════════════════
 //  CONSTANTS
 // ════════════════════════════════════════════════════════════════
-const APP_VERSION = '1.0.66';
+const APP_VERSION = '1.0.67';
 const BULAN_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 
 const PANEL_LENGTHS = [97, 147, 172, 197, 222, 247, 272, 297, 322];
@@ -3114,6 +3240,12 @@ function restoreLastMainTab() {
 }
 
 function initAppUI() {
+  // v1.0.67: teks versi di pojok kiri atas diisi dari APP_VERSION, bukan
+  // ditulis manual — dulu sempat ketinggalan di v1.0.65 waktu APP_VERSION
+  // sudah naik tapi teksnya lupa diganti.
+  const verEl = document.getElementById('appVersionLabel');
+  if (verEl) verEl.textContent = 'v' + APP_VERSION;
+
   // Default date: today
   const now = new Date();
   const y = now.getFullYear(),
@@ -3134,7 +3266,12 @@ function initAppUI() {
   // v1.0.57: catatan Tanya Harga ikut dimuat sejak awal. Dulu baru dimuat kalau
   // tab Cost dibuka, jadi kartu History sempat menulis "modal dari perkiraan
   // daerah" padahal sebenarnya ada catatan Tanya Harga-nya.
-  ilLoadAll().then(() => renderHistory());
+  if (costEnabled()) {
+    ilLoadAll().then(() => renderHistory());
+  } else {
+    ilState.loaded = true;   // v1.0.67: ditandai selesai supaya tidak ada yang mencoba memuat lagi
+    renderHistory();
+  }
 
   // Load history from Supabase cloud (async, updates UI when ready)
   loadHistoryFromCloud().then(() => {
@@ -4653,14 +4790,152 @@ function costUnit() { return costState.product === 'bata' ? 'Kubik' : 'm²'; }
 // walaupun tab Cost lagi di posisi Panel, dan dulu satuannya jadi salah tulis.
 function ilUnitOf(product) { return product === 'bata' ? 'Kubik' : 'm²'; }
 
-// ── Tab merek & produk ───────────────────────────────────────
-function costSetBrand(b) {
-  costState.brand = b;
-  costRenderAll();
+// ── v1.0.67: Kotak berputar merek & produk ───────────────────
+// Menggantikan dua baris tab yang makan tempat. Sekali ketuk = maju ke pilihan
+// berikutnya, memutar balik ke awal setelah pilihan terakhir.
+const COST_BRAND_ORDER   = ['bricon', 'citicon', 'grandel'];
+const COST_BRAND_LABEL   = { bricon: 'Bricon', citicon: 'Citicon', grandel: 'Grand Elephant' };
+const COST_PRODUCT_ORDER = ['bata', 'panel'];
+const COST_PRODUCT_LABEL = { bata: 'Bata Ringan', panel: 'Panel Lantai' };
+
+function costNextOf(list, current) {
+  const i = list.indexOf(current);
+  return list[(i + 1) % list.length];   // i === -1 → jatuh ke pilihan pertama
 }
-function costSetProduct(p) {
-  costState.product = p;
+function costCycleBrand() {
+  costState.brand = costNextOf(COST_BRAND_ORDER, costState.brand);
   costRenderAll();
+  costPopValue('costBrandVal');
+}
+function costCycleProduct() {
+  costState.product = costNextOf(COST_PRODUCT_ORDER, costState.product);
+  costRenderAll();
+  costPopValue('costProductVal');
+}
+function costPopValue(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove('pop');
+  void el.offsetWidth;          // paksa browser mengulang animasinya dari awal
+  el.classList.add('pop');
+}
+// Tetap ada supaya pemanggil lama (kalau ada) nggak patah.
+function costSetBrand(b)   { costState.brand = b;   costRenderAll(); }
+function costSetProduct(p) { costState.product = p; costRenderAll(); }
+
+function costRenderCycles() {
+  const bv = document.getElementById('costBrandVal');
+  const pv = document.getElementById('costProductVal');
+  if (bv) bv.textContent = COST_BRAND_LABEL[costState.brand]     || costState.brand;
+  if (pv) pv.textContent = COST_PRODUCT_LABEL[costState.product] || costState.product;
+  const paintDots = (id, list, cur) => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = list.map(v => `<i class="${v === cur ? 'on' : ''}"></i>`).join('');
+  };
+  paintDots('costBrandDots',   COST_BRAND_ORDER,   costState.brand);
+  paintDots('costProductDots', COST_PRODUCT_ORDER, costState.product);
+}
+
+// ── v1.0.67: tiap section jadi satu tab ──────────────────────
+// Halaman Cost dulu satu gulungan panjang berisi 7 kartu. Sekarang cuma satu
+// kartu yang tampil, dipilih lewat deretan tab yang bisa digeser ke samping.
+// Urutannya menurut seberapa sering dipakai — yang paling sering di kiri.
+const CSEC_ICON = {
+  catatan:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6a1 1 0 0 1 1 1v1H8V4a1 1 0 0 1 1-1Z"/><path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"/><path d="M8 11h8M8 15h5"/></svg>`,
+  pabrik:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 21h20"/><path d="M4 21V11l5 3.5V11l5 3.5V6l6 4.5V21"/></svg>`,
+  hargapublik: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18Z"/></svg>`,
+  testimoni:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/><path d="M8 9h8M8 13h5"/></svg>`,
+  peta:        `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6 8 3l8 3 7-3v15l-7 3-8-3-7 3Z"/><path d="M8 3v18M16 6v18"/></svg>`,
+  kontak:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+  larangan:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h14v11H1Z"/><path d="M16 8h4l3 3v3h-7Z"/><circle cx="5.5" cy="18" r="2.5"/><circle cx="18" cy="18" r="2.5"/></svg>`,
+};
+
+const COST_SECTIONS = [
+  { id: 'catatan',     label: 'Catatan' },
+  { id: 'pabrik',      label: 'Harga Pabrik' },
+  { id: 'hargapublik', label: 'Harga Publik', lite: true },
+  { id: 'testimoni',   label: 'Testimoni',    lite: true },
+  { id: 'peta',        label: 'Peta' },
+  { id: 'kontak',      label: 'Kontak' },
+  { id: 'larangan',    label: 'Larangan Truk' },
+];
+
+let costSection = 'catatan';
+
+// `lite: true` = cuma untuk akun Procon lite (fitur penyuplai website Bricon).
+function costVisibleSections() {
+  return COST_SECTIONS.filter(s => !s.lite || cpEnabled());
+}
+
+// Angka kecil di tab — hanya untuk hal yang perlu ditindaklanjuti.
+function costSectionBadgeCount(id) {
+  try {
+    if (id === 'catatan')   return ilEntriesForTab().length;
+    if (id === 'testimoni') return tmStore.filter(t => !t.is_published).length;
+    if (id === 'larangan')  return ilRestrictions.length;
+    if (id === 'kontak')    return ilContactGroups().length;
+  } catch (e) { /* data belum siap */ }
+  return 0;
+}
+
+// Deretan tab dibangun sekali saja. Kalau di-innerHTML ulang tiap render,
+// posisi geserannya balik ke kiri terus dan bikin kesal.
+function costBuildSectionTabs() {
+  const strip = document.getElementById('csecStrip');
+  if (!strip) return;
+  const list = costVisibleSections();
+  const sig = list.map(s => s.id).join(',');
+  if (strip.dataset.sig === sig) return;
+  strip.dataset.sig = sig;
+  strip.innerHTML = list.map(s => `
+    <button type="button" class="csec-chip" data-csec-tab="${s.id}" onclick="costSetSection('${s.id}')">
+      ${CSEC_ICON[s.id] || ''}<span>${s.label}</span>
+    </button>`).join('');
+  if (!strip.dataset.bound) {
+    strip.addEventListener('scroll', costUpdateStripFade, { passive: true });
+    strip.dataset.bound = '1';
+  }
+}
+
+function costSyncSectionTabs() {
+  const list = costVisibleSections();
+  if (!list.some(s => s.id === costSection)) costSection = list[0].id;
+  document.querySelectorAll('.csec-chip').forEach(chip => {
+    const id = chip.dataset.csecTab;
+    chip.classList.toggle('active', id === costSection);
+    const n = costSectionBadgeCount(id);
+    let b = chip.querySelector('.badge');
+    if (n > 0) {
+      if (!b) { b = document.createElement('span'); b.className = 'badge'; chip.appendChild(b); }
+      b.textContent = n;
+    } else if (b) { b.remove(); }
+  });
+  document.querySelectorAll('[data-csec]').forEach(el => {
+    el.style.display = (el.dataset.csec === costSection) ? '' : 'none';
+  });
+  costUpdateStripFade();
+}
+
+function costRenderSectionTabs() { costBuildSectionTabs(); costSyncSectionTabs(); }
+
+function costSetSection(id) {
+  costSection = id;
+  try { localStorage.setItem('citicon_last_cost_section', id); } catch (e) {}
+  costSyncSectionTabs();
+  const chip = document.querySelector(`.csec-chip[data-csec-tab="${id}"]`);
+  if (chip) chip.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  const main = document.querySelector('#cost-view main');
+  if (main && main.scrollTop > 0) main.scrollTo({ top: 0, behavior: 'smooth' });
+  if (window.scrollY > 0) window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Bayangan di tepi kanan = tanda masih ada tab lain di sebelah kanan.
+function costUpdateStripFade() {
+  const wrap = document.getElementById('csecStripWrap');
+  const strip = document.getElementById('csecStrip');
+  if (!wrap || !strip) return;
+  const atEnd = strip.scrollLeft + strip.clientWidth >= strip.scrollWidth - 2;
+  wrap.classList.toggle('at-end', atEnd);
 }
 
 // ── Format ───────────────────────────────────────────────────
@@ -5222,10 +5497,7 @@ function ilOpenDetail(id, editMode) {
   if (e.brand !== costState.brand || e.product !== costState.product) {
     costState.brand = e.brand;
     costState.product = e.product;
-    document.querySelectorAll('[data-cbrand]').forEach(el =>
-      el.classList.toggle('active', el.dataset.cbrand === costState.brand));
-    document.querySelectorAll('[data-cprod]').forEach(el =>
-      el.classList.toggle('active', el.dataset.cprod === costState.product));
+    costRenderCycles();
   }
   const lokasi = [e.desa, e.kecamatan, e.kabupaten].filter(Boolean).join(', ') || 'Daerah belum diisi';
   const dateLabel = new Date(e.ts).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -5567,6 +5839,7 @@ function ilOpenWa(phone) {
 let _pendingProfitFixId = null;
 
 function ilFixProfitForInvoice(invoiceId) {
+  if (!costEnabled()) return;   // v1.0.67
   const entry = getHistory().find(x => x.id === invoiceId);
   if (!entry) return;
 
@@ -5574,10 +5847,7 @@ function ilFixProfitForInvoice(invoiceId) {
   // yang dibuat masuk ke laci yang benar.
   costState.brand = entry.brand || 'citicon';
   costState.product = entry.mode === 'bata' ? 'bata' : 'panel';
-  document.querySelectorAll('[data-cbrand]').forEach(el =>
-    el.classList.toggle('active', el.dataset.cbrand === costState.brand));
-  document.querySelectorAll('[data-cprod]').forEach(el =>
-    el.classList.toggle('active', el.dataset.cprod === costState.product));
+  costRenderCycles();
 
   _pendingProfitFixId = invoiceId;
   ilOpenAdd();
@@ -5811,8 +6081,13 @@ function ilRenderContacts() {
   const list = document.getElementById('ilContactsList');
   if (!card || !list) return;
   const groups = ilContactGroups();
-  if (!groups.length) { card.style.display = 'none'; return; }
+  // v1.0.67: kartunya tidak lagi disembunyikan saat kosong — sekarang dia isi
+  // satu tab tersendiri, jadi kalau disembunyikan tabnya jadi halaman kosong.
   card.style.display = '';
+  if (!groups.length) {
+    list.innerHTML = `<div class="plog-empty">Belum ada kontak yang pernah closing untuk ${h(COST_BRAND_LABEL[costState.brand] || costState.brand)} ${costState.product === 'bata' ? 'Bata Ringan' : 'Panel Lantai'}.</div>`;
+    return;
+  }
   list.innerHTML = groups.map(g => {
     const e = g.latest;
     const suggestedName = ilSuggestContactName(e);
@@ -6230,12 +6505,12 @@ function costCloseModal() {
 
 // ── Render gabungan & init ───────────────────────────────────
 function costRenderAll() {
-  document.querySelectorAll('[data-cbrand]').forEach(el =>
-    el.classList.toggle('active', el.dataset.cbrand === costState.brand));
-  document.querySelectorAll('[data-cprod]').forEach(el =>
-    el.classList.toggle('active', el.dataset.cprod === costState.product));
-
+  costRenderCycles();
+  costRenderSectionTabs();
   ilRenderAll();
+  // v1.0.67: dua daftar ini tidak ikut merek/produk, tapi tetap digambar ulang
+  // supaya isinya selalu sinkron sesudah render apa pun.
+  if (cpEnabled() && cpLoaded) { cpRenderList(); tmRenderList(); }
 }
 
 function ilRenderAll() {
@@ -6247,6 +6522,7 @@ function ilRenderAll() {
   ilRenderContacts();
   ilRenderList();
   ilRenderFactoryPrice();
+  costSyncSectionTabs();   // v1.0.67: angka di tab ikut menyesuaikan
 }
 
 // ── v1.0.53: Harga Ambil Pabrik (harga modal dari Pak Bima, per brand/produk) ──
@@ -6358,6 +6634,29 @@ async function ilSaveFactoryPrice() {
 
 const CP_OWNER = 'proconlite';
 const CP_BRAND = 'bricon';   // dua fitur ini cuma menyuplai website Bricon
+
+// ── v1.0.67: seluruh fitur Cost cuma untuk Procon lite ───────
+// Akun proconpersada (Citicon, punya ayah) tidak memakai pencatatan lead,
+// modal, maupun untung. Untuk akun itu tab Cost dihapus dari navbar, data
+// inquiry_log tidak pernah diambil dari server, dan semua sambungannya ke
+// halaman Invoice & History (saran harga, peringatan modal, chip untung)
+// ikut mati — jadi tidak ada kerja sia-sia saat aplikasi dibuka.
+function costEnabled() { return !!(currentUser && currentUser.id === 'proconlite'); }
+
+function applyCostTabVisibility() {
+  const on = costEnabled();
+  document.querySelectorAll('[data-tab="cost"]').forEach(el => {
+    el.style.display = on ? '' : 'none';
+  });
+  if (!on) {
+    const sugg = document.getElementById('suggBox');
+    if (sugg) { sugg.innerHTML = ''; sugg.style.display = 'none'; }
+    const warn = document.getElementById('ilNoModalWarn');
+    if (warn) { warn.classList.remove('show'); warn.style.display = 'none'; }
+    const recalc = document.getElementById('recalcProfitBtn');
+    if (recalc) recalc.style.display = 'none';
+  }
+}
 
 let cpStore = [];    // semua baris city_pricing
 let tmStore = [];    // semua baris testimonials milik proconlite
@@ -6704,9 +7003,35 @@ let tmPickedInquiry = null;
 
 const TM_STAR_SVG = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.4l2.94 5.96 6.58.96-4.76 4.64 1.12 6.55L12 17.42l-5.88 3.09 1.12-6.55L2.48 9.32l6.58-.96z"/></svg>`;
 
+// v1.0.67: rating boleh setengah bintang (0,5 sampai 5,0).
+function tmClampRating(n) {
+  let v = parseFloat(n);
+  if (!isFinite(v)) v = 5;
+  v = Math.round(v * 2) / 2;                    // dibulatkan ke kelipatan 0,5
+  return Math.max(0.5, Math.min(5, v));
+}
+function tmRatingText(n) {
+  const v = tmClampRating(n);
+  return Number.isInteger(v) ? `${v},0` : String(v).replace('.', ',');
+}
+// Istilahnya sengaja pakai bahasa sehari-hari, bukan "Excellent/Good".
+function tmRatingWord(n) {
+  const v = tmClampRating(n);
+  if (v >= 5)   return 'Luar Biasa';
+  if (v >= 4)   return 'Bagus';
+  if (v >= 3)   return 'Sedang';
+  if (v >= 2)   return 'Kurang';
+  return 'Sangat Kurang';
+}
+
+// Tiap bintang digambar dua lapis: abu-abu di bawah, emas di atas yang
+// lebarnya dipotong 0% / 50% / 100%.
 function tmStars(n) {
-  const k = Math.max(0, Math.min(5, parseInt(n, 10) || 0));
-  return [1, 2, 3, 4, 5].map(i => `<span class="s${i <= k ? ' on' : ''}">${TM_STAR_SVG}</span>`).join('');
+  const v = tmClampRating(n);
+  return [1, 2, 3, 4, 5].map(i => {
+    const pct = v >= i ? 100 : (v >= i - 0.5 ? 50 : 0);
+    return `<span class="s">${TM_STAR_SVG}<span class="fill" style="width:${pct}%">${TM_STAR_SVG}</span></span>`;
+  }).join('');
 }
 
 function tmRenderList() {
@@ -6720,7 +7045,8 @@ function tmRenderList() {
     <div class="tm-item">
       <div class="tm-item-top">
         <span class="tm-item-name">${h(t.display_name || '—')}</span>
-        <span class="tm-stars">${tmStars(t.rating || 5)}</span>
+        <span class="tm-stars">${tmStars(t.rating)}</span>
+        <span class="tm-score">${tmRatingText(t.rating)}<span class="word">${tmRatingWord(t.rating)}</span></span>
         <span class="tm-badge ${t.is_published ? 'web-yes' : 'web-no'}">${t.is_published ? 'Sudah di web' : 'Belum di web'}</span>
         ${t.consent_name ? '' : '<span class="tm-badge noconsent">Belum ada izin nama</span>'}
       </div>
@@ -6784,8 +7110,18 @@ function tmOpenAdd() {
 
     <div style="height:12px;"></div>
     <label class="cost-modal-label">Rating</label>
-    <div class="tm-star-pick" id="tmStarPick">
-      ${[1,2,3,4,5].map(n => `<button type="button" class="tm-star-btn on" data-n="${n}" onclick="tmSetRating(${n})" aria-label="${n} bintang">${TM_STAR_SVG}</button>`).join('')}
+    <div class="tm-rating-row">
+      <div class="tm-star-pick" id="tmStarPick">
+        ${[1,2,3,4,5].map(n => `<span class="tm-star-btn" data-n="${n}">
+            ${TM_STAR_SVG}<span class="fill">${TM_STAR_SVG}</span>
+            <button type="button" class="tm-star-hit lo" onclick="tmSetRating(${n - 0.5})" aria-label="${tmRatingText(n - 0.5)} bintang"></button>
+            <button type="button" class="tm-star-hit hi" onclick="tmSetRating(${n})" aria-label="${n} bintang"></button>
+          </span>`).join('')}
+      </div>
+      <span class="tm-rating-label" id="tmRatingLabel"></span>
+    </div>
+    <div style="font-size:10.5px;color:#94a3b8;margin-top:6px;line-height:1.5;">
+      Ketuk sisi kiri bintang untuk setengah, sisi kanan untuk penuh.
     </div>
 
     <div style="height:12px;"></div>
@@ -6805,6 +7141,7 @@ function tmOpenAdd() {
       <button class="cost-btn primary" onclick="tmSave()">Simpan</button>
     </div>
   `);
+  tmSetRating(tmRating);   // v1.0.67: nyalakan bintang & tulis istilahnya
 }
 
 function tmPickInquiry(idStr) {
@@ -6822,9 +7159,14 @@ function tmPickInquiry(idStr) {
 }
 
 function tmSetRating(n) {
-  tmRating = n;
-  document.querySelectorAll('#tmStarPick .tm-star-btn').forEach(b =>
-    b.classList.toggle('on', parseInt(b.dataset.n, 10) <= n));
+  tmRating = tmClampRating(n);
+  document.querySelectorAll('#tmStarPick .tm-star-btn').forEach(b => {
+    const i = parseInt(b.dataset.n, 10);
+    b.classList.toggle('full', tmRating >= i);
+    b.classList.toggle('half', tmRating >= i - 0.5 && tmRating < i);
+  });
+  const lbl = document.getElementById('tmRatingLabel');
+  if (lbl) lbl.innerHTML = `<span class="num">${tmRatingText(tmRating)}</span>${tmRatingWord(tmRating)}`;
 }
 
 async function tmSave() {
@@ -6890,11 +7232,23 @@ async function tmRemove(id) {
 
 // ── Inisialisasi saat tab Cost dibuka ────────────────────────
 function costInit() {
+  // v1.0.67: halaman ini cuma untuk Procon lite. Untuk akun lain seluruh
+  // isinya tidak pernah dimuat sama sekali.
+  if (!costEnabled()) return;
   if (!ilState.loaded) ilLoadAll();
   applyBriconWebVisibility();
   if (cpEnabled() && !cpLoaded) cpLoadAll();
+  // v1.0.67: buka lagi di section terakhir yang dipakai
+  if (!_csecRestored) {
+    _csecRestored = true;
+    try {
+      const saved = localStorage.getItem('citicon_last_cost_section');
+      if (saved && COST_SECTIONS.some(s => s.id === saved)) costSection = saved;
+    } catch (e) {}
+  }
   costRenderAll();
 }
+let _csecRestored = false;
 
 
 
@@ -7156,6 +7510,7 @@ function onAddrChanged() {
 }
 
 async function refreshPriceSuggestion() {
+  if (!costEnabled()) return;   // v1.0.67
   const box = document.getElementById('suggBox');
   if (!box) return;
 
@@ -7196,6 +7551,7 @@ async function refreshPriceSuggestion() {
 function checkModalTrackable() {
   const box = document.getElementById('ilNoModalWarn');
   if (!box) return;
+  if (!costEnabled()) { box.classList.remove('show'); return; }   // v1.0.67
   if (isReadOnly) { box.classList.remove('show'); return; }
 
   const phones = invoicePhones();
@@ -7448,6 +7804,7 @@ function applySuggestedPrice(manual) {
 // "harga patokan" tersimpan, jadi kalau belum pernah ada catatan untuk
 // daerah/merek itu, untung tidak bisa dihitung (return null).
 function buildProfitSnapshot(prevEntry) {
+  if (!costEnabled()) return null;   // v1.0.67: akun tanpa fitur Cost tidak mencatat untung
   const product = costProductForMode();
   const pickup = (deliveryMethod === 'ambil');
   const phones = invoicePhones();
@@ -7542,6 +7899,7 @@ function buildProfitSnapshot(prevEntry) {
 // otomatis ditandai "Closing" dan kubik/m²-nya diisi sesuai isi invoice.
 // Jadi kamu nggak perlu update dua tempat secara manual.
 async function syncInquiryFromInvoice(entry) {
+  if (!costEnabled()) return;   // v1.0.67
   try {
     if (!entry || !entry.profit || !entry.profit.inquiryId) return;
     const inq = ilStore.find(e => e.id === entry.profit.inquiryId);
@@ -7710,6 +8068,12 @@ function statSetFilter(which, value) {
 }
 
 function renderProfitStats() {
+  // v1.0.67: statistik ini dihitung dari catatan modal di halaman Cost.
+  // Akun tanpa fitur Cost tidak menampilkannya sama sekali.
+  const section = document.getElementById('statSection');
+  if (section) section.style.display = costEnabled() ? '' : 'none';
+  if (!costEnabled()) return;
+
   const wrap = document.getElementById('statWrap');
   if (!wrap) return;
 
@@ -8194,6 +8558,7 @@ function renderHistory() {
   // customer di kartu ini, jadi cuma mengulang. Chip untung sekarang jadi
   // baris kedua di kolom kanan, tepat di bawah harga kotor.
   const histProfitChip = (e) => {
+    if (!costEnabled()) return '';   // v1.0.67
     const p = e.profit;
     if (!p || typeof p.untung !== 'number') {
       return `<div class="history-profit-chip none" onclick="event.stopPropagation();ilFixProfitForInvoice(${e.id})"
@@ -8330,6 +8695,7 @@ function mountTopNavEverywhere() {
 }
 
 function switchTab(tab) {
+  if (tab === 'cost' && !costEnabled()) tab = 'invoice';   // v1.0.67
   if (tab === 'history') { showHistoryView(); return; }
 
   // v1.0.57: kalau lagi buka invoice lama dalam mode Read-Only lalu pindah tab,
@@ -8378,7 +8744,11 @@ function switchTab(tab) {
 //  (3) Area yang memang bisa digeser ke samping (preview invoice yang lebarnya
 //      794px) dibiarkan discroll normal dulu; swipe tab baru mengambil alih
 //      kalau geserannya sudah mentok di ujung.
-const SWIPE_TAB_ORDER = ['invoice', 'cost', 'history', 'profile'];
+const SWIPE_TAB_ORDER_ALL = ['invoice', 'cost', 'history', 'profile'];
+// v1.0.67: kalau tab Cost disembunyikan, geseran antar halaman ikut melewatinya.
+function swipeTabOrder() {
+  return costEnabled() ? SWIPE_TAB_ORDER_ALL : SWIPE_TAB_ORDER_ALL.filter(t => t !== 'cost');
+}
 const SWIPE_VIEW_ID = {
   invoice: 'main-view',
   cost:    'cost-view',
@@ -8519,6 +8889,7 @@ document.addEventListener('touchmove', (ev) => {
       }
     }
 
+    const SWIPE_TAB_ORDER = swipeTabOrder();
     const curIdx = SWIPE_TAB_ORDER.indexOf(currentTab);
     if (curIdx === -1) { _sw.tracking = false; return; }
     const nextIdx = curIdx + (dx < 0 ? 1 : -1);
@@ -8837,6 +9208,7 @@ function setReadOnly(ro) {
 // tombol ini menyuruh aplikasi mengambil ulang modal dari catatan Tanya Harga
 // saat kamu tekan "Simpan Perubahan".
 function recalcProfitFromInquiry() {
+  if (!costEnabled()) return;   // v1.0.67
   if (!_viewingHistoryDetail) return;
   _forceProfitRecalc = true;
   toast('Modal akan diambil ulang dari catatan Tanya Harga saat kamu tekan Simpan Perubahan');
