@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Invoice Generator · v1.0.67</title>
-<!-- v1.0.67 -->
+<title>Invoice Generator · v1.0.68</title>
+<!-- v1.0.68 -->
 <meta name="description" content="Aplikasi pembuat invoice bata ringan & panel lantai multi-brand">
 <meta name="theme-color" content="#0e9e4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1678,6 +1678,19 @@
       <div class="splash-title">Invoice Generator</div>
       <div class="splash-subtitle">made with 🫰 by <b>cacak</b> 😎</div>
     </div>
+    <!-- v1.0.68: login lewat Supabase Auth. Username tetap seperti biasa
+         (proconlite / proconpersada); alamat email-nya disusun sendiri oleh
+         aplikasi, tidak pernah muncul di layar. -->
+    <div>
+      <div class="splash-label">Username</div>
+      <div class="splash-input-wrap">
+        <input id="splashUserInput" class="splash-input" type="text"
+               placeholder="proconlite"
+               autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false"
+               onkeydown="if(event.key==='Enter')document.getElementById('splashPwInput').focus()">
+      </div>
+    </div>
+    <div style="height:12px;"></div>
     <div>
       <div class="splash-label">Password</div>
       <div class="splash-input-wrap">
@@ -1690,7 +1703,7 @@
         </button>
       </div>
     </div>
-    <div id="splashError" class="splash-error">Password salah. Coba lagi.</div>
+    <div id="splashError" class="splash-error">Username atau password salah.</div>
     <button class="splash-btn" id="splashLoginBtn" onclick="doLogin()">Masuk</button>
   </div>
 </div>
@@ -1706,7 +1719,7 @@
     </div>
     <div class="min-w-0">
       <div class="text-[14px] font-bold text-slate-900 truncate leading-tight">Invoice Generator</div>
-      <div class="text-[10px] text-slate-400 truncate leading-tight" id="appVersionLabel">v1.0.67</div>
+      <div class="text-[10px] text-slate-400 truncate leading-tight" id="appVersionLabel">v1.0.68</div>
     </div>
   </div>
 
@@ -2322,8 +2335,18 @@
         <div id="statWrap"></div>
       </div>
 
+      <!-- v1.0.68: ganti password tanpa perlu buka dashboard Supabase -->
+      <button onclick="doChangePassword()"
+              style="margin-top:18px;width:100%;height:44px;border-radius:10px;border:1px solid #e2e8f0;background:#f8fafc;color:#475569;font-size:13.5px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        Ganti Password
+      </button>
+
       <button onclick="doLogout()"
-              style="margin-top:18px;width:100%;height:44px;border-radius:10px;border:1px solid #fecaca;background:#fef2f2;color:#b91c1c;font-size:13.5px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;">
+              style="margin-top:10px;width:100%;height:44px;border-radius:10px;border:1px solid #fecaca;background:#fef2f2;color:#b91c1c;font-size:13.5px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
           <polyline points="16 17 21 12 16 7"/>
@@ -2375,8 +2398,6 @@ const USERS = [
   {
     id: 'proconpersada',
     displayName: 'Purdiyanto S.Pd.',
-    // SHA-256 of "proconpersada"
-    hash: '51bb2db61332246df975ab42e7f1543f5186113d7a3a6b7100e5f28b6545b109',
     profile: {
       signerName: 'Purdiyanto S.Pd.',
       paymentOptions: {
@@ -2388,8 +2409,6 @@ const USERS = [
   {
     id: 'proconlite',
     displayName: 'Reyhan Rizqi Miftakhurrohman',
-    // SHA-256 of "proconlite"
-    hash: '94ee892833da843989aaa5e19911f7ee4d7fb5a8d900f089e5ca1d20028473e8',
     profile: {
       signerName: 'Purdiyanto S.Pd.',
       paymentOptions: {
@@ -2404,44 +2423,121 @@ let currentUser = null; // set after login
 
 function getCurrentUser() { return currentUser; }
 
-// ── Auth helpers ─────────────────────────────────────────────
-async function sha256hex(text) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+// ── v1.0.68: Login lewat Supabase Auth ───────────────────────
+// Dulu password diperiksa di dalam browser: kata sandinya di-hash SHA-256 lalu
+// dicocokkan dengan hash yang ditulis di file ini. Siapa pun yang membuka file
+// ini bisa membaca hash-nya, dan kata sesederhana "proconlite" bisa dibalik
+// dalam hitungan detik — jadi pintunya praktis terbuka.
+//
+// Sekarang password diperiksa oleh server Supabase. File ini tidak lagi
+// menyimpan rahasia apa pun. Username tetap ditulis seperti biasa; alamat
+// email-nya disusun sendiri oleh aplikasi dan tidak pernah muncul di layar.
+const AUTH_EMAIL_DOMAIN = '@procon.app';
+
+function authEmailFor(username) {
+  return String(username || '').trim().toLowerCase() + AUTH_EMAIL_DOMAIN;
+}
+
+// Akun aplikasi ('proconlite'/'proconpersada') diambil dari app_metadata milik
+// sesi. app_metadata hanya bisa diubah dari sisi server — beda dengan
+// user_metadata yang bisa diubah sendiri dari browser — jadi aman dipercaya.
+function appUserIdFromSession(session) {
+  return session?.user?.app_metadata?.app_user_id || null;
+}
+
+function adoptSession(session) {
+  const id = appUserIdFromSession(session);
+  const matched = USERS.find(u => u.id === id);
+  if (!matched) return null;
+  currentUser = matched;
+  return matched;
 }
 
 async function doLogin() {
   const btn = document.getElementById('splashLoginBtn');
+  const userInput = document.getElementById('splashUserInput');
   const input = document.getElementById('splashPwInput');
   const err = document.getElementById('splashError');
 
+  const username = (userInput.value || '').trim();
   const raw = input.value;
-  if (!raw) { err.textContent = 'Masukkan password.'; err.classList.add('show'); return; }
+  if (!username) { err.textContent = 'Masukkan username.'; err.classList.add('show'); userInput.focus(); return; }
+  if (!raw)      { err.textContent = 'Masukkan password.'; err.classList.add('show'); input.focus(); return; }
 
   btn.disabled = true;
+  btn.textContent = 'Memeriksa...';
   err.classList.remove('show');
 
-  const h = await sha256hex(raw);
-  const matched = USERS.find(u => u.hash === h);
-
-  if (!matched) {
+  const fail = (msg) => {
     input.value = '';
-    err.textContent = 'Password salah. Coba lagi.';
+    err.textContent = msg;
     err.classList.add('show');
     btn.disabled = false;
+    btn.textContent = 'Masuk';
     input.focus();
+  };
+
+  let res;
+  try {
+    res = await _sb.auth.signInWithPassword({ email: authEmailFor(username), password: raw });
+  } catch (e) {
+    console.error('doLogin:', e);
+    fail('Tidak bisa menghubungi server. Cek koneksi internet.');
     return;
   }
 
-  currentUser = matched;
-  localStorage.setItem('citicon_user_id', matched.id);
+  if (res.error) {
+    console.warn('doLogin:', res.error.message);
+    // Bedakan masalah jaringan dari salah password, biar tidak menyesatkan.
+    const m = (res.error.message || '').toLowerCase();
+    if (m.includes('fetch') || m.includes('network')) {
+      fail('Tidak bisa menghubungi server. Cek koneksi internet.');
+    } else {
+      fail('Username atau password salah.');
+    }
+    return;
+  }
+
+  if (!adoptSession(res.data.session)) {
+    await _sb.auth.signOut();
+    fail('Akun ini belum dikaitkan ke aplikasi. Hubungi Reyhan.');
+    return;
+  }
+
+  btn.textContent = 'Masuk';
+  btn.disabled = false;
+  input.value = '';
   applyUserProfile();
   hideSplash();
 }
 
-function doLogout() {
+// v1.0.68: ganti password sendiri dari halaman Profile — tidak perlu
+// membuka dashboard Supabase.
+async function doChangePassword() {
+  const baru  = prompt('Password baru (minimal 8 huruf).\n\nJangan pakai kata "proconlite", "proconpersada", "bricon", atau "citicon".');
+  if (baru === null) return;
+  const p = baru.trim();
+  if (p.length < 8) { toast('Password minimal 8 huruf', 'error'); return; }
+  const terlarang = ['proconlite', 'proconpersada', 'bricon', 'citicon', 'password'];
+  if (terlarang.some(k => p.toLowerCase().includes(k))) {
+    toast('Jangan pakai kata yang gampang ditebak', 'error');
+    return;
+  }
+  const ulang = prompt('Ketik ulang password barunya untuk memastikan.');
+  if (ulang === null) return;
+  if (ulang.trim() !== p) { toast('Ketikan kedua tidak sama', 'error'); return; }
+
+  try {
+    const { error } = await _sb.auth.updateUser({ password: p });
+    if (error) { console.error(error); toast('Gagal mengganti password', 'error'); return; }
+    toast('✓ Password berhasil diganti');
+  } catch (e) { console.error(e); toast('Gagal mengganti password', 'error'); }
+}
+
+async function doLogout() {
   if (!confirm('Keluar dari sesi ini?')) return;
-  localStorage.removeItem('citicon_user_id');
+  try { await _sb.auth.signOut(); } catch (e) { console.error('signOut:', e); }
+  localStorage.removeItem('citicon_user_id');   // sisa sistem login lama
   currentUser = null;
   switchTab('invoice'); // v1.0.44: kembali ke tab Invoice sebelum layar login muncul
   // Sembunyikan kartu profil di halaman Profile
@@ -2467,9 +2563,12 @@ function showSplash() {
   overlay.style.display = 'flex';
   overlay.classList.remove('hiding');
   document.getElementById('splashPwInput').value = '';
+  const uEl = document.getElementById('splashUserInput');
+  if (uEl) uEl.value = '';
   document.getElementById('splashError').classList.remove('show');
-  document.getElementById('splashLoginBtn').disabled = false;
-  setTimeout(() => document.getElementById('splashPwInput').focus(), 100);
+  const bEl = document.getElementById('splashLoginBtn');
+  bEl.disabled = false; bEl.textContent = 'Masuk';
+  setTimeout(() => (uEl || document.getElementById('splashPwInput')).focus(), 100);
 }
 
 function toggleSplashEye() {
@@ -2683,7 +2782,7 @@ const USER_PP_MAP = {
 // ════════════════════════════════════════════════════════════════
 //  CONSTANTS
 // ════════════════════════════════════════════════════════════════
-const APP_VERSION = '1.0.67';
+const APP_VERSION = '1.0.68';
 const BULAN_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 
 const PANEL_LENGTHS = [97, 147, 172, 197, 222, 247, 272, 297, 322];
@@ -3214,20 +3313,30 @@ document.addEventListener('DOMContentLoaded', () => {
   // Set default brand
   document.body.setAttribute('data-brand', 'citicon');
 
-  // ── Auth gate: check existing session ──────────────────────
-  const savedUserId = localStorage.getItem('citicon_user_id');
-  const savedUser = USERS.find(u => u.id === savedUserId);
-  if (savedUser) {
-    currentUser = savedUser;
+  // ── v1.0.68: Pintu masuk — sesi diperiksa ke Supabase ──────
+  // Dulu cukup membaca localStorage, yang bisa diisi sendiri oleh siapa pun
+  // lewat console browser. Sekarang sesinya harus sah menurut server.
+  restoreSession();
+});
+
+async function restoreSession() {
+  let session = null;
+  try {
+    const { data } = await _sb.auth.getSession();
+    session = data?.session || null;
+  } catch (e) { console.error('restoreSession:', e); }
+
+  if (session && adoptSession(session)) {
     document.getElementById('splash-overlay').style.display = 'none';
     applyUserProfile();
     initAppUI();
     restoreLastMainTab(); // v1.0.56: refresh balik ke tab terakhir, bukan selalu Invoice
-  } else {
-    // Show splash; app init happens after login
-    setTimeout(() => document.getElementById('splashPwInput')?.focus(), 200);
+    return;
   }
-});
+  // Belum login (atau sesinya sudah kedaluwarsa) — tampilkan layar masuk.
+  localStorage.removeItem('citicon_user_id');   // sisa sistem login lama
+  setTimeout(() => document.getElementById('splashUserInput')?.focus(), 200);
+}
 
 // v1.0.56: dipanggil setelah initAppUI — kalau tab terakhir sebelum refresh
 // bukan Invoice, pindahkan ke situ. Cuma untuk tab utama (bukan subpage/modal).
